@@ -14,7 +14,8 @@ et te demande de les reformuler. Il t'annonce qu'il pourra introduire des erreur
 3. Prépare `workspace/` : `git init`, puis crée `workspace/docs/journal-de-bord.md`.
 4. **Le B.A.-BA : chercher, vérifier, se tenir à jour.** Lis la section d'ouverture de la page [Démarrer](../../../cursus-orchestrateur/demarrer.html), fais **son premier exercice** (vérifier une affirmation du cursus dans la documentation officielle, avec la [fiche de recherche](../_modeles/fiche-recherche.md)).
 5. **Ouvre tes deux carnets** ([modèles](../_modeles/carnets.md)) : le *carnet de veille* avec ton **plan** (3 à 5 sources, un créneau de 30 min par semaine) et le *carnet de dérives*.
-6. Observe : le mentor installe son premier skill. Pose-lui la question : « un skill, c'est quoi ? »
+6. **Vocabulaire minimum** (section du B.A.-BA) : explique à voix haute, en une phrase et avec un exemple de ton futur jeu, au moins 8 termes parmi API, REST, MVC, DDD, MCP, skill, harness, orchestration, epic, story, ticket. Note dans ton carnet de veille ceux que tu ne sais pas encore dire, puis cherche-les.
+7. Observe : le mentor installe son premier skill. Pose-lui la question : « un skill, c'est quoi ? »
 
 ## Livrables (preuves)
 
@@ -26,7 +27,7 @@ et te demande de les reformuler. Il t'annonce qu'il pourra introduire des erreur
 
 ## Critères de passage
 
-Tu peux expliquer, sans aide : ce qu'est la GP ; pourquoi on vérifie ce que dit l'IA ; ce qu'est un skill ; comment tu juges une source (niveau, date, recoupement, test) ; ce que contient ton plan de veille.
+Tu peux expliquer, sans aide : ce qu'est la GP ; pourquoi on vérifie ce que dit l'IA ; ce qu'est un skill ; comment tu juges une source (niveau, date, recoupement, test) ; ce que contient ton plan de veille ; les termes du vocabulaire minimum (API, REST, MVC, DDD, MCP, skill, harness, orchestration) en une phrase chacun.
 
 ## Tu sauras expliquer
 

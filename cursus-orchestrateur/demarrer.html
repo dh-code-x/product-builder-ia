@@ -34,6 +34,74 @@
 <li><strong>Personne ne vous préviendra</strong> quand une réponse devient fausse. Un orchestrateur n'a pas à tout savoir ; il doit savoir où trouver, reconnaître une bonne réponse, et rester curieux. C'est cela, l'autonomie.</li>
 <li><strong>Un agent ne s'améliore pas à votre place.</strong> C'est vous qui transformez ses erreurs en règles.</li>
 </ul>
+<h3>Le vocabulaire minimum</h3>
+<p>On ne cherche bien que ce qu'on sait nommer. Ces termes reviennent dans tout le cursus : <strong>parcourez-les une fois, puis revenez-y au besoin</strong>, et approfondissez dans la leçon indiquée. Le <a href="glossaire.html">glossaire de A à Z</a> les reprend tous.</p>
+<p><strong>Le web, les serveurs et les API</strong></p>
+<table><thead><tr><th>Terme</th><th>En une phrase</th><th>Exemple</th><th>Leçon</th></tr></thead><tbody>
+<tr><td><strong>Client, serveur</strong></td><td>Le client envoie une demande (un navigateur, une application) ; le serveur la traite et répond.</td><td>Le navigateur de Marie demande les factures de mars ; le serveur répond.</td><td>1.1</td></tr>
+<tr><td><strong>Requête, appel d'API</strong></td><td>Message envoyé à un serveur pour lui demander des données ou une action : une méthode, une adresse, parfois des données.</td><td><code>GET /api/v1/factures/export?mois=2026-03</code></td><td>1.2</td></tr>
+<tr><td><strong>API</strong></td><td>Interface par laquelle un logiciel en appelle un autre.</td><td>L'application React appelle l'API de Facturo.</td><td>1.3</td></tr>
+<tr><td><strong>Endpoint</strong></td><td>Adresse précise d'une API qui réalise une action.</td><td><code>/api/v1/factures/42/paiements</code></td><td>1.3</td></tr>
+<tr><td><strong>REST</strong></td><td>Style d'API où chaque chose (une facture, un client) est une ressource avec une adresse, manipulée par les verbes HTTP : GET lit, POST crée ou déclenche, PUT remplace, PATCH modifie en partie, DELETE supprime.</td><td>GET pour lire une facture, DELETE pour supprimer un brouillon</td><td>1.2</td></tr>
+<tr><td><strong>Code de statut</strong></td><td>Nombre renvoyé avec la réponse : 2xx succès, 4xx erreur de celui qui demande, 5xx erreur du serveur.</td><td>201 facture créée ; 404 introuvable ; 500 le serveur a échoué</td><td>1.2</td></tr>
+<tr><td><strong>JSON</strong></td><td>Format texte d'échange de données entre programmes, en paires clé / valeur.</td><td><code>{"numero": "FAC-2026-0042", "total": 120}</code></td><td>1.2, 1.4</td></tr>
+<tr><td><strong>Authentification, autorisation</strong></td><td>L'authentification vérifie qui vous êtes ; l'autorisation vérifie ce que vous avez le droit de faire.</td><td>401 : je ne sais pas qui vous êtes. 403 : je le sais, mais vous n'avez pas le droit.</td><td>1.2</td></tr>
+<tr><td><strong>Base de données, SQL</strong></td><td>Lieu où l'application range ses données durablement ; SQL est le langage pour les interroger.</td><td>PostgreSQL</td><td>1.4</td></tr>
+</tbody></table>
+<p><strong>Le développement</strong></p>
+<table><thead><tr><th>Terme</th><th>En une phrase</th><th>Exemple</th><th>Leçon</th></tr></thead><tbody>
+<tr><td><strong>Dépôt, commit, branche</strong></td><td>Le dépôt est le dossier de code suivi par Git ; un commit est un enregistrement de modifications ; une branche est une ligne de travail parallèle.</td><td>Chaque agent travaille sur sa propre branche.</td><td>1.6</td></tr>
+<tr><td><strong>Pull request</strong></td><td>Demande de fusion d'une branche : c'est le moment de la relecture.</td><td>Relire le diff d'un agent avant de fusionner.</td><td>1.6</td></tr>
+<tr><td><strong>Dépendance</strong></td><td>Bibliothèque externe que votre code utilise.</td><td>Dompdf pour fabriquer les PDF</td><td>1.7</td></tr>
+<tr><td><strong>Test automatique</strong></td><td>Code qui vérifie qu'un autre code fait ce qu'on attend. Unitaire : une règle isolée. De bout en bout : un parcours complet.</td><td>Un test qui exporte 3 factures et compte les lignes</td><td>4.1</td></tr>
+<tr><td><strong>Production</strong></td><td>Version utilisée par les vrais utilisateurs : on y touche le moins possible, on essaie ailleurs d'abord.</td><td>Le serveur où travaille Marie, jamais le dossier d'essai</td><td>5.3</td></tr>
+<tr><td><strong>CI/CD, pipeline</strong></td><td>Suite automatisée d'étapes (tests, construction, déploiement) qui s'exécute à chaque modification.</td><td>Le fichier <code>.gitlab-ci.yml</code> de Facturo</td><td>5.3</td></tr>
+<tr><td><strong>Dette technique</strong></td><td>Coût futur de raccourcis pris aujourd'hui : plus le code est dégradé, plus chaque évolution coûte cher.</td><td>Une règle copiée à trois endroits</td><td>9.4</td></tr>
+</tbody></table>
+<p><strong>L'architecture et la conception</strong></p>
+<table><thead><tr><th>Terme</th><th>En une phrase</th><th>Exemple</th><th>Leçon</th></tr></thead><tbody>
+<tr><td><strong>Architecture</strong></td><td>Façon d'organiser le code pour que chaque règle ait une place : elle répond à « où vit chaque règle ? ».</td><td>Sans elle, chaque session d'agent range le code à sa façon.</td><td>3.1</td></tr>
+<tr><td><strong>MVC</strong></td><td>Modèle (les données et les règles), Vue (l'affichage), Contrôleur (le lien : il reçoit la requête, appelle le modèle, choisit la réponse).</td><td>Vue = application React ; contrôleur = classe Symfony ; modèle = entité <code>Invoice</code></td><td>3.1</td></tr>
+<tr><td><strong>Architecture en couches</strong></td><td>On empile des couches ; chacune s'appuie sur celle du dessous. Le point faible : le métier finit par dépendre de la base.</td><td>Contrôleur, cas d'usage, domaine, base</td><td>3.2</td></tr>
+<tr><td><strong>Hexagonale, Clean Architecture</strong></td><td>Le métier au centre ; la technique (HTTP, base, e-mail) se branche de l'extérieur par des ports et des adaptateurs. Les dépendances pointent vers le métier.</td><td>On teste le métier sans base de données</td><td>3.3</td></tr>
+<tr><td><strong>DDD</strong></td><td>Conception pilotée par le métier : un langage commun et des contextes délimités.</td><td>Le mot « client » a deux sens</td><td>3.4</td></tr>
+<tr><td><strong>Monolithe modulaire, microservices</strong></td><td>Monolithe : une application déployée d'un bloc, découpée en modules étanches. Microservices : plusieurs petits services déployés séparément.</td><td>Sortir l'export dans un microservice ? Cinq questions pour décider.</td><td>3.5</td></tr>
+<tr><td><strong>Design pattern</strong></td><td>Solution classique et nommée à un problème de conception qui revient.</td><td>Huit patterns à savoir reconnaître</td><td>3.6</td></tr>
+<tr><td><strong>SOLID, DRY, KISS, YAGNI</strong></td><td>Quatre grilles de questions pour relire du code : une seule raison de changer, pas de répétition, rester simple, ne pas prévoir inutilement.</td><td>« Si cette règle change, combien d'endroits dois-je modifier ? »</td><td>2.4</td></tr>
+<tr><td><strong>ADR</strong></td><td>Note courte qui consigne une décision d'architecture : contexte, options, choix, conséquences.</td><td>L'ADR du paiement en ligne</td><td>9.6</td></tr>
+</tbody></table>
+<p><strong>La gestion de projet</strong></p>
+<table><thead><tr><th>Terme</th><th>En une phrase</th><th>Exemple</th><th>Leçon</th></tr></thead><tbody>
+<tr><td><strong>Gestion de projet (GP)</strong></td><td>Conduire un projet jusqu'à sa livraison : cadrer, découper, estimer, suivre les risques, rendre compte, gérer les changements.</td><td>Piloter l'export comptable de bout en bout</td><td>10.1</td></tr>
+<tr><td><strong>Cadrage, périmètre</strong></td><td>Le cadrage écrit l'objectif, le périmètre (ce qui est dedans, ce qui est dehors), les contraintes et les risques avant de commencer.</td><td>Classer la demande de Marie</td><td>10.1</td></tr>
+<tr><td><strong>Livrable</strong></td><td>Résultat concret attendu : un document, une fonctionnalité, une version.</td><td>La fiche de cadrage ; l'export CSV</td><td>10.1</td></tr>
+<tr><td><strong>Epic, user story, tâche</strong></td><td>Epic : un résultat de valeur, sur plusieurs semaines. Story : un incrément vérifiable, « en tant que… je veux… afin de… », avec ses critères d'acceptation. Tâche : ce qu'une personne ou un agent fait seul, relu en dix minutes.</td><td>« Exporter la comptabilité » → « télécharger un CSV du mois » → « écrire l'endpoint »</td><td>11.4</td></tr>
+<tr><td><strong>Ticket</strong></td><td>Fiche écrite d'une tâche : objectif, critères, périmètre, statut. Pour un agent, c'est un brief suivi.</td><td>Une fiche par tâche de l'export CSV</td><td>8.2</td></tr>
+<tr><td><strong>Backlog</strong></td><td>Liste ordonnée des demandes et des idées en attente.</td><td>Les évolutions que Marie a demandées</td><td>9.2</td></tr>
+<tr><td><strong>MVP, tranche verticale</strong></td><td>Le MVP est la plus petite version qui apporte déjà de la valeur. On le découpe en tranches verticales : chacune fonctionne de bout en bout.</td><td>Un export complet mais minimal, puis amélioré</td><td>11.6</td></tr>
+<tr><td><strong>Jalon, chemin critique</strong></td><td>Un jalon est un point de contrôle vérifiable ; le chemin critique est la suite de tâches qui fixe la durée minimale.</td><td>Les tâches 1, 2, 3, puis 4 ou 5, puis 6</td><td>10.3</td></tr>
+<tr><td><strong>RACI, registre des risques</strong></td><td>RACI : qui est Responsable, Approbateur, Consulté, Informé. Registre des risques : la liste des risques avec probabilité, impact et actions.</td><td>Les risques de l'export comptable</td><td>10.1, 10.5</td></tr>
+<tr><td><strong>Recette</strong></td><td>Validation du livrable par le client, sur des critères convenus d'avance.</td><td>Marie vérifie l'export sur ses critères</td><td>10.7</td></tr>
+</tbody></table>
+<p><strong>L'IA et les agents</strong></p>
+<table><thead><tr><th>Terme</th><th>En une phrase</th><th>Exemple</th><th>Leçon</th></tr></thead><tbody>
+<tr><td><strong>LLM (modèle de langage)</strong></td><td>Programme qui produit du texte en prédisant la suite la plus plausible. Il n'exécute rien et ne vérifie rien : il écrit.</td><td>Un stagiaire très cultivé, qui n'a jamais ouvert votre projet</td><td>7.1</td></tr>
+<tr><td><strong>Prompt</strong></td><td>Ce qu'on envoie au modèle : votre demande du moment et les instructions de fond (le prompt système).</td><td>« Ajoute un rappel quand une facture est impayée »</td><td>7.1</td></tr>
+<tr><td><strong>Token, fenêtre de contexte</strong></td><td>Un token est un morceau de texte traité par le modèle ; les limites et les coûts se comptent en tokens. La fenêtre de contexte est la quantité de texte qu'il voit en même temps : ce qui n'y est pas n'existe pas pour lui.</td><td>Une longue session finit par « oublier » une règle</td><td>7.1, 7.3</td></tr>
+<tr><td><strong>Hallucination</strong></td><td>Contenu plausible mais faux : fonction inexistante, source inventée.</td><td>Une méthode <code>emettreAvoir</code> qui n'existe pas</td><td>7.1</td></tr>
+<tr><td><strong>Agent</strong></td><td>Programme où un modèle choisit des actions, appelle des outils et recommence jusqu'à atteindre un objectif.</td><td>Un agent de code qui lit, modifie et teste</td><td>7.2</td></tr>
+<tr><td><strong>Harness</strong></td><td>Le logiciel qui entoure le modèle : boucle, outils, permissions, contexte, mémoire. C'est lui qui fait d'un modèle un agent.</td><td>Claude Code est le harness autour du modèle</td><td>7.2</td></tr>
+<tr><td><strong>Workflow</strong></td><td>Enchaînement dont le chemin est connu d'avance, par opposition à un agent qui découvre son chemin en route. Si le chemin est connu, préférez le workflow.</td><td>Une chaîne fixe : formater, tester, publier</td><td>7.2</td></tr>
+<tr><td><strong>Fichier d'instructions</strong></td><td>Fichier d'instructions persistantes, lu au début de chaque session : CLAUDE.md pour Claude Code, souvent AGENTS.md ailleurs.</td><td>Les règles de Facturo que l'agent doit toujours suivre</td><td>7.4</td></tr>
+<tr><td><strong>Skill</strong></td><td>Dossier d'instructions et de ressources que l'agent charge à la demande.</td><td>Un skill pour rédiger un export</td><td>7.4</td></tr>
+<tr><td><strong>Hook</strong></td><td>Script déclenché automatiquement à un moment précis du travail d'un agent.</td><td>Lancer les tests après chaque modification</td><td>7.4</td></tr>
+<tr><td><strong>Sous-agent</strong></td><td>Agent lancé par un autre agent, avec son propre contexte.</td><td>Un sous-agent relecteur</td><td>7.4</td></tr>
+<tr><td><strong>MCP</strong></td><td>Standard ouvert pour connecter un agent à des outils et à des données. À chaque branchement, on décide ce qu'on autorise et ce qu'on refuse.</td><td>Donner à l'agent un accès en lecture seule au suivi des tickets</td><td>7.5</td></tr>
+<tr><td><strong>Brief</strong></td><td>Consigne écrite qui se suffit à elle-même : objectif, contexte, périmètre, règles, preuve attendue, compte rendu.</td><td>Le brief de l'export CSV</td><td>8.1</td></tr>
+<tr><td><strong>Orchestration</strong></td><td>Organiser le travail de plusieurs agents (ou de plusieurs tâches) : qui fait quoi, dans quel ordre, avec quelles vérifications. L'orchestrateur est celui qui découpe et distribue — vous, ou un agent. Six patterns : séquentiel, parallèle, orchestrateur, générateur et critique, routage, humain dans la boucle.</td><td>Trois agents sur trois branches, puis une relecture globale</td><td>8.3</td></tr>
+<tr><td><strong>Injection de prompt</strong></td><td>Texte piégé, lu par un agent, qui tente de lui donner des ordres.</td><td>Un ticket qui dit « ignore tes règles… »</td><td>7.6</td></tr>
+</tbody></table>
+<p><strong>Test des quatre phrases.</strong> Sans regarder, expliquez en une phrase chacun de ces quatre termes : <em>API</em>, <em>MVC</em>, <em>harness</em>, <em>orchestration</em>. Ce que vous ne savez pas dire, notez-le dans votre carnet de veille et cherchez-le (étape 1).</p>
 <h3>1. Chercher : poser une question qui a une réponse</h3>
 <p>Une bonne question est précise : elle donne l'outil, la version et ce que vous voulez obtenir. « Comment faire un export ? » ne mène nulle part ; « Dans Symfony 7, comment renvoyer un fichier CSV en flux pour ne pas charger tout en mémoire ? » mène à une page précise. Cherchez d'abord à la source, puis élargissez. Un agent IA sert à explorer et à résumer ; il n'est jamais la preuve finale.</p>
 <table><thead><tr><th>Niveau</th><th>Source</th><th>Confiance</th><th>À utiliser pour</th></tr></thead><tbody>
@@ -77,6 +145,7 @@ Conclusion et niveau de confiance : faible / moyen / fort</code></pre>
 <li>Choisissez une affirmation de ce cursus, par exemple la définition d'un hook ou d'un skill en leçon 7.4.</li>
 <li>Vérifiez-la dans la documentation officielle de l'outil, avec la fiche ci-dessus. Notez la date et la version.</li>
 <li>Y a-t-il un écart, une nuance, un point qui a changé ? Notez-le : c'est une vraie contribution.</li>
+<li>Prenez trois termes du vocabulaire minimum que vous ne saviez pas expliquer. Retrouvez leur définition dans une source officielle et reformulez-la avec vos mots dans votre carnet.</li>
 <li>Ouvrez votre carnet de veille et écrivez-y votre premier plan : vos trois à cinq sources et votre créneau hebdomadaire.</li>
 </ol>
 <p><strong>À retenir</strong></p>
@@ -84,7 +153,7 @@ Conclusion et niveau de confiance : faible / moyen / fort</code></pre>
 <p><strong>Erreurs fréquentes</strong></p>
 <ul><li>Prendre la réponse d'un agent pour une source.</li><li>Citer une source sans date ni version.</li><li>Faire une veille pour accumuler des liens plutôt que pour changer sa pratique.</li><li>Adopter un outil parce qu'il est récent.</li><li>Tenir un carnet de dérives sans jamais en tirer de règle.</li></ul>
 <h3>Checklist du B.A.-BA</h3>
-<ul class="check"><li>Je formule une question précise, avec l'outil, la version et le résultat attendu.</li><li>Je classe une source par niveau de confiance et je vérifie sa date.</li><li>Je recoupe une affirmation avec une source officielle avant de la retenir.</li><li>Je teste ce qui peut l'être dans un dossier d'essai.</li><li>J'ai écrit mon plan de veille : trois à cinq sources et un créneau hebdomadaire.</li><li>J'ai transformé au moins une erreur répétée en règle écrite.</li></ul>
+<ul class="check"><li>Je formule une question précise, avec l'outil, la version et le résultat attendu.</li><li>Je classe une source par niveau de confiance et je vérifie sa date.</li><li>Je recoupe une affirmation avec une source officielle avant de la retenir.</li><li>Je teste ce qui peut l'être dans un dossier d'essai.</li><li>J'ai écrit mon plan de veille : trois à cinq sources et un créneau hebdomadaire.</li><li>J'ai transformé au moins une erreur répétée en règle écrite.</li><li>Je sais expliquer en une phrase les termes du vocabulaire minimum : API, REST, MVC, DDD, MCP, skill, harness, orchestration.</li></ul>
 <h2>Comment suivre ce cursus</h2>
 <p>Ce cursus apprend à décider, à déléguer à des agents IA et à vérifier ce qu'ils produisent, en douze modules et environ vingt-quatre semaines. Il reprend le sommaire du programme de formation et le développe en vrais cours : explications, exemples, schémas, exercices corrigés et quiz.</p>
 <h3>Le principe : juger avant de déléguer</h3>

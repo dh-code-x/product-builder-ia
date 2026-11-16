@@ -18,6 +18,9 @@ Réfère-toi à `.agent/docs/method.md` (échelle d'aide, traçabilité, recherc
    une réponse ? » Attends une réponse concrète (chercher, sourcer, vérifier).
    Renvoie au **B.A.-BA** (section d'ouverture de `../cursus-orchestrateur/demarrer.html`) : chercher → vérifier (dater, recouper,
    tester) → se tenir à jour → de l'erreur à la règle. L'apprenant fait **son premier exercice** devant toi, sans que tu fournisses la source.
+   Teste ensuite le **vocabulaire minimum** (tableaux du B.A.-BA) : tire 3 à 4 termes au hasard (API, REST, MVC, DDD, MCP, skill, harness,
+   orchestration, epic, ticket…), fais-les expliquer en une phrase **avec un exemple du jeu**, ne corrige pas : pose une question qui fait
+   chercher. Les termes mal maîtrisés vont dans le carnet de veille ; tu y reviens aux phases où ils servent (3 et 4 surtout).
 4. **Annonce les pièges** : « Je pourrai introduire des erreurs dans ce que je te montre, dans tes documents, dans le code.
    Tu devras les trouver, expliquer pourquoi ça ne marche pas, et corriger. » Obtiens un « d'accord ».
 5. **Profil** : expérience en code, en gestion de projet, en jeux ; temps disponible ; CLI utilisée ; profil cursus

@@ -884,6 +884,8 @@ self::assertSame('FAC-2026-0001', $registre-&gt;suivant());</code></pre>
 </details>
 <h2>Quiz d'auto-évaluation</h2>
 <p>Répondez à voix haute, puis comparez avec la colonne de droite.</p>
+<ol><li>Quel étage de la pyramide compte le plus de tests ?</li><li>Un test passe aujourd'hui et échoue le mois prochain sans changement de code. Cause probable ?</li><li>Dans le TDD, pourquoi faut-il voir le test rouge avant d'écrire le code ?</li><li>Quelle différence entre un stub et un mock ?</li><li>Un test a 100 % de couverture. Prouve-t-il que la règle est protégée ?</li><li>Un agent annonce « tous les tests passent ». Quelle est votre première vérification ?</li></ol>
+<details><summary>Voir les réponses (après avoir répondu aux six questions)</summary>
 <table>
 <thead>
 <tr>
@@ -924,6 +926,7 @@ self::assertSame('FAC-2026-0001', $registre-&gt;suivant());</code></pre>
 <td>Valeur attendue changée, test supprimé ou ignoré, nombre de tests en baisse : tels sont les signaux de triche</td>
 </tr>
 </tbody></table>
+</details>
 <h2>Checklist de validation</h2>
 <p>Le module est validé quand vous savez dire, pour une fonctionnalité donnée, quels tests écrire, à quel étage, et si une suite existante protège vraiment l'application.</p>
 <ul class="check">
@@ -953,6 +956,20 @@ Je peux dire si une suite de tests existante protège réellement l'application.
 </li>
 </ul>
 <p><strong>Module suivant :</strong> le code est solide, il faut maintenant le mettre en ligne (module 5).</p>
+
+<h2>Sources</h2>
+<p>Pages consultées le 16 novembre 2026. Les dates sont celles affichées sur les pages.</p>
+<ul>
+<li><a href="https://martinfowler.com/bliki/TestPyramid.html">Test Pyramid</a>, Martin Fowler (1 mai 2012, révisée en 2016 et 2017) : « many more low-level UnitTests than high level BroadStackTests » : la pyramide de la leçon 4.1.</li>
+<li><a href="https://martinfowler.com/articles/practical-test-pyramid.html">The Practical Test Pyramid</a>, martinfowler.com (26 février 2018) : guide pratique de la même idée (lu en partie seulement).</li>
+<li><a href="https://martinfowler.com/bliki/TestCoverage.html">Test Coverage</a>, Martin Fowler (17 avril 2012) : « Test coverage is of little use as a numeric statement of how good your tests are. » La page ajoute que la couverture sert à repérer le code non testé : leçon 4.7.</li>
+<li><a href="https://martinfowler.com/bliki/TestDouble.html">Test Double</a>, Martin Fowler (17 janvier 2006) : terme générique pour remplacer un objet de production ; dummy, fake, stub, spy, mock : leçon 4.5.</li>
+<li><a href="https://martinfowler.com/bliki/TestDrivenDevelopment.html">Test Driven Development</a>, Martin Fowler (billet de 2005, mis à jour le 11 décembre 2023) : « Red - Green - Refactor » : leçon 4.4.</li>
+<li><a href="https://en.wikipedia.org/wiki/Mutation_testing">Mutation testing</a>, Wikipédia (source secondaire) (dernière modification le 6 septembre 2026) : on apporte de petites modifications au programme testé ; un test qui échoue « rejette » le mutant.</li>
+<li><a href="https://www-cdn.anthropic.com/6d8a8055020700718b0c49369f60816ba2a7c285.pdf">System Card: Claude Opus 4 &amp; Claude Sonnet 4</a>, Anthropic (mai 2025, révisée les 16 juillet et 2 septembre 2025) : la section 6 définit le « reward hacking » et cite parmi ses exemples le « hard-coding » (écrire des solutions qui renvoient directement les valeurs attendues) et le « special-casing » (écrire des solutions insuffisamment générales) « to pass tests » ; ces comportements sont observés en contexte de codage agentique : leçon 4.8.</li>
+<li><a href="https://arxiv.org/abs/2511.21654">EvilGenie: A Reward Hacking Benchmark</a>, Gabor, Lynch et Rosenfeld, arXiv (soumis le 26 novembre 2025, révisé le 17 mai 2026) : un banc d'essai qui détecte notamment l'édition des fichiers de test (« hardcoding test cases or editing the testing files ») et rapporte du reward hacking explicite chez Codex et Claude Code (seul le résumé a été lu) : leçon 4.8.</li>
+</ul>
+<p>Non confirmé par une source : l'exemple de la TVA (valeur attendue changée de 28 à 27), l'assertion affaiblie (<code>assertNotNull</code>) et les trois mesures techniques (consigne, approbation humaine, CI qui compte les tests) sont des repères pédagogiques de ce cours. Les sources ci-dessus documentent le hard-coding, le special-casing et l'édition des fichiers de test, pas ces cas précis. Les chiffres, les noms de classes et le projet Facturo sont fictifs.</p>
 
 <div class="pager"><a class="prev" href="../modules/module-03.html"><small>← Précédent</small>Module 3 : architectures et design patterns</a><a class="next" href="../modules/module-05.html"><small>Suivant →</small>Module 5 : serveur, mise en ligne, DevOps et CI/CD</a></div></article></main></div>
 <script>document.querySelectorAll('.side a.nav').forEach(function(a){a.addEventListener('click',function(){document.body.classList.remove('open')})});var on=document.querySelector('.side a.on');if(on)on.scrollIntoView({block:'center'});</script>

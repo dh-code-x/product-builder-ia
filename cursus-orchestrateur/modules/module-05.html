@@ -305,10 +305,10 @@ deploy-production:
 <strong>deploy-recette</strong> : déploiement automatique sur un environnement de répétition, identique à la production.
 </li>
 <li>
-<strong>deploy-production</strong> avec <code>when: manual</code> : un humain doit cliquer. C'est votre barrière : vous décidez du moment, après avoir regardé la recette.
+<strong>deploy-production</strong> avec <code>when: manual</code> : un humain doit cliquer. C'est votre barrière : vous décidez du moment, après avoir regardé la recette. Avec <code>when: manual</code>, GitLab considère par défaut qu'un job manuel non lancé ne bloque pas le pipeline (<code>allow_failure</code> vaut <code>true</code> par défaut).
 </li>
 <li>
-<strong>rules</strong> : seule la branche <code>main</code> va jusqu'au déploiement.
+<strong>rules</strong> : seule la branche <code>main</code> va jusqu'au déploiement. La variable <code>$CI_COMMIT_BRANCH</code> n'existe pas dans les pipelines de merge request : la règle ne s'y déclenche donc pas.
 </li>
 </ul>
 <figure><img src="../img/m05-02.png" alt="pipeline Facturo · 5 barrières"><figcaption>pipeline Facturo · 5 barrières</figcaption></figure>
@@ -426,7 +426,7 @@ Supprime-t-elle ou renomme-t-elle une colonne que l'ancien code utilise encore ?
 Ajoute-t-elle une contrainte <code>NOT NULL</code> sans valeur par défaut sur une table déjà remplie ?
 </li>
 <li>
-Existe-t-il un moyen de la défaire (une méthode <code>down</code>) et a-t-elle été essayée sur une copie de la base ?
+Existe-t-il un moyen de la défaire (une méthode <code>down</code> ; si la migration est irréversible, Doctrine prévoit de le signaler explicitement dans cette méthode) et a-t-elle été essayée sur une copie de la base ?
 </li>
 <li>
 Modifie-t-elle beaucoup de lignes d'un coup ? Sur une grosse table, on remplit par paquets pour ne pas bloquer les autres requêtes.
@@ -465,6 +465,7 @@ le <strong>RTO</strong> (durée d'interruption acceptable) : en combien de temps
 </ul>
 <p>Pour Facturo, ces chiffres se décident avec Marie, pas avec le technicien : une journée de factures perdue est-elle supportable ? Une heure d'arrêt, un jour ouvré ?</p>
 <p>La règle simple dite « 3-2-1 » aide à ne pas tout perdre : trois copies des données, sur deux supports différents, dont une hors du serveur et hors du site de l'hébergeur. Une sauvegarde stockée sur le serveur même disparaît avec lui.</p>
+<p>La documentation de PostgreSQL précise que, hors cas simples, <code>pg_dump</code> n'est généralement pas le bon choix pour les sauvegardes régulières d'une base de production ; elle décrit d'autres approches (sauvegarde au niveau fichier, archivage continu). Pour Facturo, un dump nocturne reste un point de départ pédagogique.</p>
 <p>Les commandes, à faire exécuter par un agent mais à savoir lire :</p>
 <pre><code># Sauvegarde (chaque nuit, copiée ensuite hors du serveur)
 $ docker compose exec -T db pg_dump -U postgres -Fc facturo &gt; /backups/facturo-2026-11-12.dump
@@ -474,6 +475,7 @@ $ docker compose exec -T db createdb -U postgres facturo_restore
 $ docker compose exec -T db pg_restore -U postgres -d facturo_restore &lt; /backups/facturo-2026-11-12.dump
 $ docker compose exec db psql -U postgres -d facturo_restore -c "SELECT count(*) FROM facture;"</code></pre>
 <p>Le test ne s'arrête pas à l'absence d'erreur : on compare le nombre de factures avec celui de la production, et l'on note la durée. Cette durée mesurée est votre vrai RTO.</p>
+<p>Dans cet exemple, <code>pg_restore</code> lit l'archive sur l'entrée standard : la restauration ne peut alors pas être parallélisée avec l'option <code>-j</code>, qui exige un fichier ordinaire.</p>
 <p><strong>À retenir</strong></p>
 <ul>
 <li>
@@ -527,7 +529,7 @@ Ne jamais mesurer la durée d'une restauration : on la découvre le jour de la p
 </tr>
 </tbody></table>
 <p>Quatre questions à poser avant de choisir : où sont stockées les données (pays, voir module 6) ? Qui s'occupe des mises à jour de sécurité ? Que se passe-t-il à la panne d'un serveur ? Peut-on partir facilement chez un autre hébergeur ? Pour Facturo, un VPS est un point de départ raisonnable, mais la question des données de santé ou des exigences d'hébergement spécifiques se traite avec le module 6.</p>
-<p><strong>Les secrets</strong> (mots de passe, clés d'API, clé de signature) suivent quatre règles : jamais dans Git, jamais dans une image Docker, stockés dans les variables protégées de la CI ou dans un fichier lisible uniquement par le serveur, et changés dès qu'on soupçonne une fuite. Si un agent colle un mot de passe dans le code « pour tester », c'est une dérive à corriger tout de suite, même si le dépôt est privé.</p>
+<p><strong>Les secrets</strong> (mots de passe, clés d'API, clé de signature) suivent quatre règles : jamais dans Git, jamais dans une image Docker, de préférence récupérés par le service lui-même ou placés dans un fichier lisible uniquement par le serveur (les variables protégées de la CI conviennent pour des secrets limités, pas pour des identifiants de grande valeur ou de longue durée), et changés dès qu'on soupçonne une fuite. Si un agent colle un mot de passe dans le code « pour tester », c'est une dérive à corriger tout de suite, même si le dépôt est privé.</p>
 <p>L'<strong>infrastructure as code</strong> consiste à décrire le serveur dans des fichiers (installation, utilisateurs, pare-feu) plutôt que de le configurer à la main. L'avantage est double : on peut reconstruire le serveur à l'identique après un incident, et chaque changement est relu comme du code.</p>
 <p><strong>À retenir</strong></p>
 <ul>
@@ -587,6 +589,8 @@ Garder un fichier <code>.env</code> de production partagé par e-mail ou message
 <details><summary>Corrigé</summary><p>Au pire, tout ce qui a été saisi depuis 2 h, soit presque quatorze heures de factures. Il faut demander à Marie si c'est acceptable (RPO). Si non, on sauvegarde plus souvent ou on archive en continu les journaux de la base. On demande aussi quelle durée d'interruption elle tolère (RTO).</p>
 </details>
 <h2>Quiz</h2>
+<ol><li>Quel composant est la seule porte ouverte sur Internet ?</li><li>À quoi sert un volume Docker ?</li><li>Que protège la mention <code>when: manual</code> ?</li><li>Quelle stratégie évite toute coupure sans doubler l'environnement ?</li><li>Pourquoi ajouter une colonne <code>NOT NULL</code> d'un coup est risqué ?</li><li>Quand une sauvegarde est-elle fiable ?</li></ol>
+<details><summary>Voir les réponses (après avoir répondu aux six questions)</summary>
 <table>
 <thead>
 <tr>
@@ -627,6 +631,7 @@ Garder un fichier <code>.env</code> de production partagé par e-mail ou message
 <td>Sinon c'est une hypothèse</td>
 </tr>
 </tbody></table>
+</details>
 <h2>Checklist du module 5</h2>
 <ul class="check">
 <li>
@@ -654,15 +659,23 @@ J'ai déjà restauré une sauvegarde et mesuré le temps nécessaire.
 J'ai fait l'atelier du déploiement raté et du retour arrière.
 </li>
 </ul>
-<h2>Sources et limites</h2>
+<h2>Sources</h2>
+<p>Pages consultées le 16 novembre 2026. Les dates sont celles affichées sur les pages.</p>
 <ul>
-<li>
-<a href="https://docs.docker.com/reference/compose-file/version-and-name/">Docker, éléments </a><a href="https://docs.docker.com/reference/compose-file/version-and-name/"><code>version</code></a><a href="https://docs.docker.com/reference/compose-file/version-and-name/"> et </a><a href="https://docs.docker.com/reference/compose-file/version-and-name/"><code>name</code></a><a href="https://docs.docker.com/reference/compose-file/version-and-name/"> d'un fichier Compose</a> : l'élément <code>version</code> est obsolète et seulement informatif, c'est pourquoi le fichier Compose de la leçon 5.2 n'en comporte pas.
-</li>
-<li>
-Non vérifié en ligne lors de la rédaction : la syntaxe détaillée de <code>.gitlab-ci.yml</code> (la page de référence GitLab n'était pas accessible), les commandes PostgreSQL de la leçon 5.6 et les options Doctrine de la leçon 5.5. Les exemples sont pédagogiques : faites-les valider par un agent de revue et testez-les sur la recette avant tout usage réel.
-</li>
+<li><a href="https://docs.docker.com/reference/compose-file/version-and-name/">Version and name top-level elements</a>, Docker (aucune date affichée) : l'élément version est obsolète et seulement informatif ; un avertissement s'affiche s'il est utilisé. C'est pourquoi le fichier Compose de la leçon 5.2 n'en comporte pas.</li>
+<li><a href="https://docs.docker.com/build/building/best-practices/">Building best practices</a>, Docker (aucune date affichée) : épingler la version de l'image de base (voire son condensat) est recommandé pour la chaîne d'approvisionnement ; si le service peut tourner sans privilèges, utiliser USER pour un utilisateur non root.</li>
+<li><a href="https://docs.gitlab.com/ci/yaml/">CI/CD YAML syntax reference</a>, GitLab (aucune date affichée) : les mots-clés stages, script, rules, when, allow_failure, environment et coverage existent et se comportent comme décrit en leçon 5.3 ; en particulier un <code>when: manual</code> au niveau du job s'applique à une règle <code>rules: - if:</code> qui n'a pas de <code>when</code>. Les 275 000 caractères de la page ont été parcourus par fenêtres, avec des questions ciblées.</li>
+<li><a href="https://www.postgresql.org/docs/current/backup.html">Chapter 25. Backup and Restore</a>, PostgreSQL (aucune date affichée) : trois approches de sauvegarde : dump SQL, sauvegarde au niveau fichier, archivage continu : leçon 5.6.</li>
+<li><a href="https://www.postgresql.org/docs/current/app-pgdump.html">pg_dump</a>, PostgreSQL (aucune date affichée) : « Dumps can be output in script or archive file formats. »</li>
+<li><a href="https://12factor.net/config">III. Config</a>, The Twelve-Factor App (« Last updated 2017 ») : la configuration vient de l'environnement, séparée du code : leçon 5.7.</li>
+<li><a href="https://www.postgresql.org/docs/current/app-pgrestore.html">pg_restore</a>, PostgreSQL (aucune date affichée ; documentation 18.7) : « If a database name is specified, pg_restore connects to that database and restores archive contents directly into the database » ; l'entrée standard est utilisée si aucun fichier n'est donné ; l'option -j n'accepte pas un tube ni l'entrée standard.</li>
+<li><a href="https://www.postgresql.org/docs/current/app-createdb.html">createdb</a>, PostgreSQL (aucune date affichée ; documentation 18.7) : « createdb creates a new PostgreSQL database » ; enveloppe de CREATE DATABASE.</li>
+<li><a href="https://www.postgresql.org/docs/current/app-psql.html">psql</a>, PostgreSQL (aucune date affichée ; documentation 18.7) : -c exécute la commande donnée, -d désigne la base, -U l'utilisateur (page lue en partie : 100 000 caractères sur 147 582).</li>
+<li><a href="https://docs.docker.com/reference/cli/docker/compose/exec/">docker compose exec</a>, Docker (aucune date affichée) : -T désactive l'allocation d'un pseudo-TTY, allouée par défaut.</li>
+<li><a href="https://www.doctrine-project.org/projects/doctrine-migrations/en/current/reference/migration-classes.html">Migration Classes</a>, Doctrine Migrations (aucune date affichée ; version 3.9.8) : une classe de migration définit up() et down() ; addSql() s'utilise dans les deux ; une migration irréversible peut le signaler dans down().</li>
 </ul>
+<p>Non vérifié en ligne : les instructions SQL de la leçon 5.5 (<code>ALTER TABLE … ADD</code>, <code>INTERVAL</code>, <code>CHECK</code>) et les conseils de pratique de cette leçon (remplissage par paquets, test sur une copie). Les exemples sont pédagogiques : faites-les valider par un agent de revue et testez-les sur la recette avant tout usage réel.</p>
+
 
 <div class="pager"><a class="prev" href="../modules/module-04.html"><small>← Précédent</small>Module 4 : tests et qualité</a><a class="next" href="../modules/module-06.html"><small>Suivant →</small>Module 6 : sécurité, observabilité, données et conformité</a></div></article></main></div>
 <script>document.querySelectorAll('.side a.nav').forEach(function(a){a.addEventListener('click',function(){document.body.classList.remove('open')})});var on=document.querySelector('.side a.on');if(on)on.scrollIntoView({block:'center'});</script>

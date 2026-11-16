@@ -117,7 +117,7 @@ return $facture-&gt;getCabinet() === $user-&gt;getCabinet();</code></pre>
 <ul>
 <li><strong>Mots de passe :</strong> ils ne sont jamais stockés en clair mais sous forme de condensé (hash) avec l'outil fourni par le framework, jamais une fonction maison. Un agent qui « invente » son propre chiffrement est un signal d'alerte.</li>
 <li><strong>Tentatives répétées :</strong> on limite le nombre d'essais de connexion pour gêner les attaques par devinettes.</li>
-<li><strong>Dépendances :</strong> l'application embarque des dizaines de bibliothèques tierces. Chacune peut avoir une faille connue. Les commandes d'audit des gestionnaires de paquets (<code>composer audit</code>, <code>npm audit</code>) la signalent, et le pipeline du module 5 peut les lancer à chaque modification. Mettre à jour régulièrement, par petits pas, est moins risqué que tout reporter d'un an.</li>
+<li><strong>Dépendances :</strong> l'application embarque des dizaines de bibliothèques tierces. Chacune peut avoir une faille connue. Les commandes d'audit des gestionnaires de paquets (<code>composer audit</code>, disponible depuis Composer 2.4, et <code>npm audit</code>) la signalent ; un code de sortie non nul permet de faire échouer le pipeline, et le pipeline du module 5 peut les lancer à chaque modification. Mettre à jour régulièrement, par petits pas, est moins risqué que tout reporter d'un an.</li>
 </ul>
 <p>Avant d'accepter qu'un agent ajoute une nouvelle dépendance, posez-vous : est-elle maintenue ? Est-elle vraiment nécessaire ? Que se passe-t-il si elle disparaît ?</p>
 
@@ -130,7 +130,7 @@ return $facture-&gt;getCabinet() === $user-&gt;getCabinet();</code></pre>
  "error":"null value in column date_echeance violates not-null constraint"}</code></pre>
 <p>Ce log est utile parce qu'il dit <strong>quoi</strong> (l'émission a échoué), <strong>pour qui</strong> (cabinet 7, sans le nom du client) et <strong>pourquoi</strong> (la contrainte). Règle de sécurité : on journalise des identifiants, jamais de mots de passe, de jetons ni de données personnelles inutiles.</p>
 <p><strong>Les métriques</strong> sont des chiffres dans le temps : factures émises par minute, taux de réponses en erreur, temps de réponse, taille de la file Redis. Elles répondent à la question « est-ce normal en ce moment ? ». On déclenche les alertes sur les symptômes que vivent les utilisateurs (les émissions échouent), pas sur les causes présumées (le processeur est à 70 %).</p>
-<p><strong>Les traces</strong> suivent une requête d'un bout à l'autre. Un identifiant unique (<code>request_id</code>) est créé à l'arrivée dans Nginx, puis recopié dans chaque log de l'API et du worker. Une recherche sur cet identifiant reconstitue le trajet complet d'une facture, et montre à quel maillon ça casse.</p>
+<p><strong>Les traces</strong> suivent une requête d'un bout à l'autre. Un identifiant unique (<code>request_id</code>) est créé à l'arrivée dans Nginx, puis recopié dans chaque log de l'API et du worker. Une recherche sur cet identifiant reconstitue le trajet complet d'une facture, et montre à quel maillon ça casse. Les outils spécialisés, comme OpenTelemetry, découpent une trace en étapes appelées <em>spans</em> ; l'identifiant de requête décrit ici en est une version simplifiée.</p>
 <p><strong>À retenir</strong></p>
 <ul>
 <li>Logs : ce qui s'est passé. Métriques : combien et à quel rythme. Traces : par où est passée une requête.</li>
@@ -196,7 +196,7 @@ return $facture-&gt;getCabinet() === $user-&gt;getCabinet();</code></pre>
 <tr><td>Mesures de sécurité</td><td>Accès par cabinet, chiffrement HTTPS, sauvegardes testées, journalisation sans données inutiles</td></tr>
 </tbody></table>
 <p><strong>Ce que cela change pour le code.</strong> Si la durée de conservation est fixée, il faut du code pour supprimer ou anonymiser ensuite ; si la finalité est limitée, on ne réutilise pas les e-mails de facturation pour une newsletter ; si l'on doit répondre à une demande d'accès ou d'effacement d'une personne, il faut pouvoir retrouver ses données, y compris dans les sauvegardes et les logs. Ce sont des exigences d'architecture, pas des détails.</p>
-<p><strong>Encadré : les données de santé.</strong> Certaines données sont dites sensibles, notamment les données de santé, et leur hébergement est encadré en France par une certification dédiée, la certification HDS (hébergeur de données de santé), suivie par l'Agence du numérique en santé. Facturo, outil de facturation d'un cabinet comptable, n'est pas concerné. La question se poserait si un client était un cabinet médical et que des données de santé se retrouvaient dans les factures. Cet encadré n'a pas pu être vérifié sur la page officielle de l'ANS lors de la rédaction : confirmez les conditions précises auprès d'elle ou d'un juriste.</p>
+<p><strong>Encadré : les données de santé.</strong> Certaines données sont dites sensibles, notamment les données de santé, et leur hébergement est encadré en France par une certification dédiée, la certification HDS (hébergeur de données de santé), prévue par l'article L. 1111-8 du code de la santé publique. Elle vise l'hébergement, pour le compte d'un tiers, de données de santé recueillies lors d'activités de prévention, de diagnostic, de soins ou de suivi social et médico-social, et l'Agence du numérique en santé publie la liste des hébergeurs certifiés. Facturo, outil de facturation d'un cabinet comptable, n'est pas concerné. La question se poserait si un client était un cabinet médical et que des données de santé se retrouvaient dans les factures. Cet encadré s'appuie sur une page de la CNIL et une fiche juridique (voir les sources) ; les pages de l'ANS n'ont pas pu être lues. Le périmètre exact dépend du cas : confirmez-le auprès d'elle ou d'un juriste.</p>
 <p><strong>À retenir</strong></p>
 <ul>
 <li>Quatre questions par donnée : pourquoi, où, qui, combien de temps.</li>
@@ -232,6 +232,8 @@ return $facture-&gt;getCabinet() === $user-&gt;getCabinet();</code></pre>
 <details><summary>Corrigé</summary><p>« Rien dans le processus n'exigeait un test sur l'émission d'un avoir, et la revue n'avait pas de ligne pour le vérifier. » On décrit ce que le système a permis, puis on en tire des actions : un test, une ligne de grille de revue.</p></details>
 
 <h2>Quiz</h2>
+<ol><li>Comment éviter l'injection SQL ?</li><li>« Connecté » suffit-il pour lire une facture ?</li><li>Un mot de passe a été commité puis supprimé : que faire ?</li><li>Que montre une trace ?</li><li>Quel est le premier geste en incident ?</li><li>Quelles sont les 4 questions par donnée personnelle ?</li></ol>
+<details><summary>Voir les réponses (après avoir répondu aux six questions)</summary>
 <table>
 <thead><tr><th>Question</th><th>Réponse</th><th>Pourquoi</th></tr></thead>
 <tbody>
@@ -242,6 +244,7 @@ return $facture-&gt;getCabinet() === $user-&gt;getCabinet();</code></pre>
 <tr><td>Quel est le premier geste en incident ?</td><td>Stopper l'impact</td><td>La cause se cherche après le retour au service</td></tr>
 <tr><td>Quelles sont les 4 questions par donnée personnelle ?</td><td>Pourquoi, où, qui, combien de temps</td><td>Elles structurent le registre</td></tr>
 </tbody></table>
+</details>
 
 <h2>Checklist du module 6</h2>
 <ul class="check">
@@ -254,12 +257,23 @@ return $facture-&gt;getCabinet() === $user-&gt;getCabinet();</code></pre>
 <li>J'ai fait la revue de sécurité de l'atelier.</li>
 </ul>
 
-<h2>Sources et limites</h2>
+<h2>Sources</h2>
+<p>Pages consultées le 16 novembre 2026. Les dates sont celles affichées sur les pages.</p>
 <ul>
-<li><a href="https://www.cnil.fr/fr/RGPD-le-registre-des-activites-de-traitement">CNIL, le registre des activités de traitement</a> : qui doit tenir un registre, contenu, allègement pour les structures de moins de 250 personnes, distinction responsable de traitement et sous-traitant.</li>
-<li><a href="https://esante.gouv.fr/ens/offre/hds">ANS, certification HDS</a> : page de référence indiquée pour l'encadré santé ; son contenu n'a pas pu être lu lors de la rédaction, l'encadré est donc à confirmer.</li>
-<li>Non vérifié en ligne : la description technique des failles (injection, contrôle d'accès, secrets), les commandes d'audit des dépendances, les pratiques d'observabilité et de post-mortem, ainsi que les notions générales du RGPD hors registre. Elles sont données à titre pédagogique. Les durées de conservation sont volontairement laissées à confirmer.</li>
+<li><a href="https://top10.owasp.org/2025/">OWASP Top 10:2025</a>, OWASP (aucune date affichée) : « A01:2025 - Broken Access Control » et « A05:2025 - Injection » figurent dans la liste, qui a changé par rapport aux éditions précédentes : ne vous fiez pas à d'anciens numéros.</li>
+<li><a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html">SQL Injection Prevention Cheat Sheet</a>, OWASP (aucune date affichée) : « use parameterized queries for dynamic data values » : leçon 6.2.</li>
+<li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html">Secrets Management Cheat Sheet</a>, OWASP (aucune date affichée) : le problème des secrets écrits en clair dans le code ; la rotation régulière des secrets ; « Keys that were exposed should undergo immediate revocation » ; réécrire l'historique Git est possible mais peut casser des liens (table des matières lue en entier ; sections 1, 2.7.2, 3.2.1, 5.1, 8.1, 8.3 et 9.2 lues, les autres non relues mot à mot).</li>
+<li><a href="https://sre.google/sre-book/postmortem-culture/">Postmortem Culture: Learning from Failure</a>, Google SRE (copyright 2017) : « Blameless postmortems are a tenet of SRE culture. » : leçon 6.5.</li>
+<li><a href="https://www.cnil.fr/fr/rgpd-de-quoi-parle-t-on">RGPD : de quoi parle-t-on ?</a>, CNIL (10 avril 2018) : une donnée personnelle est « toute information se rapportant à une personne physique identifiée ou identifiable ».</li>
+<li><a href="https://www.cnil.fr/fr/les-durees-de-conservation-des-donnees">Les durées de conservation des données</a>, CNIL (2 avril 2026) : la durée n'est pas unique : le responsable la détermine en fonction de la finalité du traitement.</li>
+<li><a href="https://www.cnil.fr/fr/RGPD-le-registre-des-activites-de-traitement">Le registre des activités de traitement</a>, CNIL (13 avril 2018) : qui doit tenir un registre, contenu, allègement pour les structures de moins de 250 personnes, responsable de traitement et sous-traitant.</li>
+<li><a href="https://www.cnil.fr/fr/securite-cloud-informatique-en-nuage">Sécurité : cloud, informatique en nuage</a>, CNIL (14 mars 2024) : recourir à un fournisseur certifié HDS pour le traitement de données de santé ; l'Agence du numérique en santé publie la liste des hébergeurs certifiés.</li>
+<li><a href="https://open.lefebvre-dalloz.fr/droit-affaires/protection-donnees-personnelles/heberger-donnees-sante_a93491">Héberger des données de santé</a>, Lefebvre Dalloz (source secondaire) (9 décembre 2022) : l'hébergeur de données de santé à caractère personnel doit être titulaire d'un certificat de conformité ; données recueillies lors d'activités de prévention, de diagnostic, de soins ou de suivi social et médico-social.</li>
+<li><a href="https://getcomposer.org/doc/03-cli.md">Command-line interface, commande audit</a>, Composer (aucune date affichée) : vérifie les paquets installés par rapport aux avis de sécurité ; code de sortie 1 en cas de paquets en infraction. La commande est apparue avec la version 2.4 (<a href="https://getcomposer.org/changelog/2.4.0-RC1">journal 2.4.0-RC1, 21 juillet 2022</a>).</li>
+<li><a href="https://opentelemetry.io/docs/concepts/signals/">Signals</a>, OpenTelemetry (aucune date affichée) : trace, « The path of a request through your application » ; métrique, « A measurement captured at runtime » ; log, « A recording of an event ».</li>
 </ul>
+<p>Non vérifié sur une page officielle ouverte : le texte exact de l'article L. 1111-8 du code de la santé publique et les pages esante.gouv.fr sur la certification HDS (elles se chargent vides) ; l'encadré santé s'appuie sur une page de la CNIL et sur une fiche d'un éditeur juridique, et son périmètre exact reste à confirmer auprès de l'ANS ou d'un juriste. Aucune date de référentiel HDS n'est citée : les sources consultées ne concordent pas. Non vérifiées également : les bonnes pratiques d'observabilité au-delà des définitions des signaux d'OpenTelemetry (logs structurés, alerte sur les symptômes), l'expression « trois piliers » qui est d'usage courant, et la description technique des failles hors documentation OWASP citée. Les durées de conservation précises sont laissées à confirmer pour chaque traitement. Les exemples sont donnés à titre pédagogique.</p>
+
 
 <div class="pager"><a class="prev" href="../modules/module-05.html"><small>← Précédent</small>Module 5 : serveur, mise en ligne, DevOps et CI/CD</a><a class="next" href="../modules/module-07.html"><small>Suivant →</small>Module 7 : agents IA, définitions et fonctionnement</a></div></article></main></div>
 <script>document.querySelectorAll('.side a.nav').forEach(function(a){a.addEventListener('click',function(){document.body.classList.remove('open')})});var on=document.querySelector('.side a.on');if(on)on.scrollIntoView({block:'center'});</script>
