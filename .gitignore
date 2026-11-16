@@ -1,0 +1,15 @@
+.DS_Store
+*.zip
+
+# Privé : état de l'apprenant, registre des pièges, scénario secret de la cliente.
+# Seul le README est versionné ; les modèles vides sont dans cursus-learning-app/.agent/docs/modeles/.
+cursus-learning-app/.agent/apprenant/*
+!cursus-learning-app/.agent/apprenant/README.md
+
+# Liens créés à l'installation des skills
+cursus-learning-app/.claude/
+cursus-learning-app/.agents/
+
+# Le projet de l'apprenant a son propre dépôt Git
+cursus-learning-app/workspace/*
+!cursus-learning-app/workspace/README.md

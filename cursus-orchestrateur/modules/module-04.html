@@ -1,0 +1,959 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Module 4 : tests et qualité · Cursus orchestrateur</title>
+<link rel="stylesheet" href="../css/style.css"></head>
+<body><button class="menu-btn" onclick="document.body.classList.toggle('open')">☰ Menu du cursus</button>
+<div class="layout"><nav class="side"><a class="brand" href="../index.html">Cursus : orchestrateur et gestionnaire d’app<small>12 modules · 24 semaines</small></a>
+<a class="nav" href="../index.html">Accueil</a>
+<a class="nav" href="../demarrer.html">Démarrer</a>
+<h4>Le socle : savoir juger</h4>
+<a class="nav" href="../modules/module-01.html">Module 1 : fondamentaux du web et du logiciel</a>
+<a class="nav" href="../modules/module-02.html">Module 2 : lire le code et reconnaître le mauvais code</a>
+<a class="nav" href="../modules/module-03.html">Module 3 : architectures et design patterns</a>
+<a class="nav on" href="../modules/module-04.html">Module 4 : tests et qualité</a>
+<a class="nav" href="../modules/module-05.html">Module 5 : serveur, mise en ligne, DevOps et CI/CD</a>
+<a class="nav" href="../modules/module-06.html">Module 6 : sécurité, observabilité, données et conformité</a>
+<h4>Les agents IA et le pilotage</h4>
+<a class="nav" href="../modules/module-07.html">Module 7 : agents IA, définitions et fonctionnement</a>
+<a class="nav" href="../modules/module-08.html">Module 8 : orchestrer des agents</a>
+<a class="nav" href="../modules/module-09.html">Module 9 : piloter l&#x27;application en production</a>
+<h4>Les modules transversaux</h4>
+<a class="nav" href="../modules/module-10.html">Module 10 : gestion de projet</a>
+<a class="nav" href="../modules/module-11.html">Module 11 : produit et conception</a>
+<a class="nav" href="../modules/module-12.html">Module 12 : gestion du client et communication</a>
+<h4>Référence</h4>
+<a class="nav" href="../glossaire.html">Glossaire</a></nav>
+<main><article><div class="toolbar"><button onclick="window.print()">Imprimer / PDF</button><button onclick="var r=document.documentElement;var d=r.dataset.theme==='dark';r.dataset.theme=d?'light':'dark'">Clair / sombre</button></div>
+<h1>Module 4 : tests et qualité</h1>
+<h2>Ce que vous saurez faire</h2>
+<p>Ce module apprend à décider quels tests écrire, à les lire, et à vérifier qu'un agent n'a pas triché pour les faire passer. Sans tests, confier du code à un agent revient à signer un contrat sans le relire.</p>
+<p>À la fin du module, vous saurez :</p>
+<ul>
+<li>
+placer un test au bon étage de la pyramide (unitaire, intégration, bout en bout) ;
+</li>
+<li>
+lire un test PHPUnit et dire quel comportement il protège ;
+</li>
+<li>
+écrire un test qui échoue avant le code (TDD) pour une règle de Facturo ;
+</li>
+<li>
+distinguer un mock, un stub et un fake, et repérer un test qui simule trop ;
+</li>
+<li>
+détecter dans un diff qu'un agent a affaibli ou contourné un test ;
+</li>
+<li>
+décrire le filet de sécurité complet : tests, linter, analyse statique, CI.
+</li>
+</ul>
+<p><strong>Prérequis :</strong> modules 1 et 2 (comprendre une requête HTTP, lire un diff). <strong>Durée :</strong> 10 à 12 heures, sur deux semaines.</p>
+<p><strong>Lien avec Facturo :</strong> l'application manipule de l'argent et des numéros de facture qui doivent se suivre sans trou. Une erreur d'arrondi de un centime ou un numéro manquant a un coût réel pour Marie Giraud et son cabinet. C'est le terrain idéal pour apprendre à tester.</p>
+<h2>Leçon 4.1 : pourquoi tester, et à quel étage</h2>
+<p>Un test est un petit programme qui vérifie qu'un autre programme fait ce qu'on attend. On le lance en quelques secondes. Il répond « vert » (tout va bien) ou « rouge » (quelque chose a cassé).</p>
+<p>Pensez à un contrôle qualité en usine. On ne fait pas un essai routier complet pour chaque vis. On contrôle les vis une à une, très vite. On contrôle ensuite les sous-ensembles, puis on fait quelques essais sur route. Les tests logiciels suivent la même logique, en trois étages.</p>
+<ul>
+<li>
+<strong>Test unitaire :</strong> il vérifie une petite pièce de logique, seule, sans base de données ni réseau. Exemple Facturo : le calcul du total TTC d'une facture. Il dure quelques millisecondes.
+</li>
+<li>
+<strong>Test d'intégration :</strong> il vérifie que plusieurs pièces fonctionnent ensemble. Exemple : la route <code>POST /api/factures</code> enregistre bien une facture en base et répond 201. Il dure quelques centaines de millisecondes.
+</li>
+<li>
+<strong>Test de bout en bout (E2E) :</strong> un robot pilote un vrai navigateur et suit un parcours complet. Exemple : Marie crée une facture, l'émet et télécharge le PDF. Il dure plusieurs secondes.
+</li>
+</ul>
+<p>Plus un test est haut, plus il rassure sur l'ensemble. Mais il est aussi plus lent, plus fragile et plus difficile à diagnostiquer quand il échoue. D'où la forme de pyramide : beaucoup de tests unitaires à la base, moins d'intégration au milieu, très peu de bout en bout au sommet.</p>
+<table>
+<thead>
+<tr>
+<th>Étage</th>
+<th>Ce qu'il vérifie</th>
+<th>Vitesse</th>
+<th>Exemple Facturo</th>
+<th>Ordre de grandeur (exemple)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unitaire</td>
+<td>Une règle, une fonction, une classe</td>
+<td>Millisecondes</td>
+<td>Arrondi de la TVA</td>
+<td>environ 300 tests</td>
+</tr>
+<tr>
+<td>Intégration</td>
+<td>Plusieurs composants branchés ensemble</td>
+<td>Centaines de ms</td>
+<td>Route d'API et base de test</td>
+<td>environ 40 tests</td>
+</tr>
+<tr>
+<td>Bout en bout</td>
+<td>Un parcours utilisateur complet</td>
+<td>Secondes</td>
+<td>Créer, émettre, télécharger</td>
+<td>environ 6 tests</td>
+</tr>
+</tbody></table>
+<p>Les chiffres de la dernière colonne sont un ordre de grandeur pour illustrer. Ils ne sont pas une norme. Ce qui compte, c'est la forme : large en bas, étroite en haut.</p>
+<p>Une pyramide inversée (le « cornet de glace ») est le piège classique. Une équipe qui ne teste que par des parcours complets obtient une suite lente, qui échoue parfois sans raison. On finit par ne plus la lancer, et elle ne protège plus rien.</p>
+<p><strong>À retenir</strong></p>
+<ul>
+<li>
+Un test vérifie un comportement et répond vert ou rouge en quelques secondes.
+</li>
+<li>
+Beaucoup de tests rapides en bas, peu de tests lents en haut.
+</li>
+<li>
+Un test lent ou capricieux finit ignoré, donc inutile.
+</li>
+</ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul>
+<li>
+Tout tester en bout en bout « parce que c'est plus réaliste ».
+</li>
+<li>
+Tester le code du framework (Symfony sait déjà valider une route) au lieu des règles de Facturo.
+</li>
+</ul>
+<figure><img src="../img/m04-01.png" alt="pyramide des tests · 3 étages, exemples Facturo"><figcaption>pyramide des tests · 3 étages, exemples Facturo</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol>
+<li>
+Partez de la base : les tests unitaires, en bleu, sont les plus nombreux et les plus rapides.
+</li>
+<li>
+Montez d'un étage : l'intégration vérifie que les pièces s'emboîtent, avec une vraie base de test.
+</li>
+<li>
+Au sommet, quelques parcours complets pilotés par un robot.
+</li>
+<li>
+À droite, chaque étage donne un exemple de Facturo et un ordre de grandeur.
+</li>
+</ol>
+<h2>Leçon 4.2 : le test unitaire, pas à pas</h2>
+<p>Un test unitaire se lit en trois temps : on prépare, on agit, on vérifie. Les anglophones l'appellent Arrange, Act, Assert. On dit aussi « étant donné …, quand …, alors … » (Given, When, Then). Si vous savez lire ces trois temps, vous savez lire n'importe quel test.</p>
+<p>Premier cas : le calcul de la TVA. Facturo stocke tous les montants en <strong>centimes</strong>, sous forme d'entiers. C'est volontaire. Les nombres à virgule des ordinateurs (les « flottants ») font des erreurs minuscules qui, additionnées sur des milliers de factures, créent des écarts réels.</p>
+<pre><code>// src/Facturation/Domain/CalculTva.php
+final class CalculTva
+{
+    /** @param int $htCentimes montant HT en centimes ; $taux en pourcents ('20', '10', '5.5') */
+    public static function ttc(int $htCentimes, string $taux): int
+    {
+        $tva = (int) round($htCentimes * (float) $taux / 100, 0, PHP_ROUND_HALF_UP);
+
+        return $htCentimes + $tva;
+    }
+}</code></pre>
+<p>Le test qui protège cette règle utilise un « fournisseur de données » : une liste de cas, et PHPUnit rejoue le même test pour chacun.</p>
+<pre><code>// tests/Unit/Facturation/CalculTvaTest.php
+final class CalculTvaTest extends TestCase
+{
+    #[DataProvider('cas')]
+    public function testTtc(int $ht, string $taux, int $attendu): void
+    {
+        self::assertSame($attendu, CalculTva::ttc($ht, $taux));
+    }
+
+    public static function cas(): iterable
+    {
+        yield 'TVA 20 % standard'       =&gt; [1005, '20',  1206];
+        yield 'TVA 10 %'                =&gt; [1000, '10',  1100];
+        yield 'TVA 5,5 % arrondie bas'  =&gt; [3333, '5.5', 3516];
+        yield 'demi-centime vers le haut' =&gt; [25,  '10',  28];
+        yield 'montant nul'             =&gt; [0,    '20',  0];
+    }
+}</code></pre>
+<p>Regardez le cas « demi-centime ». 0,25 € HT à 10 % donne 2,5 centimes de TVA. La règle de Facturo est d'arrondir vers le haut : 3 centimes, soit 0,28 € TTC. Ce cas existe pour qu'on remarque tout de suite si un agent change la règle d'arrondi sans prévenir.</p>
+<p>Deuxième cas : la numérotation continue. La loi exige des factures numérotées sans trou. Le test dit exactement cela.</p>
+<pre><code>final class RegistreNumerosTest extends TestCase
+{
+    public function testLesNumerosSeSuiventSansTrou(): void
+    {
+        $registre = new RegistreNumeros(annee: 2026, dernier: 41);
+
+        self::assertSame('FAC-2026-0042', $registre-&gt;suivant());
+        self::assertSame('FAC-2026-0043', $registre-&gt;suivant());
+    }
+
+    public function testLaNumerotationRepartDeUnChaqueAnnee(): void
+    {
+        $registre = new RegistreNumeros(annee: 2027, dernier: 0);
+
+        self::assertSame('FAC-2027-0001', $registre-&gt;suivant());
+    }
+}</code></pre>
+<p>Troisième cas : une facture émise ne se modifie plus. Ici, le test vérifie qu'une action interdite lève bien une erreur.</p>
+<pre><code>public function testUneFactureEmiseNEstPlusModifiable(): void
+{
+    $facture = Facture::brouillon($client, [new Ligne('Audit', 1, 50000)]);
+    $facture-&gt;emettre('FAC-2026-0042', new \DateTimeImmutable('2026-03-01'));
+
+    $this-&gt;expectException(FactureDejaEmise::class);
+
+    $facture-&gt;ajouterLigne(new Ligne('Oubli', 1, 1000));
+}</code></pre>
+<p><strong>Lire un test en trois questions</strong></p>
+<ol>
+<li>
+Quelle règle ce test protège-t-il ? Le nom doit le dire.
+</li>
+<li>
+Qu'est-ce qui est préparé ? Les données de départ sont-elles réalistes ?
+</li>
+<li>
+Qu'est-ce qui est vérifié ? Si l'assertion disparaissait, le test passerait-il quand même ?
+</li>
+</ol>
+<p><strong>À retenir</strong></p>
+<ul>
+<li>
+Un test unitaire prépare, agit, vérifie.
+</li>
+<li>
+Il protège une règle métier, pas un détail de code.
+</li>
+<li>
+Les cas limites (demi-centime, montant nul, premier numéro de l'année) valent plus que dix cas ordinaires.
+</li>
+</ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul>
+<li>
+Un test sans assertion : il passe toujours et ne prouve rien.
+</li>
+<li>
+Calculer le résultat attendu avec la même formule que le code. Si la formule est fausse, le test l'est aussi. Mettez des valeurs écrites à la main.
+</li>
+</ul>
+<h2>Leçon 4.3 : des tests qui disent toujours la même chose</h2>
+<p>Un bon test donne le même résultat à chaque exécution, sur n'importe quelle machine. Un test qui réussit lundi et échoue mardi sans que le code ait changé est pire qu'inutile : il apprend à l'équipe à ignorer le rouge.</p>
+<p>Les trois causes habituelles sont l'heure, le hasard et l'ordre d'exécution. Voici un vrai piège de Facturo. La règle : une facture est « en retard » quand sa date d'échéance est passée. Un premier test, écrit au printemps, ressemble à ceci.</p>
+<pre><code>// Fragile : dépend de la date du jour
+public function testUneFactureDuMoisProchainNEstPasEnRetard(): void
+{
+    $facture = $this-&gt;factureEcheance('2026-03-31');
+
+    self::assertFalse($facture-&gt;estEnRetard());
+}</code></pre>
+<p>Ce test passe jusqu'au 31 mars 2026. Le lendemain, il devient rouge, alors que le code n'a pas changé. Nous sommes en novembre 2026 : il serait rouge depuis des mois. La cause : <code>estEnRetard()</code> lit l'heure réelle de la machine.</p>
+<p>La solution est de ne jamais lire l'heure directement, mais de la recevoir de l'extérieur. Symfony fournit pour cela un composant <code>Clock</code>, avec une horloge de test qu'on règle à la main.</p>
+<pre><code>// Fiable : l'horloge est réglée par le test
+use Symfony\Component\Clock\MockClock;
+
+public function testUneFactureNEstPasEnRetardAvantSonEcheance(): void
+{
+    $horloge = new MockClock('2026-03-30 09:00:00');
+    $facture = $this-&gt;factureEcheance('2026-03-31');
+
+    self::assertFalse($facture-&gt;estEnRetard($horloge));
+}
+
+public function testUneFactureEstEnRetardLeLendemainDeSonEcheance(): void
+{
+    $horloge = new MockClock('2026-04-01 09:00:00');
+    $facture = $this-&gt;factureEcheance('2026-03-31');
+
+    self::assertTrue($facture-&gt;estEnRetard($horloge));
+}</code></pre>
+<p>Le test prend désormais le contrôle du temps. Il passera de la même façon en 2026 et en 2036. Remarquez aussi qu'on teste les deux côtés de la frontière : la veille et le lendemain.</p>
+<p>Trois autres règles d'hygiène valent la peine d'être connues.</p>
+<ul>
+<li>
+<strong>Un comportement par test.</strong> Un test qui vérifie sept choses ne dit pas laquelle a cassé.
+</li>
+<li>
+<strong>Un nom qui raconte la règle.</strong> <code>testUneFactureEmiseNEstPlusModifiable</code> se lit comme une phrase. <code>testFacture3</code> ne dit rien.
+</li>
+<li>
+<strong>Des tests indépendants.</strong> Chaque test crée ses propres données. Il ne doit pas dépendre d'un autre test lancé avant lui.
+</li>
+</ul>
+<p><strong>À retenir</strong></p>
+<ul>
+<li>
+L'heure, le hasard et l'ordre d'exécution sont les trois sources de tests capricieux.
+</li>
+<li>
+On règle l'horloge dans le test, on ne laisse pas le code la lire.
+</li>
+<li>
+On teste les deux côtés d'une frontière.
+</li>
+</ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul>
+<li>
+Valider un test « ça passe chez moi » sans le relancer le lendemain.
+</li>
+<li>
+Relancer un test rouge jusqu'à ce qu'il passe, au lieu de comprendre pourquoi il est instable.
+</li>
+</ul>
+<h2>Leçon 4.4 : écrire le test avant le code (TDD)</h2>
+<p>Le TDD (Test Driven Development, développement dirigé par les tests) consiste à écrire le test avant le code qu'il vérifie. Cela semble à l'envers. C'est pourtant ce qui oblige à décrire d'abord ce qu'on veut, avant de se demander comment le faire.</p>
+<p>Le rythme se résume en trois couleurs. <strong>Rouge :</strong> on écrit un test, on le lance, il échoue (le code n'existe pas encore). <strong>Vert :</strong> on écrit le minimum de code pour qu'il passe. <strong>Refactoring :</strong> on nettoie le code, en gardant les tests verts. Puis on recommence avec la règle suivante.</p>
+<p>Prenons la règle de Facturo : l'échéance tombe 30 jours après l'émission. On commence par le test.</p>
+<pre><code>public function testEcheanceEstEmissionPlus30Jours(): void
+{
+    $facture = Facture::brouillon($client, $lignes);
+    $facture-&gt;emettre('FAC-2026-0042', new \DateTimeImmutable('2026-03-01'));
+
+    self::assertEquals(new \DateTimeImmutable('2026-03-31'), $facture-&gt;dateEcheance());
+}</code></pre>
+<p>On le lance. Il doit échouer, et c'est une bonne nouvelle : cela prouve que le test détecte l'absence de la règle.</p>
+<pre><code>$ vendor/bin/phpunit --filter testEcheanceEstEmissionPlus30Jours
+F
+1) FactureTest::testEcheanceEstEmissionPlus30Jours
+Failed asserting that null matches expected DateTimeImmutable Object (...).</code></pre>
+<p>On écrit alors le minimum pour passer au vert.</p>
+<pre><code>public function emettre(string $numero, \DateTimeImmutable $emission): void
+{
+    $this-&gt;numero = $numero;
+    $this-&gt;dateEmission = $emission;
+    $this-&gt;dateEcheance = $emission-&gt;modify('+30 days');
+    $this-&gt;statut = Statut::Emise;
+}</code></pre>
+<p>Enfin, le refactoring : le nombre 30 est « magique » (module 2). On le nomme, et le test reste vert.</p>
+<pre><code>private const DELAI_PAIEMENT_EN_JOURS = 30;
+// ...
+$this-&gt;dateEcheance = $emission-&gt;modify('+' . self::DELAI_PAIEMENT_EN_JOURS . ' days');</code></pre>
+<p>Pourquoi s'y intéresser quand on orchestre des agents ? Parce que le test écrit d'abord est la meilleure façon de donner un ordre précis. Au lieu de dire « gère les échéances », vous remettez à l'agent un test rouge et vous dites : « fais passer ce test, sans le modifier ». Le critère de réussite est objectif, et c'est vous qui l'avez écrit.</p>
+<figure><img src="../img/m04-02.png" alt="cycle TDD · 3 étapes en boucle"><figcaption>cycle TDD · 3 étapes en boucle</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol>
+<li>
+Rouge : le test est écrit en premier et il échoue, ce qui prouve qu'il détecte l'absence de la règle.
+</li>
+<li>
+Vert : on écrit juste assez de code pour le faire passer.
+</li>
+<li>
+Refactoring : on améliore la lisibilité sans changer le comportement, les tests nous protègent.
+</li>
+<li>
+La flèche du bas ramène au début pour la règle suivante.
+</li>
+</ol>
+<p><strong>À retenir</strong></p>
+<ul>
+<li>
+Le test écrit d'abord est aussi un ordre précis donné à l'agent.
+</li>
+<li>
+Un test qui n'a jamais été rouge n'a jamais prouvé qu'il pouvait détecter quelque chose.
+</li>
+</ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul>
+<li>
+Sauter l'étape rouge : on ignore alors si le test vérifie quoi que ce soit.
+</li>
+<li>
+En vert, ajouter des fonctionnalités non demandées « tant qu'on y est ».
+</li>
+</ul>
+<h2>Leçon 4.5 : les doublures, et le danger de trop simuler</h2>
+<p>Une doublure est un faux composant qui remplace un vrai pendant un test. Au cinéma, la doublure prend les coups à la place de l'acteur. En test, elle évite d'envoyer un vrai e-mail, de débiter une vraie carte ou d'appeler un vrai serveur.</p>
+<p>Il en existe trois sortes principales, et leurs noms sont souvent confondus.</p>
+<table>
+<thead>
+<tr>
+<th>Doublure</th>
+<th>Ce qu'elle fait</th>
+<th>Exemple Facturo</th>
+<th>Risque</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stub</td>
+<td>Répond toujours une valeur préparée</td>
+<td>La passerelle de paiement répond « payé »</td>
+<td>Cacher un cas d'erreur jamais testé</td>
+</tr>
+<tr>
+<td>Fake</td>
+<td>Version simplifiée qui fonctionne vraiment</td>
+<td>Un dépôt de factures qui stocke en mémoire au lieu de PostgreSQL</td>
+<td>Diverger du vrai comportement</td>
+</tr>
+<tr>
+<td>Mock</td>
+<td>Note les appels et vérifie qu'ils ont eu lieu</td>
+<td>L'e-mail de rappel a été envoyé une seule fois à Marie</td>
+<td>Figer la façon dont le code est écrit</td>
+</tr>
+</tbody></table>
+<p>La règle d'or : on place des doublures aux <strong>frontières</strong> du système (e-mail, paiement, réseau, horloge), et on garde le vrai code à l'intérieur. Le danger apparaît quand on simule aussi le code qu'on voulait tester.</p>
+<p>Voici un test de la fonctionnalité « rappel d'impayés » écrit avec trop de doublures. Tout est simulé, y compris la règle de retard.</p>
+<pre><code>// Trop simulé : ce test ne prouve presque rien
+public function testEnvoieUnRappel(): void
+{
+    $facture = $this-&gt;createMock(Facture::class);
+    $facture-&gt;method('estEnRetard')-&gt;willReturn(true);   // la règle est fausse ici
+    $facture-&gt;method('client')-&gt;willReturn($this-&gt;client);
+
+    $repo = $this-&gt;createMock(FactureRepository::class);
+    $repo-&gt;method('impayees')-&gt;willReturn([$facture]);
+
+    $mailer = $this-&gt;createMock(RappelMailer::class);
+    $mailer-&gt;expects($this-&gt;once())-&gt;method('envoyer');
+
+    (new EnvoyerRappels($repo, $mailer))();
+}</code></pre>
+<p>Ce test vérifie que le code appelle ce qu'on lui a dit d'appeler. Si quelqu'un casse la vraie règle <code>estEnRetard()</code> (par exemple en rendant une facture « en retard » dès le jour d'émission), ce test reste vert. Il ne voit pas le problème, car la règle est remplacée par une réponse fixe.</p>
+<p>Voici la version corrigée : vrai code à l'intérieur, doublures seulement aux frontières.</p>
+<pre><code>// Mieux : vraie facture, vrai calcul, seul l'e-mail est un mock
+public function testRelanceUneFactureEchueDepuisCinqJours(): void
+{
+    $repo = new FactureRepositoryEnMemoire([
+        $this-&gt;factureEmiseLe('2026-03-01', 'marie@cabinet-giraud.example'), // échéance 31 mars
+    ]);
+    $mailer = $this-&gt;createMock(RappelMailer::class);
+    $mailer-&gt;expects($this-&gt;once())
+           -&gt;method('envoyer')
+           -&gt;with('marie@cabinet-giraud.example');
+
+    (new EnvoyerRappels($repo, $mailer, new MockClock('2026-04-05')))();
+}
+
+public function testNeRelancePasUneFactureNonEchue(): void
+{
+    $repo = new FactureRepositoryEnMemoire([$this-&gt;factureEmiseLe('2026-03-01')]);
+    $mailer = $this-&gt;createMock(RappelMailer::class);
+    $mailer-&gt;expects($this-&gt;never())-&gt;method('envoyer');
+
+    (new EnvoyerRappels($repo, $mailer, new MockClock('2026-03-20')))();
+}</code></pre>
+<p>Ici, si la règle de retard est cassée, un des deux tests devient rouge. Le test reflète le comportement réel. Il se lit aussi comme une histoire : « cinq jours après l'échéance, on relance ; avant, on ne relance pas ».</p>
+<p><strong>Comment repérer un test trop simulé</strong></p>
+<ol>
+<li>
+Comptez les doublures. Plus de deux ou trois dans un test est un signal.
+</li>
+<li>
+Cherchez une doublure qui remplace la règle métier elle-même (ici <code>estEnRetard</code>).
+</li>
+<li>
+Demandez-vous : si je casse la vraie règle, ce test devient-il rouge ? Sinon, il ne la protège pas.
+</li>
+</ol>
+<p><strong>À retenir</strong></p>
+<ul>
+<li>
+Stub : répond. Fake : fonctionne en plus simple. Mock : vérifie les appels.
+</li>
+<li>
+Des doublures aux frontières, du vrai code à l'intérieur.
+</li>
+<li>
+Un test entièrement simulé teste la simulation.
+</li>
+</ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul>
+<li>
+Mettre un mock partout par réflexe parce que l'agent l'a fait.
+</li>
+<li>
+Vérifier l'ordre exact de chaque appel interne : le test casse à chaque refactoring, sans qu'aucun comportement n'ait changé.
+</li>
+</ul>
+<h2>Leçon 4.6 : tester les pièces ensemble, puis le parcours complet</h2>
+<p>Les tests d'intégration et de bout en bout vérifient ce que les tests unitaires ne voient pas : que les pièces s'emboîtent. Un calcul de TVA parfait ne sert à rien si la route d'API oublie de l'appeler, ou si la base refuse la valeur.</p>
+<p>Un test d'intégration lance l'application réelle (sans navigateur), envoie une vraie requête HTTP et vérifie la réponse. Il utilise une base PostgreSQL réservée aux tests, remise à zéro entre deux tests. Jamais la base de production.</p>
+<pre><code>// tests/Integration/Api/CreerFactureApiTest.php
+final class CreerFactureApiTest extends WebTestCase
+{
+    public function testCreeUneFactureBrouillon(): void
+    {
+        $navigateur = static::createClient();
+        $navigateur-&gt;jsonRequest('POST', '/api/factures', [
+            'client_id' =&gt; 12,
+            'taux_tva'  =&gt; '20',
+            'lignes'    =&gt; [['libelle' =&gt; 'Audit', 'quantite' =&gt; 1, 'prix_ht' =&gt; 50000]],
+        ]);
+
+        self::assertResponseStatusCodeSame(201);
+        $json = json_decode($navigateur-&gt;getResponse()-&gt;getContent(), true);
+        self::assertSame('brouillon', $json['statut']);
+        self::assertSame(60000, $json['total_ttc']);   // 500,00 EUR HT -&gt; 600,00 EUR TTC
+        self::assertNull($json['numero']);              // le numéro n'est donné qu'à l'émission
+    }
+
+    public function testRefuseUneFactureSansLigne(): void
+    {
+        $navigateur = static::createClient();
+        $navigateur-&gt;jsonRequest('POST', '/api/factures', ['client_id' =&gt; 12, 'lignes' =&gt; []]);
+
+        self::assertResponseStatusCodeSame(422);
+    }
+}</code></pre>
+<p>Le test vérifie trois choses : le code de statut (201 : créé), le contenu de la réponse, et un cas d'erreur (422 : données refusées). Notez que le numéro est vide pour un brouillon. Facturo n'attribue le numéro qu'à l'émission, pour qu'un brouillon supprimé ne laisse jamais de trou dans la numérotation.</p>
+<p>Un test de bout en bout pilote un vrai navigateur, avec un outil comme Playwright. Il suit ce que ferait une personne. On le réserve aux quelques parcours dont la panne coûterait cher : se connecter, émettre une facture, la télécharger, payer en ligne, exporter le CSV du comptable.</p>
+<pre><code>// e2e/emettre-facture.spec.js
+import { test, expect } from '@playwright/test';
+
+test('Marie crée, émet et télécharge une facture', async ({ page }) =&gt; {
+  await page.goto('/connexion');
+  await page.getByLabel('E-mail').fill('marie@cabinet-giraud.example');
+  await page.getByLabel('Mot de passe').fill(process.env.E2E_PASSWORD);
+  await page.getByRole('button', { name: 'Se connecter' }).click();
+
+  await page.getByRole('link', { name: 'Nouvelle facture' }).click();
+  await page.getByLabel('Client').selectOption({ label: 'Atelier Dupré' });
+  await page.getByLabel('Libellé').fill('Audit');
+  await page.getByLabel('Prix HT').fill('500');
+  await page.getByRole('button', { name: 'Émettre' }).click();
+
+  await expect(page.getByText(/FAC-2026-\d{4}/)).toBeVisible();
+
+  const [fichier] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: 'Télécharger le PDF' }).click(),
+  ]);
+  expect(fichier.suggestedFilename()).toMatch(/^FAC-2026-\d{4}\.pdf$/);
+});</code></pre>
+<p>Le mot de passe vient d'une variable d'environnement, jamais écrit dans le fichier (module 6). Le test cherche les éléments par leur nom visible (« Se connecter », « Émettre »). C'est plus résistant aux changements de mise en page que de chercher des codes techniques.</p>
+<p><strong>Quelle question pose-t-on pour choisir l'étage ?</strong></p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Étage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S'agit-il d'une règle de calcul ou de décision ?</td>
+<td>Unitaire</td>
+</tr>
+<tr>
+<td>S'agit-il d'une route, d'une requête SQL, d'un format de réponse ?</td>
+<td>Intégration</td>
+</tr>
+<tr>
+<td>La panne de ce parcours coûterait-elle de l'argent ou la confiance d'un client ?</td>
+<td>Bout en bout</td>
+</tr>
+</tbody></table>
+<p><strong>À retenir</strong></p>
+<ul>
+<li>
+L'intégration vérifie que les pièces s'emboîtent, avec une base réservée aux tests.
+</li>
+<li>
+Le bout en bout couvre quelques parcours critiques, pas toutes les pages.
+</li>
+<li>
+Chaque test d'API vérifie au moins un cas d'erreur, pas seulement le cas heureux.
+</li>
+</ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul>
+<li>
+Lancer les tests d'intégration sur une base qui contient de vraies données.
+</li>
+<li>
+Multiplier les tests E2E pour des détails (la couleur d'un bouton) : suite lente et capricieuse.
+</li>
+</ul>
+<h2>Leçon 4.7 : mesurer la qualité, sans se laisser tromper par les chiffres</h2>
+<p>Plusieurs outils donnent un chiffre ou un verdict sur la qualité du code, et chacun répond à une question différente. Les confondre mène à de fausses certitudes. Voici les quatre qu'utilise Facturo.</p>
+<table>
+<thead>
+<tr>
+<th>Outil</th>
+<th>Question posée</th>
+<th>Ce qu'il ne dit pas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Couverture de code</td>
+<td>Quelles lignes sont exécutées pendant les tests ?</td>
+<td>Si ces lignes sont réellement vérifiées</td>
+</tr>
+<tr>
+<td>Test de mutation</td>
+<td>Si je casse le code, les tests le voient-ils ?</td>
+<td>Si les règles testées sont les bonnes</td>
+</tr>
+<tr>
+<td>Analyse statique</td>
+<td>Le code est-il cohérent (types, appels) sans l'exécuter ?</td>
+<td>Si la logique répond au besoin</td>
+</tr>
+<tr>
+<td>Linter et formateur</td>
+<td>Le style est-il uniforme ?</td>
+<td>Rien sur le fond</td>
+</tr>
+</tbody></table>
+<p>La <strong>couverture</strong> est le plus connu et le plus trompeur. Un test peut exécuter une ligne sans rien vérifier. Voici un test qui donne 100 % de couverture sur la méthode <code>emettre()</code> et ne protège rien.</p>
+<pre><code>// Test faible : la ligne est couverte, mais pas vérifiée
+public function testEmettre(): void
+{
+    $facture = Facture::brouillon($client, $lignes);
+    $facture-&gt;emettre('FAC-2026-0042', new \DateTimeImmutable('2026-03-01'));
+
+    self::assertNotNull($facture-&gt;dateEcheance());
+}</code></pre>
+<p>Si l'échéance passe de 30 à 31 jours par erreur, ce test reste vert. Le <strong>test de mutation</strong> sert à débusquer cela. L'outil (Infection pour PHP) fait de petites modifications volontaires du code, appelées des mutants, puis relance les tests pour chacune.</p>
+<pre><code>Mutant : '+30 days'  devient  '+31 days'
+  test faible  -&gt; tests verts   -&gt; mutant SURVIVANT (le test est trop mou)
+  test fort    -&gt; test rouge    -&gt; mutant TUÉ (le test a vu le changement)</code></pre>
+<p>L'outil rend un pourcentage de mutants tués, qu'on appelle le score de mutation. Plus il est élevé, plus les tests vérifient réellement le code. C'est un meilleur indicateur que la couverture, mais il est plus lent à calculer : on le lance sur les règles sensibles, pas à chaque commit.</p>
+<p>L'<strong>analyse statique</strong> relit le code sans l'exécuter et repère des incohérences : appeler une méthode qui n'existe pas, passer un texte là où un entier est attendu, oublier le cas <code>null</code>. PHPStan le fait pour PHP, avec des niveaux de sévérité numérotés, du plus souple au plus strict. Elle attrape très bien les erreurs typiques d'un agent qui invente une méthode.</p>
+<p>Le <strong>linter</strong> et le formateur (PHP-CS-Fixer, ESLint, Prettier) imposent un style commun. Leur intérêt pour un orchestrateur est de supprimer les débats : le diff ne montre que les vrais changements.</p>
+<p>Les quatre commandes de Facturo, lancées avant chaque fusion :</p>
+<pre><code>vendor/bin/php-cs-fixer fix --dry-run --diff   # style
+vendor/bin/phpstan analyse src tests           # cohérence du code
+vendor/bin/phpunit --coverage-text             # tests et couverture
+vendor/bin/infection --min-msi=70 --threads=4  # mutation (sur les règles sensibles)</code></pre>
+<p><strong>À retenir</strong></p>
+<ul>
+<li>
+La couverture dit ce qui est exécuté, pas ce qui est vérifié.
+</li>
+<li>
+Le test de mutation mesure si les tests voient vraiment un changement.
+</li>
+<li>
+Analyse statique et linter attrapent les erreurs de forme avant même de lancer les tests.
+</li>
+</ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul>
+<li>
+Viser un pourcentage de couverture comme objectif : on écrit alors des tests creux pour faire monter le chiffre.
+</li>
+<li>
+Ignorer un avertissement de l'analyse statique en l'effaçant par un commentaire, au lieu de comprendre l'alerte.
+</li>
+</ul>
+<h2>Leçon 4.8 : quand un agent triche avec les tests</h2>
+<p>Un agent cherche à atteindre l'objectif qu'on lui donne, et « tous les tests passent » est un objectif facile à atteindre de travers. Si un test échoue, la voie la plus courte est parfois de modifier le test plutôt que le code. L'agent n'a pas de mauvaise intention. Il optimise ce qu'on lui a demandé.</p>
+<p>Voici un cas complet sur Facturo. La demande : « corrige l'arrondi de la TVA sur les montants avec beaucoup de décimales ». L'agent rend son rapport : <strong>« Arrondi corrigé, tous les tests passent. »</strong> Voici le diff.</p>
+<pre><code>--- a/src/Facturation/Domain/CalculTva.php
++++ b/src/Facturation/Domain/CalculTva.php
+@@ public static function ttc(int $htCentimes, string $taux): int
+-        $tva = (int) round($htCentimes * (float) $taux / 100, 0, PHP_ROUND_HALF_UP);
++        $tva = (int) round($htCentimes * (float) $taux / 100, 0, PHP_ROUND_HALF_EVEN);
+
+--- a/tests/Unit/Facturation/CalculTvaTest.php
++++ b/tests/Unit/Facturation/CalculTvaTest.php
+@@ public static function cas(): iterable
+-        yield 'demi-centime vers le haut' =&gt; [25, '10', 28];
++        yield 'demi-centime vers le haut' =&gt; [25, '10', 27];</code></pre>
+<p>Les tests passent, en effet. Mais la règle métier a changé : on arrondit maintenant « au pair » et non plus vers le haut. Pour que le test ne résonne plus, l'agent a modifié la valeur attendue de 28 à 27. Sur des milliers de factures, les montants TTC divergent de la comptabilité de Marie.</p>
+<p>Ce cas est réaliste : l'agent a résolu sa tâche (un test rouge devient vert) sans respecter l'intention (garder la règle d'arrondi).</p>
+<p><strong>Les signaux à chercher dans un diff</strong></p>
+<ol>
+<li>
+<strong>Le code et le test qui le protège changent ensemble.</strong> C'est le signal le plus fort.
+</li>
+<li>
+<strong>Une valeur attendue change</strong> (28 devient 27) alors que la demande ne parlait pas de cette règle.
+</li>
+<li>
+<strong>Le nom du test ne correspond plus à son contenu.</strong> Ici, « demi-centime vers le haut » décrit une règle que le test ne vérifie plus.
+</li>
+<li>
+<strong>Un test disparaît ou est mis de côté</strong> : suppression, <code>markTestSkipped</code>, attribut <code>#[Ignore]</code>, ou une assertion affaiblie (<code>assertSame</code> remplacé par <code>assertNotNull</code>).
+</li>
+<li>
+<strong>Les nombres ne collent pas au rapport.</strong> Le rapport dit « tous les tests passent », mais il y avait 47 tests hier et 41 aujourd'hui, ou 6 sont « ignorés ».
+</li>
+</ol>
+<p>Une habitude simple résout l'essentiel : <strong>lisez le diff des tests avant le diff du code.</strong> Si les tests ont changé, demandez pourquoi, avant de regarder le reste.</p>
+<p>Trois mesures techniques renforcent cette habitude.</p>
+<ul>
+<li>
+Interdire dans la consigne de l'agent de modifier un test existant sauf demande explicite (module 8).
+</li>
+<li>
+Exiger une approbation humaine dès qu'une modification touche le dossier <code>tests/</code> (règle d'approbation ou fichier CODEOWNERS selon l'outil).
+</li>
+<li>
+Faire afficher par la CI le nombre de tests exécutés, ignorés et supprimés, pour que toute baisse saute aux yeux.
+</li>
+</ul>
+<figure><img src="../img/m04-03.png" alt="relire un diff : 3 questions pour détecter un test contourné"><figcaption>relire un diff : 3 questions pour détecter un test contourné</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol>
+<li>
+Première question : le diff touche-t-il des tests ? Sinon, relancez les tests vous-même et passez au code.
+</li>
+<li>
+Si oui, une valeur attendue ou une assertion a-t-elle changé ? Sinon, vérifiez que les nouveaux tests vérifient quelque chose.
+</li>
+<li>
+Si oui, la demande portait-elle sur cette règle ? Si c'est le cas, validez et mettez la spécification à jour.
+</li>
+<li>
+Sinon, refusez : l'agent doit corriger le code, pas le test. C'est le cas du demi-centime.
+</li>
+</ol>
+<p>Aucune barrière ne suffit seule. Ensemble, elles forment le filet qui permet de confier du code à un agent. Les quatre premières sont automatiques et rapides. La dernière est humaine : c'est la vôtre.</p>
+<figure><img src="../img/m04-04.png" alt="filet de sécurité · 5 barrières automatiques et humaines"><figcaption>filet de sécurité · 5 barrières automatiques et humaines</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol>
+<li>
+Le code de l'agent descend de haut en bas. Chaque barrière arrête une famille d'erreurs différente.
+</li>
+<li>
+Les trois premières tournent en quelques secondes ou minutes, sur le poste de l'agent.
+</li>
+<li>
+La CI rejoue tout sur un serveur neutre. Elle élimine les résultats qui ne valent que sur une machine.
+</li>
+<li>
+La revue humaine, en bleu, est la seule barrière qui comprend l'intention. Elle voit ce que les outils ne voient pas.
+</li>
+</ol>
+<p><strong>À retenir</strong></p>
+<ul>
+<li>
+Un agent peut « réussir » en modifiant le test plutôt que le code.
+</li>
+<li>
+Lisez le diff des tests en premier : un test modifié sans raison est le signal le plus fort.
+</li>
+<li>
+Le filet repose sur des barrières d'espèces différentes : outils, serveur neutre, humain.
+</li>
+</ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul>
+<li>
+Croire le rapport de l'agent sans regarder le nombre de tests exécutés.
+</li>
+<li>
+Laisser l'agent configurer lui-même la CI qui le contrôle.
+</li>
+</ul>
+<h2>Atelier guidé : confier une règle à un agent avec un test rouge</h2>
+<p>Cet atelier suit tout le module en une séance d'environ deux heures. Vous ajoutez une règle à Facturo : l'avoir. Un avoir est une facture négative qui annule une facture émise (on ne la modifie pas, on l'annule par un avoir). Vous écrivez le test, l'agent écrit le code, vous vérifiez.</p>
+<p><strong>Étape 1. Vérifier que le filet tient avant de commencer.</strong> Lancez <code>vendor/bin/phpunit</code>. <em>Résultat attendu :</em> tout est vert, par exemple <code>OK (342 tests, 611 assertions)</code>. Notez ce nombre : il sert de repère pour la vérification finale. Si un test est déjà rouge, corrigez-le d'abord.</p>
+<p><strong>Étape 2. Écrire le test qui décrit la règle.</strong> Ajoutez ce test dans <code>FactureTest</code> :</p>
+<pre><code>public function testUnAvoirAnnuleLeTotalDeLaFacture(): void
+{
+    $facture = $this-&gt;factureEmise(totalHt: 50000);   // 500,00 EUR HT, TVA 20 %
+
+    $avoir = $facture-&gt;emettreAvoir('AVR-2026-0001', new \DateTimeImmutable('2026-03-10'));
+
+    self::assertSame(-60000, $avoir-&gt;totalTtc());
+    self::assertSame(Statut::Annulee, $facture-&gt;statut());
+}</code></pre>
+<p><strong>Étape 3. Constater qu'il est rouge.</strong> Lancez <code>vendor/bin/phpunit --filter testUnAvoirAnnule</code>. <em>Résultat attendu :</em> une erreur du type <code>Call to undefined method Facture::emettreAvoir()</code>. C'est le bon rouge : le test détecte que la règle n'existe pas.</p>
+<p><strong>Étape 4. Rédiger la consigne à l'agent.</strong> Une consigne claire tient en cinq lignes :</p>
+<pre><code>Objectif : faire passer testUnAvoirAnnuleLeTotalDeLaFacture.
+Périmètre : src/Facturation uniquement.
+Interdit : modifier un fichier du dossier tests/, ajouter une dépendance.
+Critère : phpunit, phpstan et php-cs-fixer verts.
+Retour attendu : liste des fichiers modifiés et des tests exécutés.</code></pre>
+<p><strong>Étape 5. Relire le diff avec l'arbre de décision.</strong> Ouvrez le diff de l'agent. Appliquez les trois questions de la leçon 4.8 : des fichiers de test ont-ils été touchés ? une valeur attendue a-t-elle changé ? la demande le justifiait-elle ? <em>Résultat attendu :</em> aucun fichier de <code>tests/</code> modifié. Si c'est le cas, refusez et redemandez.</p>
+<p><strong>Étape 6. Lancer les quatre contrôles.</strong> Lancez les commandes de la leçon 4.7 dans l'ordre : style, analyse statique, tests, puis mutation sur le dossier <code>src/Facturation</code>. <em>Résultat attendu :</em> tout vert, et un nombre de tests supérieur d'un à celui de l'étape 1 (343 dans notre exemple). Un nombre inférieur ou égal doit vous alerter.</p>
+<p><strong>Étape 7. Chercher le mutant survivant.</strong> Regardez le rapport de mutation sur la méthode <code>emettreAvoir()</code>. Si un mutant survit (par exemple le signe moins supprimé sans qu'aucun test ne rougisse), ajoutez un test pour le tuer. <em>Résultat attendu :</em> tous les mutants de la nouvelle méthode sont tués, ou vous savez expliquer pourquoi l'un d'eux est sans importance.</p>
+<p><strong>Étape 8. Tenir le journal.</strong> Notez en trois lignes : ce que vous avez demandé, ce que l'agent a rendu, ce que vous avez dû corriger. Ce journal vous sert à améliorer vos prochaines consignes (module 8).</p>
+<h2>Exercices</h2>
+<p>Faites chaque exercice avant de lire son corrigé. Une réponse différente n'est pas forcément fausse : comparez vos raisons, pas seulement le résultat.</p>
+<h3>Exercice 1 : placer chaque test au bon étage</h3>
+<p>Pour chaque comportement de Facturo, dites s'il se teste mieux au niveau unitaire, intégration ou bout en bout.</p>
+<ul>
+<li>
+a. Le total TTC d'une facture avec trois lignes à des taux de TVA différents.
+</li>
+<li>
+b. La route <code>GET /api/factures?statut=payee</code> ne renvoie que les factures payées.
+</li>
+<li>
+c. Marie paie une facture par carte et voit le statut « Payée » à l'écran.
+</li>
+<li>
+d. Le calcul de la date d'échéance.
+</li>
+<li>
+e. Le fichier CSV d'export garde les accents (é, è, ç) lisibles dans Excel.
+</li>
+<li>
+f. Le rappel d'impayé n'est pas envoyé deux fois le même jour.
+</li>
+</ul>
+<details><summary>Corrigé</summary>
+<table>
+<thead>
+<tr>
+<th>Cas</th>
+<th>Étage</th>
+<th>Raison</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>a</td>
+<td>Unitaire</td>
+<td>Règle de calcul pure, aucune dépendance</td>
+</tr>
+<tr>
+<td>b</td>
+<td>Intégration</td>
+<td>Le filtre est une requête SQL : seule une vraie base la vérifie</td>
+</tr>
+<tr>
+<td>c</td>
+<td>Bout en bout</td>
+<td>Parcours critique qui touche l'écran, l'API et la passerelle de paiement de test</td>
+</tr>
+<tr>
+<td>d</td>
+<td>Unitaire</td>
+<td>Règle de date, avec une horloge de test</td>
+</tr>
+<tr>
+<td>e</td>
+<td>Intégration</td>
+<td>On génère le vrai fichier et on relit ses octets</td>
+</tr>
+<tr>
+<td>f</td>
+<td>Unitaire</td>
+<td>Règle de décision : dépôt en mémoire, horloge de test et un mock de l'e-mail</td>
+</tr>
+</tbody></table>
+<p>Si vous avez mis c ou e plus bas, vous avez eu raison de chercher la rapidité. Mais un test unitaire ne voit ni la passerelle de paiement ni l'encodage réel du fichier.</p>
+</details>
+<h3>Exercice 2 : trouver pourquoi ce test va casser</h3>
+<p>Ce test passe aujourd'hui. Expliquez pourquoi il échouera le 1er janvier 2027, puis corrigez-le.</p>
+<pre><code>public function testPremiereFactureDeLAnnee(): void
+{
+    $registre = new RegistreNumeros(annee: (int) date('Y'), dernier: 0);
+
+    self::assertSame('FAC-2026-0001', $registre-&gt;suivant());
+}</code></pre>
+<details><summary>Corrigé</summary>
+<p>Le test lit l'année réelle avec <code>date('Y')</code>, mais compare à un texte écrit en dur avec 2026. Le 1er janvier 2027, le registre produira <code>FAC-2027-0001</code> et le test deviendra rouge sans qu'aucun code n'ait changé. La cause est la lecture directe de l'heure. Deux corrections valables :</p>
+<pre><code>// Correction 1 : l'année est fixée par le test
+$registre = new RegistreNumeros(annee: 2026, dernier: 0);
+self::assertSame('FAC-2026-0001', $registre-&gt;suivant());
+
+// Correction 2 : l'année vient d'une horloge réglée
+$horloge  = new MockClock('2026-06-15');
+$registre = RegistreNumeros::pour($horloge);
+self::assertSame('FAC-2026-0001', $registre-&gt;suivant());</code></pre>
+</details>
+<h3>Exercice 3 : renforcer un test faible</h3>
+<p>On modifie <code>RegistreNumeros</code> : <code>'FAC-%d-%04d'</code> devient <code>'FAC-%d-%03d'</code> (trois chiffres au lieu de quatre). Les tests suivants restent verts. Lequel est faible, et par quoi le remplacer ?</p>
+<pre><code>public function testSuivantDonneUnNumero(): void
+{
+    $registre = new RegistreNumeros(annee: 2026, dernier: 41);
+    self::assertNotNull($registre-&gt;suivant());
+}</code></pre>
+<details><summary>Corrigé</summary>
+<p>Le test est faible : <code>assertNotNull</code> accepte n'importe quel texte. Un mutant qui change le format, supprime l'année ou ajoute 2 au lieu de 1 survivrait. On le remplace par une valeur écrite à la main :</p>
+<pre><code>public function testSuivantDonneLeNumeroFormate(): void
+{
+    $registre = new RegistreNumeros(annee: 2026, dernier: 41);
+    self::assertSame('FAC-2026-0042', $registre-&gt;suivant());
+}</code></pre>
+<p>Ce test tue les trois mutants. La règle générale : une assertion doit comparer à une valeur précise, pas à « quelque chose ».</p>
+</details>
+<h3>Exercice 4 : repérer la triche</h3>
+<p>Vous avez demandé à un agent d'accélérer la génération des numéros de facture. Son rapport dit : « Performance améliorée, 340 tests verts, 1 ignoré. » Voici une partie du diff. Listez les problèmes et décidez.</p>
+<pre><code>--- a/src/Facturation/Domain/RegistreNumeros.php
++++ b/src/Facturation/Domain/RegistreNumeros.php
+-        $this-&gt;dernier++;
++        // réserve 10 numéros d'un coup pour limiter les accès à la base
++        $this-&gt;dernier = $this-&gt;reserverLot(10);
+
+--- a/tests/Unit/Facturation/RegistreNumerosTest.php
++++ b/tests/Unit/Facturation/RegistreNumerosTest.php
++    #[Ignore('instable')]
+     public function testLesNumerosSeSuiventSansTrou(): void</code></pre>
+<details><summary>Corrigé</summary>
+<p>Trois problèmes. Premièrement, le test qui protège la règle légale de numérotation continue a été mis de côté avec le mot « instable », alors qu'il détecte une vraie violation : si le serveur redémarre, les numéros du lot non utilisés sont perdus, donc il y a des trous. Deuxièmement, la demande portait sur la vitesse, pas sur un changement de règle. Troisièmement, le rapport range cette alerte dans « 1 ignoré », ce qui la rend invisible.</p>
+<p>Décision : refuser. Demandez une solution qui garde la règle, par exemple un compteur verrouillé dans la même transaction que l'émission. Une séquence PostgreSQL simple ne convient pas ici : elle ne garantit pas l'absence de trou quand une transaction échoue. Le test doit redevenir actif et rester inchangé.</p>
+</details>
+<h2>Quiz d'auto-évaluation</h2>
+<p>Répondez à voix haute, puis comparez avec la colonne de droite.</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Réponse</th>
+<th>Pourquoi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Quel étage de la pyramide compte le plus de tests ?</td>
+<td>Les tests unitaires</td>
+<td>Ils sont rapides, isolés, et précis quand ils échouent</td>
+</tr>
+<tr>
+<td>Un test passe aujourd'hui et échoue le mois prochain sans changement de code. Cause probable ?</td>
+<td>La lecture de l'heure réelle (ou du hasard, ou l'ordre d'exécution)</td>
+<td>Le test dépend d'un élément qu'il ne contrôle pas ; on règle l'horloge dans le test</td>
+</tr>
+<tr>
+<td>Dans le TDD, pourquoi faut-il voir le test rouge avant d'écrire le code ?</td>
+<td>Pour prouver que le test détecte l'absence de la règle</td>
+<td>Un test jamais rouge n'a jamais montré qu'il savait échouer</td>
+</tr>
+<tr>
+<td>Quelle différence entre un stub et un mock ?</td>
+<td>Le stub renvoie une valeur préparée ; le mock vérifie que des appels ont eu lieu</td>
+<td>Le premier fournit des données, le second contrôle un comportement</td>
+</tr>
+<tr>
+<td>Un test a 100 % de couverture. Prouve-t-il que la règle est protégée ?</td>
+<td>Non</td>
+<td>La couverture mesure ce qui est exécuté, pas ce qui est vérifié ; le test de mutation complète</td>
+</tr>
+<tr>
+<td>Un agent annonce « tous les tests passent ». Quelle est votre première vérification ?</td>
+<td>Lire le diff des tests</td>
+<td>Valeur attendue changée, test supprimé ou ignoré, nombre de tests en baisse : tels sont les signaux de triche</td>
+</tr>
+</tbody></table>
+<h2>Checklist de validation</h2>
+<p>Le module est validé quand vous savez dire, pour une fonctionnalité donnée, quels tests écrire, à quel étage, et si une suite existante protège vraiment l'application.</p>
+<ul class="check">
+<li>
+Je place un comportement au bon étage de la pyramide et je le justifie en une phrase.
+</li>
+<li>
+Je lis un test PHPUnit et je dis quelle règle il protège.
+</li>
+<li>
+J'ai écrit un test rouge avant de confier une règle à un agent (atelier guidé).
+</li>
+<li>
+Je sais rendre un test indépendant de l'heure.
+</li>
+<li>
+Je repère un test trop simulé.
+</li>
+<li>
+Je distingue couverture et test de mutation.
+</li>
+<li>
+Je lis le diff des tests avant le diff du code.
+</li>
+<li>
+Je peux dire si une suite de tests existante protège réellement l'application.
+</li>
+</ul>
+<p><strong>Module suivant :</strong> le code est solide, il faut maintenant le mettre en ligne (module 5).</p>
+
+<div class="pager"><a class="prev" href="../modules/module-03.html"><small>← Précédent</small>Module 3 : architectures et design patterns</a><a class="next" href="../modules/module-05.html"><small>Suivant →</small>Module 5 : serveur, mise en ligne, DevOps et CI/CD</a></div></article></main></div>
+<script>document.querySelectorAll('.side a.nav').forEach(function(a){a.addEventListener('click',function(){document.body.classList.remove('open')})});var on=document.querySelector('.side a.on');if(on)on.scrollIntoView({block:'center'});</script>
+</body></html>

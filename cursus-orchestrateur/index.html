@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Accueil · Cursus orchestrateur</title>
+<link rel="stylesheet" href="css/style.css"></head>
+<body><button class="menu-btn" onclick="document.body.classList.toggle('open')">☰ Menu du cursus</button>
+<div class="layout"><nav class="side"><a class="brand" href="index.html">Cursus : orchestrateur et gestionnaire d’app<small>12 modules · 24 semaines</small></a>
+<a class="nav on" href="index.html">Accueil</a>
+<a class="nav" href="demarrer.html">Démarrer</a>
+<h4>Le socle : savoir juger</h4>
+<a class="nav" href="modules/module-01.html">Module 1 : fondamentaux du web et du logiciel</a>
+<a class="nav" href="modules/module-02.html">Module 2 : lire le code et reconnaître le mauvais code</a>
+<a class="nav" href="modules/module-03.html">Module 3 : architectures et design patterns</a>
+<a class="nav" href="modules/module-04.html">Module 4 : tests et qualité</a>
+<a class="nav" href="modules/module-05.html">Module 5 : serveur, mise en ligne, DevOps et CI/CD</a>
+<a class="nav" href="modules/module-06.html">Module 6 : sécurité, observabilité, données et conformité</a>
+<h4>Les agents IA et le pilotage</h4>
+<a class="nav" href="modules/module-07.html">Module 7 : agents IA, définitions et fonctionnement</a>
+<a class="nav" href="modules/module-08.html">Module 8 : orchestrer des agents</a>
+<a class="nav" href="modules/module-09.html">Module 9 : piloter l&#x27;application en production</a>
+<h4>Les modules transversaux</h4>
+<a class="nav" href="modules/module-10.html">Module 10 : gestion de projet</a>
+<a class="nav" href="modules/module-11.html">Module 11 : produit et conception</a>
+<a class="nav" href="modules/module-12.html">Module 12 : gestion du client et communication</a>
+<h4>Référence</h4>
+<a class="nav" href="glossaire.html">Glossaire</a></nav>
+<main><article><div class="toolbar"><button onclick="window.print()">Imprimer / PDF</button><button onclick="var r=document.documentElement;var d=r.dataset.theme==='dark';r.dataset.theme=d?'light':'dark'">Clair / sombre</button></div>
+<div class="hero"><h1>Cursus complet : orchestrateur et gestionnaire d’app</h1><p class="lead">Apprendre à décider, à déléguer à des agents IA et à vérifier ce qu’ils produisent : 12 modules, environ 24 semaines, un fil rouge (l’app fictive Facturo), des schémas, des exercices corrigés et des quiz.</p><p><a href="demarrer.html"><b>Commencer par « Démarrer » →</b></a><br><small>Première chose à savoir faire : chercher, vérifier, se tenir à jour (le B.A.-BA).</small></p></div>
+<h2>Le socle : savoir juger</h2><div class="cards">
+<a class="card" href="modules/module-01.html"><b>Module 1</b><span>Fondamentaux du web et du logiciel</span></a>
+<a class="card" href="modules/module-02.html"><b>Module 2</b><span>Lire le code et reconnaître le mauvais code</span></a>
+<a class="card" href="modules/module-03.html"><b>Module 3</b><span>Architectures et design patterns</span></a>
+<a class="card" href="modules/module-04.html"><b>Module 4</b><span>Tests et qualité</span></a>
+<a class="card" href="modules/module-05.html"><b>Module 5</b><span>Serveur, mise en ligne, DevOps et CI/CD</span></a>
+<a class="card" href="modules/module-06.html"><b>Module 6</b><span>Sécurité, observabilité, données et conformité</span></a>
+</div>
+<h2>Les agents IA et le pilotage</h2><div class="cards">
+<a class="card" href="modules/module-07.html"><b>Module 7</b><span>Agents IA, définitions et fonctionnement</span></a>
+<a class="card" href="modules/module-08.html"><b>Module 8</b><span>Orchestrer des agents</span></a>
+<a class="card" href="modules/module-09.html"><b>Module 9</b><span>Piloter l&#x27;application en production</span></a>
+</div>
+<h2>Les modules transversaux</h2><div class="cards">
+<a class="card" href="modules/module-10.html"><b>Module 10</b><span>Gestion de projet</span></a>
+<a class="card" href="modules/module-11.html"><b>Module 11</b><span>Produit et conception</span></a>
+<a class="card" href="modules/module-12.html"><b>Module 12</b><span>Gestion du client et communication</span></a>
+</div>
+<h2>Référence</h2><div class="cards"><a class="card" href="glossaire.html"><b>Glossaire</b><span>Environ 90 termes de A à Z, avec le module où chacun est expliqué</span></a></div>
+<div class="pager"><span style="flex:1"></span><a class="next" href="demarrer.html"><small>Suivant →</small>Cursus complet : orchestrateur et gestionnaire d&#x27;app</a></div></article></main></div>
+<script>document.querySelectorAll('.side a.nav').forEach(function(a){a.addEventListener('click',function(){document.body.classList.remove('open')})});var on=document.querySelector('.side a.on');if(on)on.scrollIntoView({block:'center'});</script>
+</body></html>

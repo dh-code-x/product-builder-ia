@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Module 12 : gestion du client et communication · Cursus orchestrateur</title>
+<link rel="stylesheet" href="../css/style.css"></head>
+<body><button class="menu-btn" onclick="document.body.classList.toggle('open')">☰ Menu du cursus</button>
+<div class="layout"><nav class="side"><a class="brand" href="../index.html">Cursus : orchestrateur et gestionnaire d’app<small>12 modules · 24 semaines</small></a>
+<a class="nav" href="../index.html">Accueil</a>
+<a class="nav" href="../demarrer.html">Démarrer</a>
+<h4>Le socle : savoir juger</h4>
+<a class="nav" href="../modules/module-01.html">Module 1 : fondamentaux du web et du logiciel</a>
+<a class="nav" href="../modules/module-02.html">Module 2 : lire le code et reconnaître le mauvais code</a>
+<a class="nav" href="../modules/module-03.html">Module 3 : architectures et design patterns</a>
+<a class="nav" href="../modules/module-04.html">Module 4 : tests et qualité</a>
+<a class="nav" href="../modules/module-05.html">Module 5 : serveur, mise en ligne, DevOps et CI/CD</a>
+<a class="nav" href="../modules/module-06.html">Module 6 : sécurité, observabilité, données et conformité</a>
+<h4>Les agents IA et le pilotage</h4>
+<a class="nav" href="../modules/module-07.html">Module 7 : agents IA, définitions et fonctionnement</a>
+<a class="nav" href="../modules/module-08.html">Module 8 : orchestrer des agents</a>
+<a class="nav" href="../modules/module-09.html">Module 9 : piloter l&#x27;application en production</a>
+<h4>Les modules transversaux</h4>
+<a class="nav" href="../modules/module-10.html">Module 10 : gestion de projet</a>
+<a class="nav" href="../modules/module-11.html">Module 11 : produit et conception</a>
+<a class="nav on" href="../modules/module-12.html">Module 12 : gestion du client et communication</a>
+<h4>Référence</h4>
+<a class="nav" href="../glossaire.html">Glossaire</a></nav>
+<main><article><div class="toolbar"><button onclick="window.print()">Imprimer / PDF</button><button onclick="var r=document.documentElement;var d=r.dataset.theme==='dark';r.dataset.theme=d?'light':'dark'">Clair / sombre</button></div>
+<h1>Module 12 : gestion du client et communication</h1>
+<h2>Ce que vous saurez faire</h2>
+<p>À la fin de ce module, vous saurez parler à un client sans jargon, tenir une réunion utile, annoncer une mauvaise nouvelle et dire non sans perdre la relation. Chaque situation est jouée deux fois : une version maladroite, puis une version bien menée, avec l&#x27;explication de ce qui change.</p>
+<ul><li>Identifier les trois rôles d&#x27;un client : décideur, payeur, utilisateur.</li><li>Conduire un premier rendez-vous de découverte avec un script et des questions prêtes.</li><li>Expliquer la dette technique sans jargon.</li><li>Réagir à une demande urgente, et refuser une demande hors périmètre.</li><li>Annoncer un retard et un incident par écrit, avec les bons éléments.</li><li>Gérer un client qui change d&#x27;avis, avec une demande de changement.</li><li>Rédiger un compte rendu et un devis qui protègent les deux parties.</li><li>Dire ce qu&#x27;il faut sur l&#x27;usage d&#x27;agents IA, les données personnelles et la responsabilité.</li></ul>
+<table><thead><tr><th>Repère</th><th>Valeur</th></tr></thead><tbody><tr><td>Prérequis</td><td>Modules 10 et 11</td></tr><tr><td>Durée</td><td>5 à 6 heures, atelier compris</td></tr><tr><td>Lien avec Facturo</td><td>Marie Giraud, cabinet comptable de 12 personnes, client du projet d&#x27;export</td></tr><tr><td>Livrable final</td><td>Un compte rendu, un devis, un message d&#x27;incident et une réponse à une demande hors périmètre</td></tr></tbody></table>
+<p>Ce module donne des repères de communication et des exemples de clauses de devis. Il ne remplace pas un conseil juridique : pour un contrat réel, faites relire par un juriste.</p>
+<h2>Leçon 12.1 : savoir à qui l&#x27;on parle</h2>
+<p>Un client n&#x27;est pas une personne unique avec un seul désir. Dans une organisation, trois rôles se croisent : celui qui décide, celui qui paie, celui qui utilise. Leurs intérêts divergent, donc leurs questions aussi.</p>
+<figure><img src="../img/m12-01.png" alt="les trois rôles d&#x27;un client · décideur, payeur, utilisateur"><figcaption>les trois rôles d&#x27;un client · décideur, payeur, utilisateur</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>Chaque carte est un rôle, avec ce qui compte pour lui.</li><li>Le décideur pense résultat et risque ; il veut une date et une garantie.</li><li>Le payeur pense budget et échéances ; il veut un devis sans surprise.</li><li>L&#x27;utilisateur pense gain de temps ; c&#x27;est lui qui voit si l&#x27;outil marche vraiment.</li><li>Le bandeau rappelle qu&#x27;une personne cumule parfois plusieurs rôles, mais qu&#x27;il faut le vérifier.</li></ol>
+<p>Chez Facturo, imaginons que le cabinet de Marie Giraud emploie 12 personnes. Marie décide, une assistante de gestion s&#x27;occupe des paiements, les collaboratrices comptables utilisent l&#x27;export. Si vous ne parlez qu&#x27;à Marie, vous ne saurez rien des difficultés réelles des collaboratrices.</p>
+<p>Le premier rendez-vous de découverte sert à le vérifier. Voici deux versions de son ouverture.</p>
+<p><strong>Scène 1 : le rendez-vous de découverte, version maladroite</strong></p>
+<pre><code>Lecteur : Bonjour Marie. Alors, vous voulez un export CSV ?
+Marie :   Oui, enfin, il faut que ce soit rapide.
+Lecteur : Pas de souci, on a l&#x27;habitude. On fait ça avec une API REST et un
+          job asynchrone, donc ça scale sans problème.
+Marie :   Hum, d&#x27;accord... et ça coûte combien ?
+Lecteur : On vous envoie un devis, on a de quoi faire.</code></pre>
+<p>Le lecteur propose une solution avant d&#x27;avoir compris le problème, emploie du jargon (API REST, job asynchrone, scale), et laisse le budget en suspens. Marie repart sans avoir dit ce qui la gêne.</p>
+<p><strong>Scène 1 bis : version bien menée</strong></p>
+<pre><code>Lecteur : Bonjour Marie. Merci de prendre 30 minutes. Je vous propose de
+          commencer par comprendre comment cela se passe chez vous, avant de
+          parler de solution. Cela vous convient ?
+Marie :   Oui, très bien.
+Lecteur : Racontez-moi la dernière clôture mensuelle, de la réception des
+          factures jusqu&#x27;à l&#x27;import dans votre logiciel.
+Marie :   [décrit les étapes]
+Lecteur : Qui fait quoi, à chaque étape ? Et qui décide si on change d&#x27;outil ?
+Marie :   Moi pour la décision. Pour le travail, ce sont Camille et Sofiane.
+Lecteur : Pourrais-je leur parler 20 minutes la semaine prochaine ?
+          Ce sont eux qui verront les problèmes au quotidien.
+Marie :   Bien sûr.
+Lecteur : Pour finir : une date vous importe-t-elle, et avez-vous un budget
+          en tête, même approximatif ?</code></pre>
+<p>Cette version annonce le plan, pose des questions ouvertes sur un fait passé, identifie les rôles, demande à rencontrer les utilisateurs, et aborde la date et le budget sans gêne.</p>
+<table><thead><tr><th>Étape du rendez-vous</th><th>Durée</th><th>Exemple de phrase</th></tr></thead><tbody><tr><td>Ouverture</td><td>3 min</td><td>« Je propose de comprendre avant de parler de solution. »</td></tr><tr><td>Le passé</td><td>12 min</td><td>« Racontez-moi la dernière fois... »</td></tr><tr><td>Les personnes</td><td>5 min</td><td>« Qui décide, qui utilise, qui paie ? »</td></tr><tr><td>Les contraintes</td><td>5 min</td><td>« Une date, un budget, un logiciel à respecter ? »</td></tr><tr><td>Clôture</td><td>5 min</td><td>« Je vous écris un compte rendu demain, vous me corrigez. »</td></tr></tbody></table>
+<p><strong>À retenir</strong></p>
+<p>Cherchez les trois rôles dès le premier rendez-vous. Annoncez le plan, questionnez sur le passé, parlez budget et date. Terminez par une promesse de compte rendu.</p>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Proposer une solution technique avant d&#x27;avoir compris le problème.</li><li>Ne parler qu&#x27;au décideur et ignorer ceux qui utiliseront l&#x27;outil.</li><li>Fuir la question du budget par gêne : le devis la rendra plus délicate encore.</li></ul>
+<h2>Leçon 12.2 : expliquer sans jargon et réagir à l&#x27;urgence</h2>
+<p>Un client comprend ce qui le touche, pas ce qui vous occupe. Traduisez donc chaque terme technique en conséquence pour lui : du temps, de l&#x27;argent, un risque ou une date. Le jargon n&#x27;est pas interdit, mais il se définit en une phrase au premier usage.</p>
+<table><thead><tr><th>Terme technique</th><th>Ce que le client comprend</th><th>Phrase de traduction</th></tr></thead><tbody><tr><td>Dette technique</td><td>Un retard accumulé sur l&#x27;entretien</td><td>« C&#x27;est comme reporter l&#x27;entretien d&#x27;une voiture : chaque mois le prochain devient plus cher. »</td></tr><tr><td>Déploiement</td><td>Mise en ligne</td><td>« C&#x27;est le moment où la nouveauté devient visible pour vos utilisateurs. »</td></tr><tr><td>Environnement de test</td><td>Une copie sans risque</td><td>« Une répétition générale avant la vraie représentation. »</td></tr><tr><td>Bug</td><td>Un comportement inattendu</td><td>« Le logiciel ne fait pas ce que nous avions convenu. »</td></tr><tr><td>Sauvegarde</td><td>Une copie de sécurité</td><td>« Si un incident survient, nous pouvons revenir à hier matin. »</td></tr><tr><td>Refactorisation</td><td>Un rangement invisible</td><td>« On réorganise l&#x27;intérieur pour que les prochaines nouveautés coûtent moins. »</td></tr><tr><td>Test automatique</td><td>Un contrôle fait par une machine</td><td>« Un vérificateur qui rejoue chaque jour les cas importants. »</td></tr></tbody></table>
+<p>La dette technique est le sujet le plus difficile à vendre, parce que son bénéfice est invisible. Voici la même réunion deux fois : Marie vient de demander une nouvelle fonction, et le lecteur sait que l&#x27;export actuel accumule des raccourcis.</p>
+<p><strong>Scène 2 : expliquer la dette technique, version maladroite</strong></p>
+<pre><code>Lecteur : Avant la nouvelle fonction, il faut refactoriser le module Facturation,
+          il y a beaucoup de dette technique et le couplage est trop fort.
+Marie :   Je ne comprends pas. Vous me demandez de payer pour que rien ne change ?
+Lecteur : C&#x27;est important pour la maintenabilité.
+Marie :   D&#x27;accord, mais je veux ma fonction pour mars.</code></pre>
+<p>Marie entend un surcoût sans bénéfice. Le lecteur n&#x27;a pas donné de chiffre, de risque, ni d&#x27;alternative.</p>
+<p><strong>Scène 2 bis : version bien menée</strong></p>
+<pre><code>Lecteur : Pour livrer votre nouvelle fonction à la date voulue, j&#x27;ai une
+          décision à vous soumettre. Le code actuel de la facturation a été
+          écrit vite. Chaque nouveauté y prend aujourd&#x27;hui environ deux fois
+          plus de temps que prévu.
+Marie :   Et si on ne fait rien ?
+Lecteur : Deux options. A : on ajoute la fonction tout de suite, c&#x27;est livré en
+          mars, mais la suivante coûtera plus cher et le risque d&#x27;erreur
+          sur les factures augmente. B : on consacre 3 jours à remettre le
+          code en ordre, la fonction arrive une semaine plus tard, et les
+          suivantes seront plus rapides. Je recommande B.
+Marie :   Pourquoi pas A ?
+Lecteur : Parce que les erreurs sur les factures vous coûteraient plus cher
+          qu&#x27;une semaine de délai. Mais c&#x27;est votre décision.</code></pre>
+<p>Le lecteur parle en conséquences (temps, risque, argent), donne deux options chiffrées, recommande l&#x27;une et laisse la décision. Aucun mot technique n&#x27;est employé.</p>
+<p><strong>Scène 3 : la demande urgente, version maladroite</strong></p>
+<pre><code>Marie :   Il me faut un export en PDF pour demain matin, c&#x27;est urgent !
+Lecteur : D&#x27;accord, je m&#x27;en occupe tout de suite.
+[le lecteur déplace deux tâches prévues, sans le dire ; l&#x27;agent de code livre
+ un PDF sans tests ; une erreur d&#x27;arrondi passe en production]</code></pre>
+<p>Dire oui sans réfléchir transforme l&#x27;urgence de Marie en risque pour elle.</p>
+<p><strong>Scène 3 bis : version bien menée</strong></p>
+<pre><code>Marie :   Il me faut un export en PDF pour demain matin, c&#x27;est urgent !
+Lecteur : Je comprends que c&#x27;est important. Pour que je vous aide au mieux :
+          que se passe-t-il si vous ne l&#x27;avez pas demain ?
+Marie :   Mon associé veut voir les chiffres de janvier avant sa réunion.
+Lecteur : Alors le besoin de demain, c&#x27;est de lui montrer les chiffres. Je peux
+          vous fournir tout de suite le CSV, que vous ouvrez dans un tableur.
+          Un PDF propre et testé prendrait environ 4 jours : je vous propose
+          de le planifier pour la semaine prochaine. Cela vous convient ?
+Marie :   Oui, le CSV suffira pour demain.</code></pre>
+<p>Le lecteur cherche le vrai besoin derrière l&#x27;urgence, propose une solution immédiate qui existe déjà, chiffre la demande complète et la planifie. L&#x27;urgence disparaît sans que la qualité soit sacrifiée.</p>
+<p><strong>À retenir</strong></p>
+<p>Traduisez chaque terme en temps, argent, risque ou date. Présentez deux options chiffrées avec une recommandation. Face à l&#x27;urgence, cherchez d&#x27;abord le vrai besoin.</p>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Employer un mot technique sans le définir, ou l&#x27;éviter par condescendance.</li><li>Dire oui à une urgence sans en mesurer l&#x27;effet sur le reste du planning.</li><li>Présenter la dette comme une obligation plutôt que comme une décision du client.</li></ul>
+<h2>Leçon 12.3 : annoncer un retard et un incident</h2>
+<p>Une mauvaise nouvelle annoncée tôt et clairement coûte moins cher qu&#x27;une bonne nouvelle annoncée tard. Le client pardonne un retard, pas la surprise. Pour écrire ces messages, on applique une structure en pyramide inversée : l&#x27;essentiel d&#x27;abord, le détail ensuite.</p>
+<figure><img src="../img/m12-02.png" alt="structure d&#x27;un message difficile · pyramide inversée en 4 niveaux"><figcaption>structure d&#x27;un message difficile · pyramide inversée en 4 niveaux</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>Le niveau 1 est le plus large : c&#x27;est ce que tout le monde lira, donc il porte le fait et la nouvelle date.</li><li>Le niveau 2 donne la cause en une phrase, sans chercher de coupable.</li><li>Le niveau 3 décrit les mesures prises pour corriger.</li><li>Le niveau 4 dit ce que l&#x27;on attend du client : une décision, une information, un accord.</li></ol>
+<p><strong>Scène 4 : annoncer un retard, version maladroite</strong></p>
+<pre><code>Lecteur : Salut Marie, petit souci, on a eu des imprévus techniques sur
+          l&#x27;envoi des e-mails, ça se complique un peu. On fait au mieux,
+          je te redis ça bientôt.</code></pre>
+<p>Le message ne dit ni de combien on décale, ni pourquoi, ni ce que Marie doit faire. Elle devine le pire.</p>
+<p><strong>Scène 4 bis : version bien menée</strong></p>
+<pre><code>Objet : Export comptable - mise en ligne décalée de 2 jours
+
+Bonjour Marie,
+
+La mise en ligne prévue lundi 22 février est décalée au mercredi 24 février.
+
+Cause : le test d&#x27;envoi d&#x27;e-mail a révélé que les fichiers de plus de
+500 lignes étaient tronqués. Nous l&#x27;avons détecté avant la
+mise en ligne, donc aucun client n&#x27;est touché.
+
+Nous corrigeons le problème et nous rejouons tous les tests demain.
+
+De votre côté : aucune action n&#x27;est nécessaire. Si le décalage vous gène
+vis-à-vis de votre équipe, appelez-moi demain et nous en parlons.
+
+Cordialement,
+Le lecteur</code></pre>
+<p>Le message donne la nouvelle date dans l&#x27;objet, rassure sur l&#x27;impact, explique en une phrase et ne demande rien d&#x27;inutile. Si le fait n&#x27;est pas encore sûr, on le dit : « nous saurons mardi si la date tient ».</p>
+<p>Un incident est plus sérieux : quelque chose en production a mal fonctionné pour des utilisateurs. La règle est de prévenir avant d&#x27;être interrogé, et de dire ce que l&#x27;on sait, ce que l&#x27;on ignore, et quand on reparlera.</p>
+<p><strong>Scène 5 : annoncer un incident, e-mail complet</strong></p>
+<pre><code>Objet : Incident sur l&#x27;export du 3 mars - corrigé, vérification en cours
+
+Bonjour Marie,
+
+Ce matin, entre 9 h 10 et 9 h 50, l&#x27;export comptable a généré des fichiers
+contenant des montants arrondis au mauvais chiffre après la virgule. Le
+problème est corrigé depuis 10 h 15.
+
+Ce que nous savons : 14 exports ont été produits pendant cette période.
+Les factures dans Facturo ne sont pas touchées : seul le fichier était faux.
+
+Ce que nous ignorons encore : lesquels de ces 14 fichiers ont été
+importés dans votre logiciel. Nous le vérifierons avec vous cet après-midi.
+
+Ce que nous faisons : nous régénérons les 14 fichiers corrects et nous
+ajoutons un test d&#x27;arrondi qui aurait dû détecter l&#x27;erreur.
+
+Ce que nous vous demandons : pouvez-vous nous indiquer qui a importé un
+export ce matin ? Nous vous appelons à 14 h pour avancer ensemble.
+
+Un compte rendu complet, avec la cause et les mesures préventives,
+vous sera envoyé d&#x27;ici vendredi.
+
+Cordialement,
+Le lecteur</code></pre>
+<p>Ce message suit le plan : fait, périmètre exact, ce que l&#x27;on ignore, mesures, demande, prochain rendez-vous. Il ne cherche pas de coupable et ne minimise pas. Si l&#x27;incident touche des données personnelles, il faut en plus consulter la leçon 12.6 avant d&#x27;écrire.</p>
+<p><strong>À retenir</strong></p>
+<p>Prévenez tôt, mettez le fait et la date en premier. Distinguez ce que vous savez de ce que vous ignorez. Donnez l&#x27;heure de votre prochain message.</p>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Attendre d&#x27;avoir toutes les réponses pour prévenir : le silence est interprété comme une dissimulation.</li><li>Minimiser (« petit souci ») ou dramatiser, au lieu de donner le périmètre exact.</li><li>Promettre une date de correction sans l&#x27;avoir vérifiée avec l&#x27;agent et l&#x27;équipe.</li></ul>
+<h2>Leçon 12.4 : dire non, et gérer le client qui change d&#x27;avis</h2>
+<p>Dire non à une demande ne signifie pas refuser le client. Cela signifie remplacer un « non » sec par un « oui, à telle condition » ou un « pas maintenant, voici quand ». Le client entend alors que vous protégez le projet, pas que vous résistez.</p>
+<p><strong>Scène 6 : refuser une demande hors périmètre, version maladroite</strong></p>
+<pre><code>Marie :   Pendant que vous y êtes, pouvez-vous aussi faire l&#x27;export Excel ?
+Lecteur : Non, ce n&#x27;est pas dans le devis.
+Marie :   Ah. Je pensais que c&#x27;était compris.</code></pre>
+<p>Le refus est exact mais froid, et il laisse Marie avec le sentiment d&#x27;avoir été mal comprise.</p>
+<p><strong>Scène 6 bis : version bien menée</strong></p>
+<pre><code>Marie :   Pendant que vous y êtes, pouvez-vous aussi faire l&#x27;export Excel ?
+Lecteur : C&#x27;est une bonne idée, et je comprends le besoin. L&#x27;export Excel
+          n&#x27;est pas dans le devis signé, qui porte sur le CSV. Je peux le
+          chiffrer : je vous donne trois options d&#x27;ici mercredi.
+Marie :   Combien ça coûtera ?
+Lecteur : Je ne veux pas vous donner un chiffre au hasard. Mercredi, vous aurez
+          le coût, le délai, et ce que cela change pour la date de livraison.
+          Vous déciderez ensuite.</code></pre>
+<p>Le lecteur reconnaît le besoin, situe la demande par rapport au devis, ne répond pas de tête et s&#x27;engage sur une date de réponse. Le processus complet est dessiné ci-dessous.</p>
+<figure><img src="../img/m12-03.png" alt="processus de demande de changement · 2 décisions, 2 issues"><figcaption>processus de demande de changement · 2 décisions, 2 issues</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>Toute demande entre par la même porte : on se demande si elle est dans le périmètre signé.</li><li>Si oui, elle est traitée dans le plan, sans formalité.</li><li>Si non, on la chiffre : jours, prix, effet sur la date.</li><li>On présente trois options au client, qui décide.</li><li>Si le client accepte, un avenant est signé et le planning est mis à jour ; sinon l&#x27;idée va dans la liste d&#x27;attente.</li></ol>
+<p>Le client qui change d&#x27;avis suit le même chemin. Changer d&#x27;avis est normal : on découvre son besoin en le voyant. Ce qui ne l&#x27;est pas, c&#x27;est d&#x27;absorber le changement en silence.</p>
+<p><strong>Scène 7 : le client change d&#x27;avis, version maladroite</strong></p>
+<pre><code>Marie :   Finalement, je voudrais que le fichier soit par client, pas par mois.
+Lecteur : D&#x27;accord, pas de problème.
+[trois semaines plus tard : la livraison a quinze jours de retard ; Marie est
+ mécontente ; le lecteur aussi]</code></pre>
+<p><strong>Scène 7 bis : version bien menée</strong></p>
+<pre><code>Marie :   Finalement, je voudrais que le fichier soit par client, pas par mois.
+Lecteur : Merci de me le dire maintenant. Voyons ce que cela change. Le fichier
+          par mois est déjà développé : repartir sur un fichier par client
+          coûterait environ 4 jours et décalerait la livraison au 2 mars.
+          Autre possibilité : on livre le fichier par mois comme prévu, puis le
+          fichier par client dans un second temps. Que préférez-vous ?
+Marie :   Livrons d&#x27;abord le mois, et nous verrons pour le client.
+Lecteur : Parfait. Je vous envoie ce soir un résumé de la décision pour que
+          nous soyons d&#x27;accord sur les dates.</code></pre>
+<p>Le changement est accueilli, chiffré en jours et en date, et se termine par une trace écrite.</p>
+<p><strong>À retenir</strong></p>
+<p>Remplacez le non sec par une condition ou une date. Chiffrez toute demande avant de répondre. Terminez par une trace écrite de la décision.</p>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Répondre « oui » pour ne pas gê ner, puis absorber le retard.</li><li>Chiffrer à l&#x27;oral et de tête : le chiffre devient une promesse.</li><li>Refuser sans proposer d&#x27;alternative ni de date.</li></ul>
+<h2>Leçon 12.5 : écrire ce qui engage : rythme, compte rendu et devis</h2>
+<p>Ce qui n&#x27;est pas écrit n&#x27;a pas été dit. La confiance d&#x27;un client se construit sur un rythme régulier et des traces simples. Fixez les deux dès le début du projet : quand vous parlerez, et ce que vous écrirez.</p>
+<figure><img src="../img/m12-04.png" alt="rythme de communication hebdomadaire et mensuel"><figcaption>rythme de communication hebdomadaire et mensuel</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>Les trois jours pleins sont les points de contact : un point bref le lundi, un message le mercredi, un rapport le vendredi.</li><li>Les jours en pointillés sont du travail sans réunion : les protéger fait avancer le projet.</li><li>Le bandeau du bas ajoute une revue mensuelle pour le budget, les risques et les décisions.</li></ol>
+<p>Chaque rendez-vous produit un compte rendu court dans les 24 heures. Voici celui de l&#x27;entretien du 11 janvier 2027, écrit pour être relu en une minute.</p>
+<pre><code>Compte rendu : entretien de cadrage du 11 janvier 2027
+Participants : Marie Giraud (cabinet), le lecteur (Facturo)
+
+Ce que nous avons compris
+- Chaque clôture, le cabinet ressaisit à la main les factures de ses clients
+  (environ 45 minutes par client, 30 clients).
+- Le logiciel du cabinet accepte un CSV (point-virgule, dates JJ/MM/AAAA).
+
+Décisions
+- Le projet porte sur un export CSV des factures émises et payées.
+- L&#x27;export PDF et l&#x27;export Excel ne font pas partie du projet.
+
+Actions
+- Le lecteur envoie un devis : jeudi 14 janvier.
+- Marie envoie un fichier CSV d&#x27;exemple de son logiciel : vendredi 15 janvier.
+
+Points ouverts
+- Qui, au cabinet, importera les fichiers ? À confirmer lundi.
+
+Sans réponse de votre part d&#x27;ici mercredi, nous considérons ce compte rendu validé.</code></pre>
+<p>Le devis est le document qui engage le plus. Un bon devis dit ce qui est fait, ce qui ne l&#x27;est pas, ce que l&#x27;on suppose, et comment on traite un changement.</p>
+<table><thead><tr><th>Rubrique</th><th>Contenu pour l&#x27;export comptable</th></tr></thead><tbody><tr><td>Périmètre</td><td>Export CSV des factures émises et payées d&#x27;une période, envoi du fichier par e-mail, écran de commande</td></tr><tr><td>Exclusions</td><td>Export PDF ou Excel, relances automatiques, reprise des données avant 2026</td></tr><tr><td>Hypothèses</td><td>Un fichier d&#x27;exemple fourni le 15 janvier ; un interlocuteur disponible pour valider en 2 jours ouvrés</td></tr><tr><td>Prix</td><td>9 000 € HT au forfait</td></tr><tr><td>Paiement</td><td>30 % à la signature (2 700 €), 40 % à la livraison en recette (3 600 €), 30 % après la mise en ligne (2 700 €)</td></tr><tr><td>Délais</td><td>Début le 4 janvier 2027, mise en ligne visée le 22 février 2027</td></tr><tr><td>Recette</td><td>5 jours ouvrés pour tester ; sans retour, la livraison est réputée acceptée</td></tr><tr><td>Modifications</td><td>Toute demande hors périmètre est chiffrée puis validée par écrit avant d&#x27;être réalisée</td></tr><tr><td>Retard du client</td><td>Un retard de plus de 5 jours ouvrés sur une validation décale la livraison d&#x27;autant</td></tr></tbody></table>
+<p>Le vocabulaire d&#x27;un devis doit rester concret. « Environ 3 semaines » vaut mieux que « dans les meilleurs délais », et « non inclus : l&#x27;export Excel » vaut mieux que « selon besoins ». Ces clauses sont des exemples de communication : pour un contrat réel, faites-les relire par un juriste.</p>
+<p><strong>À retenir</strong></p>
+<p>Fixez un rythme et tenez-le. Rédigez un compte rendu sous 24 heures, avec décisions et actions datées. Un devis dit ce qui est exclu autant que ce qui est inclus.</p>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Un compte rendu qui raconte la réunion au lieu de lister décisions et actions.</li><li>Un devis sans exclusions : tout ce qui n&#x27;est pas exclu est supposé inclus.</li><li>Un rythme annoncé puis abandonné dès que le projet prend du retard, au moment où il serait le plus utile.</li></ul>
+<h2>Leçon 12.6 : parler d&#x27;IA, de données personnelles et de responsabilité</h2>
+<p>Un client a le droit de savoir comment son produit est fabriqué, surtout quand des agents IA écrivent une partie du code. Il ne s&#x27;agit pas d&#x27;un aveu, mais d&#x27;un cadre. Dites-le simplement, au début, et dites qui reste responsable.</p>
+<table><thead><tr><th>Sujet</th><th>Ce que vous dites au client</th><th>Ce que vous faites réellement</th></tr></thead><tbody><tr><td>Usage d&#x27;agents IA</td><td>« Nous utilisons des assistants IA pour écrire du code. Chaque modification est relue et testée par une personne. »</td><td>Revue humaine systématique, tests obligatoires, aucun code non relu en production</td></tr><tr><td>Responsabilité</td><td>« Nous restons responsables de ce que nous livrons, quel que soit l&#x27;outil utilisé. »</td><td>L&#x27;outil n&#x27;est jamais cité comme cause d&#x27;une erreur</td></tr><tr><td>Données du client</td><td>« Vos données de production ne servent pas à entraîner ou à tester des outils externes. »</td><td>Données de test fictives, accès limités, aucun secret dans les instructions données à l&#x27;agent</td></tr><tr><td>Données personnelles</td><td>« Un contrat précise qui fait quoi avec ces données. »</td><td>Contrat de sous-traitance écrit avant de traiter des données personnelles</td></tr><tr><td>Incident touchant des données</td><td>« Nous vous prévenons sans délai, car le délai légal court à partir de la constatation. »</td><td>Message d&#x27;incident de la leçon 12.3, envoyé dès que les faits sont établis</td></tr></tbody></table>
+<p>Sur les données personnelles, retenez deux repères vérifiés auprès de la CNIL. D&#x27;une part, le contrat avec un sous-traitant doit reprendre les exigences de l&#x27;article 28 du RGPD et être signé avant le début de la prestation. D&#x27;autre part, une violation de données présentant un risque doit être notifiée à la CNIL dans les meilleurs délais, avec une notification initiale dans un délai de 72 heures ; les personnes concernées doivent aussi être informées en cas de risque élevé.</p>
+<p>La réponse à « qui est responsable ? » doit être précise : qui est responsable du traitement des données (à établir cas par cas), qui agit pour son compte (le sous-traitant), et ce que le contrat prévoit en cas d&#x27;incident. Cette répartition dépend du contrat et du cas : consultez un juriste ou le délégué à la protection des données avant d&#x27;affirmer quoi que ce soit.</p>
+<p><strong>À retenir</strong></p>
+<p>Dites très tôt comment vous utilisez l&#x27;IA et qui relit. Ne mettez jamais de données réelles du client dans un outil sans cadre. Prévenez vite en cas d&#x27;incident touchant des données personnelles.</p>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Cacher l&#x27;usage d&#x27;agents IA : s&#x27;il est découvert, la confiance est perdue.</li><li>Rejeter la faute sur l&#x27;outil : le client a contracté avec vous, pas avec lui.</li><li>Traiter des données personnelles sans contrat écrit préalable.</li></ul>
+<h2>Atelier guidé : un mois de communication sur le projet d&#x27;export</h2>
+<p>Prévoyez deux à trois heures. Vous allez rédiger les cinq documents qu&#x27;un orchestrateur envoie réellement au cours d&#x27;un projet, à partir d&#x27;une situation de départ unique.</p>
+<p>Situation : le projet d&#x27;export comptable de Marie Giraud (devis de 9 000 € HT, mise en ligne visée le 22 février 2027). Au milieu du projet, trois faits surviennent : un test révèle un problème d&#x27;arrondi, Marie demande un export Excel, et la mise en ligne risque de glisser de deux jours.</p>
+<table><thead><tr><th>Étape</th><th>Ce que vous faites</th><th>Résultat attendu</th></tr></thead><tbody><tr><td>1</td><td>Écrivez les 8 questions du rendez-vous de découverte, dans l&#x27;ordre du tableau de la leçon 12.1</td><td>Aucune question ne propose une solution ; une question porte sur les rôles</td></tr><tr><td>2</td><td>Rédigez le compte rendu de ce rendez-vous (modèle de la leçon 12.5)</td><td>Décisions, actions datées et points ouverts séparés</td></tr><tr><td>3</td><td>Rédigez le devis en 9 rubriques</td><td>Exclusions non vides ; paiement échelonné qui totalise 100 %</td></tr><tr><td>4</td><td>Écrivez le message d&#x27;annonce du décalage de deux jours</td><td>Fait et nouvelle date dans l&#x27;objet ; une phrase de cause ; aucune action inutile</td></tr><tr><td>5</td><td>Répondez à la demande d&#x27;export Excel</td><td>Reconnaissance du besoin, devis à chiffrer, date de réponse</td></tr><tr><td>6</td><td>Rédigez le message d&#x27;incident d&#x27;arrondi (inventez les heures et les chiffres)</td><td>Savoir, ignoré, mesures, demande, prochain contact</td></tr><tr><td>7</td><td>Relisez chaque texte en entourant chaque mot technique</td><td>Chaque mot entouré est remplacé ou défini</td></tr></tbody></table>
+<p>Pour contrôler, faites lire chaque texte à une personne qui ne connaît pas le projet et demandez-lui : qu&#x27;est-ce qui change pour moi ? Que dois-je faire ? Si elle hésite, réécrivez la première phrase.</p>
+<h2>Exercices</h2>
+<h3>Exercice 1 : traduire le jargon</h3>
+<p>Réécrivez ces trois phrases pour une cliente qui n&#x27;est pas technicienne.</p>
+<p>a. « Le déploiement a échoué à cause d&#x27;une régression sur l&#x27;API. » b. « Il faut migrer la base avant de livrer. » c. « L&#x27;agent a généré du code que la revue a rejeté. »</p>
+<details><summary>Corrigé</summary>
+<table><thead><tr><th>Phrase</th><th>Réécriture</th></tr></thead><tbody><tr><td>a</td><td>« La mise en ligne n&#x27;a pas eu lieu : une modification récente a cassé une fonction qui marchait. Nous la réparons avant de réessayer. »</td></tr><tr><td>b</td><td>« Avant de vous livrer, nous devons déplacer vos données vers la nouvelle structure. Cela prend une demi-journée et nous sauvegardons tout avant. »</td></tr><tr><td>c</td><td>« Notre assistant IA a proposé une modification ; notre relecture l&#x27;a refusée car elle n&#x27;était pas conforme. Cela fait partie du processus normal. »</td></tr></tbody></table>
+<p>Ce qui compte : le résultat pour la cliente, une conséquence (temps ou risque), et un ton rassurant sans minimiser.</p>
+</details>
+<h3>Exercice 2 : diagnostiquer un message</h3>
+<p>Voici un message envoyé à un client : « Petit souci sur la prod hier soir, on regarde ça, je reviens vers vous. » Listez ce qui manque, puis réécrivez-le.</p>
+<details><summary>Corrigé</summary>
+<p>Manque : ce qui s&#x27;est réellement passé, l&#x27;impact sur le client, l&#x27;heure de début et de fin, ce qui est corrigé, quand on reparlera. Les mots « petit souci » minimisent, « prod » est du jargon.</p>
+<pre><code>Objet : Incident d&#x27;hier soir - service rétabli, vérification en cours
+
+Bonjour,
+Hier soir entre 21 h et 21 h 40, l&#x27;envoi des relances par e-mail a été
+interrompu. Il fonctionne de nouveau depuis 21 h 40. Les relances
+non envoyées partiront ce matin. Aucune donnée n&#x27;a été perdue.
+Nous vérifions la cause et vous écrivons à midi.</code></pre>
+<p>Ce qui compte : fait, périmètre exact, heure, mesure, prochain contact.</p>
+</details>
+<h3>Exercice 3 : répondre à une demande urgente</h3>
+<p>Un client écrit : « Il me faut les rappels par SMS pour lundi, sinon je change de prestataire ! » Jouez la scène en trois phrases clefs.</p>
+<details><summary>Corrigé</summary>
+<p>Phrase 1 (comprendre) : « Je comprends l&#x27;enjeu. Qu&#x27;est-ce qui se passe lundi qui rend les SMS indispensables ? » Phrase 2 (alternative) : « Les rappels par e-mail existent déjà ; je peux les activer dès demain pour votre premier cas. » Phrase 3 (cadrer) : « Les SMS demandent un nouveau prestataire d&#x27;envoi et des tests : je vous donne un chiffrage et une date avant mercredi. »</p>
+<p>Ce qui compte : on ne cède pas à la menace, on ne l&#x27;ignore pas non plus : on cherche le besoin, on offre une solution immédiate, on planifie le reste.</p>
+</details>
+<h3>Exercice 4 : corriger un devis</h3>
+<p>Un devis dit : « Développement d&#x27;un module d&#x27;export, environ 3 semaines, 9 000 €, paiement à la livraison. » Listez cinq faiblesses et proposez des corrections.</p>
+<details><summary>Corrigé</summary>
+<table><thead><tr><th>Faiblesse</th><th>Correction</th></tr></thead><tbody><tr><td>Le périmètre est une seule phrase</td><td>Lister fonctions incluses (CSV, envoi, écran)</td></tr><tr><td>Aucune exclusion</td><td>Ajouter : pas de PDF, pas d&#x27;Excel, pas de reprise d&#x27;anciennes données</td></tr><tr><td>« Environ 3 semaines » sans date de début</td><td>Donner dates de début et de fin visées</td></tr><tr><td>Prix sans HT ni TTC</td><td>Préciser « 9 000 € HT »</td></tr><tr><td>Paiement unique à la livraison</td><td>Échelonner : signature, recette, mise en ligne</td></tr><tr><td>Aucune clause de modification</td><td>Ajouter : toute demande hors périmètre est chiffrée et validée par écrit</td></tr></tbody></table>
+</details>
+<h3>Exercice 5 : parler d&#x27;IA et de données</h3>
+<p>Marie demande : « Vos outils IA voient-ils les factures de nos clients ? » Rédigez une réponse honnête en cinq lignes, sans promettre ce que vous ne contrôlez pas.</p>
+<details><summary>Corrigé</summary>
+<p>« Nous utilisons des assistants IA pour écrire et relire du code. Ils travaillent sur des données de test fictives, pas sur vos factures réelles. Si un jour une intervention exige d&#x27;accéder à des données réelles, nous vous le demandons avant et nous l&#x27;écrivons dans le contrat. Chaque modification est relue par une personne et nous restons responsables de ce que nous livrons. Je peux vous envoyer notre document de règles d&#x27;usage si cela vous aide. »</p>
+<p>Ce qui compte : pas de promesse absolue (« jamais ») que vous ne pouvez pas garantir, une règle claire, une responsabilité assumée.</p>
+</details>
+<h2>Quiz d&#x27;auto-évaluation</h2>
+<table><thead><tr><th>Question</th><th>Réponse</th><th>Pourquoi</th></tr></thead><tbody><tr><td>Quels sont les trois rôles d&#x27;un client ?</td><td>Décideur, payeur, utilisateur</td><td>Leurs intérêts divergent ; ne parler qu&#x27;à l&#x27;un d&#x27;eux cache des problèmes</td></tr><tr><td>Que doit contenir la première ligne d&#x27;un message de retard ?</td><td>Le fait et la nouvelle date</td><td>Le lecteur pressé s&#x27;arrête là : elle doit suffire</td></tr><tr><td>Comment répondre à une demande hors périmètre ?</td><td>La chiffrer et présenter des options avec une date de réponse</td><td>Le client décide en connaissance de cause, et la trace écrite protège les deux parties</td></tr><tr><td>Que faire face à une urgence ?</td><td>Chercher le vrai besoin, proposer une solution immédiate et planifier le reste</td><td>L&#x27;urgence cache souvent un besoin plus simple</td></tr><tr><td>Quelle rubrique d&#x27;un devis prévient le plus de conflits ?</td><td>Les exclusions</td><td>Ce qui n&#x27;est pas exclu est supposé inclus</td></tr><tr><td>Dans quel délai notifie-t-on une violation de données à la CNIL ?</td><td>Dans les meilleurs délais, avec une notification initiale sous 72 heures</td><td>C&#x27;est le repère donné par la CNIL ; un juriste confirme le cas concret</td></tr></tbody></table>
+<h2>Checklist de validation</h2>
+<p>Cochez chaque ligne quand vous pouvez le prouver avec un document.</p>
+<ul class="check"><li>J&#x27;identifie le décideur, le payeur et l&#x27;utilisateur d&#x27;un client.</li><li>Je conduis un rendez-vous de découverte avec un plan, des questions ouvertes et un budget abordé.</li><li>J&#x27;explique la dette technique en temps, risque et argent, avec deux options chiffrées.</li><li>J&#x27;écris un message de retard dont la première ligne contient le fait et la date.</li><li>J&#x27;écris un message d&#x27;incident avec ce que je sais, ce que j&#x27;ignore et la date du prochain contact.</li><li>Je refuse une demande hors périmètre par une condition ou une date, et je la chiffre.</li><li>Je rédige un compte rendu en 24 heures et un devis avec exclusions, hypothèses et clause de modification.</li><li>J&#x27;explique à un client comment j&#x27;utilise des agents IA, qui relit et qui est responsable.</li></ul>
+<h2>Sources</h2>
+<ul><li><a href="https://cnil.fr/fr/notifier-une-violation-de-donnees-personnelles">Notifier une violation de données personnelles, CNIL</a> : consultée le 13 novembre 2026, pour le délai de notification de 72 heures et l&#x27;information des personnes en cas de risque élevé.</li><li><a href="https://cnil.fr/fr/securite-gerer-la-sous-traitance">Sécurité : gérer la sous-traitance, CNIL</a> : consultée le 13 novembre 2026, pour le contrat de sous-traitance exigé par l&#x27;article 28 du RGPD.</li></ul>
+
+<div class="pager"><a class="prev" href="../modules/module-11.html"><small>← Précédent</small>Module 11 : produit et conception</a><a class="next" href="../glossaire.html"><small>Suivant →</small>Glossaire</a></div></article></main></div>
+<script>document.querySelectorAll('.side a.nav').forEach(function(a){a.addEventListener('click',function(){document.body.classList.remove('open')})});var on=document.querySelector('.side a.on');if(on)on.scrollIntoView({block:'center'});</script>
+</body></html>

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Glossaire · Cursus orchestrateur</title>
+<link rel="stylesheet" href="css/style.css"></head>
+<body><button class="menu-btn" onclick="document.body.classList.toggle('open')">☰ Menu du cursus</button>
+<div class="layout"><nav class="side"><a class="brand" href="index.html">Cursus : orchestrateur et gestionnaire d’app<small>12 modules · 24 semaines</small></a>
+<a class="nav" href="index.html">Accueil</a>
+<a class="nav" href="demarrer.html">Démarrer</a>
+<h4>Le socle : savoir juger</h4>
+<a class="nav" href="modules/module-01.html">Module 1 : fondamentaux du web et du logiciel</a>
+<a class="nav" href="modules/module-02.html">Module 2 : lire le code et reconnaître le mauvais code</a>
+<a class="nav" href="modules/module-03.html">Module 3 : architectures et design patterns</a>
+<a class="nav" href="modules/module-04.html">Module 4 : tests et qualité</a>
+<a class="nav" href="modules/module-05.html">Module 5 : serveur, mise en ligne, DevOps et CI/CD</a>
+<a class="nav" href="modules/module-06.html">Module 6 : sécurité, observabilité, données et conformité</a>
+<h4>Les agents IA et le pilotage</h4>
+<a class="nav" href="modules/module-07.html">Module 7 : agents IA, définitions et fonctionnement</a>
+<a class="nav" href="modules/module-08.html">Module 8 : orchestrer des agents</a>
+<a class="nav" href="modules/module-09.html">Module 9 : piloter l&#x27;application en production</a>
+<h4>Les modules transversaux</h4>
+<a class="nav" href="modules/module-10.html">Module 10 : gestion de projet</a>
+<a class="nav" href="modules/module-11.html">Module 11 : produit et conception</a>
+<a class="nav" href="modules/module-12.html">Module 12 : gestion du client et communication</a>
+<h4>Référence</h4>
+<a class="nav on" href="glossaire.html">Glossaire</a></nav>
+<main><article><div class="toolbar"><button onclick="window.print()">Imprimer / PDF</button><button onclick="var r=document.documentElement;var d=r.dataset.theme==='dark';r.dataset.theme=d?'light':'dark'">Clair / sombre</button></div>
+<h1>Glossaire</h1>
+<p>Le glossaire réunit les termes du cursus, classés de A à Z. La colonne « Module » indique l'onglet où le terme est expliqué en détail.</p>
+<table><thead><tr><th>Terme</th><th>Définition</th><th>Module</th></tr></thead><tbody>
+<tr><td>ACID</td><td>Quatre garanties d'une transaction de base de données : atomicité, cohérence, isolation, durabilité</td><td><a href="modules/module-01.html">1</a></td></tr>
+<tr><td>ADR</td><td>Note courte qui consigne une décision d'architecture : contexte, options, choix, conséquences</td><td><a href="modules/module-09.html">9</a></td></tr>
+<tr><td>Agent</td><td>Programme où un modèle choisit des actions, appelle des outils et recommence jusqu'à atteindre un objectif</td><td><a href="modules/module-07.html">7</a></td></tr>
+<tr><td>API</td><td>Interface par laquelle un logiciel en appelle un autre</td><td><a href="modules/module-01.html">1</a></td></tr>
+<tr><td>Artefact</td><td>Fichier produit par un pipeline (image, paquet, rapport)</td><td><a href="modules/module-05.html">5</a></td></tr>
+<tr><td>Bac à sable</td><td>Environnement isolé qui limite ce qu'un programme ou un agent peut faire</td><td><a href="modules/module-07.html">7</a></td></tr>
+<tr><td>Backlog</td><td>Liste ordonnée des demandes et des idées en attente</td><td><a href="modules/module-10.html">10</a></td></tr>
+<tr><td>Blue / green</td><td>Déploiement avec deux environnements identiques et une bascule du trafic</td><td><a href="modules/module-05.html">5</a></td></tr>
+<tr><td>Branche</td><td>Ligne de travail parallèle dans Git, fusionnée ensuite dans la branche principale</td><td><a href="modules/module-01.html">1</a></td></tr>
+<tr><td>Cache</td><td>Copie temporaire de données pour répondre plus vite</td><td><a href="modules/module-01.html">1</a></td></tr>
+<tr><td>Cadrage</td><td>Phase où l'on écrit l'objectif, le périmètre, les contraintes et les risques avant de commencer</td><td><a href="modules/module-10.html">10</a></td></tr>
+<tr><td>Canary</td><td>Déploiement d'abord proposé à un petit pourcentage d'utilisateurs</td><td><a href="modules/module-05.html">5</a></td></tr>
+<tr><td>Chemin critique</td><td>Suite de tâches dépendantes qui détermine la date de fin d'un projet</td><td><a href="modules/module-10.html">10</a></td></tr>
+<tr><td>CI/CD</td><td>Intégration et livraison (ou déploiement) continues, automatisées</td><td><a href="modules/module-05.html">5</a></td></tr>
+<tr><td>Clean Architecture</td><td>Variante de l'architecture hexagonale en cercles concentriques : les dépendances ne pointent que vers le métier</td><td><a href="modules/module-03.html">3</a></td></tr>
+<tr><td>Clean Code</td><td>Pratiques d'écriture lisible : noms clairs, fonctions courtes, pas de duplication, erreurs traitées</td><td><a href="modules/module-02.html">2</a></td></tr>
+<tr><td>Code smell</td><td>Signe en surface d'un problème possible de conception</td><td><a href="modules/module-02.html">2</a></td></tr>
+<tr><td>Compaction</td><td>Résumé d'une longue session d'agent pour libérer de la place dans le contexte</td><td><a href="modules/module-07.html">7</a></td></tr>
+<tr><td>Couplage</td><td>Degré de dépendance entre deux modules</td><td><a href="modules/module-02.html">2</a></td></tr>
+<tr><td>CQRS</td><td>Séparation du modèle de lecture et du modèle d'écriture</td><td><a href="modules/module-03.html">3</a></td></tr>
+<tr><td>Critère d'acceptation</td><td>Condition vérifiable, écrite en Étant donné / Quand / Alors, qui dit qu'une story est terminée</td><td><a href="modules/module-11.html">11</a></td></tr>
+<tr><td>DDD</td><td>Conception pilotée par le métier : langage commun, contextes délimités, agrégats</td><td><a href="modules/module-03.html">3</a></td></tr>
+<tr><td>Dérive</td><td>Écart progressif entre ce qui était prévu et ce qui existe</td><td><a href="modules/module-02.html">2</a></td></tr>
+<tr><td>Design system</td><td>Composants, couleurs et règles d'interface réutilisables</td><td><a href="modules/module-11.html">11</a></td></tr>
+<tr><td>Dette technique</td><td>Coût futur dû à des raccourcis ou à une dégradation du code</td><td><a href="modules/module-09.html">9</a></td></tr>
+<tr><td>Docker</td><td>Outil qui empaquette une application et son environnement dans un conteneur</td><td><a href="modules/module-05.html">5</a></td></tr>
+<tr><td>DORA</td><td>Quatre indicateurs de performance de livraison logicielle</td><td><a href="modules/module-09.html">9</a></td></tr>
+<tr><td>DRY</td><td>Ne pas répéter la même connaissance à plusieurs endroits</td><td><a href="modules/module-02.html">2</a></td></tr>
+<tr><td>Epic</td><td>Résultat de valeur pour l'utilisateur, plus gros qu'une story ; correspond à un lot du découpage</td><td><a href="modules/module-11.html">11</a></td></tr>
+<tr><td>Event storming</td><td>Atelier avec le métier pour dresser la chronologie des événements d'un processus</td><td><a href="modules/module-11.html">11</a></td></tr>
+<tr><td>Feature flag</td><td>Interrupteur qui active ou non une fonctionnalité déjà déployée</td><td><a href="modules/module-05.html">5</a></td></tr>
+<tr><td>Fenêtre de contexte</td><td>Quantité maximale de texte (en tokens) que le modèle voit à la fois</td><td><a href="modules/module-07.html">7</a></td></tr>
+<tr><td>Forfait et régie</td><td>Deux modèles de facturation : prix fixe pour un périmètre, ou paiement au temps passé</td><td><a href="modules/module-10.html">10</a></td></tr>
+<tr><td>Git</td><td>Outil qui conserve l'historique d'un code et permet d'y travailler à plusieurs</td><td><a href="modules/module-01.html">1</a></td></tr>
+<tr><td>Hallucination</td><td>Contenu plausible mais faux produit par un modèle</td><td><a href="modules/module-07.html">7</a></td></tr>
+<tr><td>Harness</td><td>Logiciel qui entoure le modèle : boucle, outils, permissions, contexte, mémoire</td><td><a href="modules/module-07.html">7</a></td></tr>
+<tr><td>HDS</td><td>Certification française exigée pour héberger des données de santé</td><td><a href="modules/module-06.html">6</a></td></tr>
+<tr><td>Hexagonale (architecture)</td><td>Le métier au centre, les technologies branchées par des interfaces (ports et adaptateurs)</td><td><a href="modules/module-03.html">3</a></td></tr>
+<tr><td>Hook</td><td>Script déclenché automatiquement à un moment précis du travail d'un agent</td><td><a href="modules/module-07.html">7</a></td></tr>
+<tr><td>Hors-périmètre</td><td>Ce qui est explicitement exclu d'un projet ou d'une version</td><td><a href="modules/module-10.html">10</a></td></tr>
+<tr><td>IaC</td><td>Infrastructure décrite dans des fichiers versionnés</td><td><a href="modules/module-05.html">5</a></td></tr>
+<tr><td>Idempotence</td><td>Répéter une opération donne le même résultat qu'une seule fois</td><td><a href="modules/module-01.html">1</a></td></tr>
+<tr><td>Injection de prompt</td><td>Instructions cachées dans un contenu lu par l'agent pour le détourner</td><td><a href="modules/module-07.html">7</a></td></tr>
+<tr><td>Injection SQL</td><td>Entrée utilisateur interprétée comme une commande de base de données</td><td><a href="modules/module-06.html">6</a></td></tr>
+<tr><td>Jalon</td><td>Point de contrôle vérifiable dans un planning</td><td><a href="modules/module-10.html">10</a></td></tr>
+<tr><td>Kanban</td><td>Méthode de flux continu avec limite du travail en cours</td><td><a href="modules/module-10.html">10</a></td></tr>
+<tr><td>KISS</td><td>Garder les solutions aussi simples que possible</td><td><a href="modules/module-02.html">2</a></td></tr>
+<tr><td>LLM</td><td>Modèle de langage entraîné à prédire la suite d'un texte</td><td><a href="modules/module-07.html">7</a></td></tr>
+<tr><td>MCP</td><td>Standard ouvert pour connecter un agent à des outils et à des données</td><td><a href="modules/module-07.html">7</a></td></tr>
+<tr><td>Migration</td><td>Modification versionnée du schéma d'une base de données</td><td><a href="modules/module-01.html">1</a></td></tr>
+<tr><td>Mock</td><td>Doublure d'un composant utilisée dans un test</td><td><a href="modules/module-04.html">4</a></td></tr>
+<tr><td>Monolithe modulaire</td><td>Application déployée d'un bloc, découpée en modules étanches</td><td><a href="modules/module-03.html">3</a></td></tr>
+<tr><td>MVP</td><td>Plus petite version qui permet de vérifier l'hypothèse la plus risquée</td><td><a href="modules/module-11.html">11</a></td></tr>
+<tr><td>N+1</td><td>Problème où une requête déclenche une requête de plus par élément</td><td><a href="modules/module-01.html">1</a></td></tr>
+<tr><td>NDA</td><td>Accord de confidentialité entre deux parties</td><td><a href="modules/module-12.html">12</a></td></tr>
+<tr><td>Notes de version (changelog)</td><td>Journal officiel des changements d'un outil entre deux versions ; source de niveau 2 pour vérifier une nouveauté</td><td><a href="demarrer.html">Démarrer</a></td></tr>
+<tr><td>Observabilité</td><td>Capacité à comprendre l'état du système via logs, métriques et traces</td><td><a href="modules/module-06.html">6</a></td></tr>
+<tr><td>OWASP</td><td>Organisation qui publie la liste des principaux risques de sécurité web (Top 10)</td><td><a href="modules/module-06.html">6</a></td></tr>
+<tr><td>Pipeline</td><td>Suite automatisée d'étapes de vérification et de livraison</td><td><a href="modules/module-05.html">5</a></td></tr>
+<tr><td>Prompt système</td><td>Instructions de fond données au modèle avant la conversation</td><td><a href="modules/module-07.html">7</a></td></tr>
+<tr><td>Pull request</td><td>Demande de fusion d'une branche, point de revue</td><td><a href="modules/module-01.html">1</a></td></tr>
+<tr><td>RACI</td><td>Tableau des rôles : responsable, approbateur, consulté, informé</td><td><a href="modules/module-10.html">10</a></td></tr>
+<tr><td>RAG</td><td>Recherche d'extraits pertinents fournis au modèle avant qu'il réponde</td><td><a href="modules/module-07.html">7</a></td></tr>
+<tr><td>Recette</td><td>Validation de la livraison par le client selon des critères convenus</td><td><a href="modules/module-10.html">10</a></td></tr>
+<tr><td>Refactoring</td><td>Améliorer la structure du code sans changer son comportement</td><td><a href="modules/module-04.html">4</a></td></tr>
+<tr><td>Registre des risques</td><td>Liste des risques d'un projet avec probabilité, impact et actions</td><td><a href="modules/module-10.html">10</a></td></tr>
+<tr><td>REST</td><td>Style d'API fondé sur des ressources et les verbes HTTP</td><td><a href="modules/module-01.html">1</a></td></tr>
+<tr><td>Réversibilité</td><td>Possibilité pour le client de récupérer ses données et son code en fin de contrat</td><td><a href="modules/module-12.html">12</a></td></tr>
+<tr><td>RGPD</td><td>Règlement européen sur la protection des données personnelles</td><td><a href="modules/module-06.html">6</a></td></tr>
+<tr><td>RICE</td><td>Méthode de priorisation : portée, impact, confiance, effort</td><td><a href="modules/module-09.html">9</a></td></tr>
+<tr><td>Rollback</td><td>Retour à la version précédente après un déploiement défectueux</td><td><a href="modules/module-05.html">5</a></td></tr>
+<tr><td>Rolling</td><td>Déploiement où les instances sont remplacées une par une</td><td><a href="modules/module-05.html">5</a></td></tr>
+<tr><td>Scope creep</td><td>Élargissement progressif du périmètre par de petites demandes non chiffrées</td><td><a href="modules/module-10.html">10</a></td></tr>
+<tr><td>Scrum</td><td>Méthode agile par itérations courtes avec rôles et rituels définis</td><td><a href="modules/module-10.html">10</a></td></tr>
+<tr><td>Skill</td><td>Dossier d'instructions et de ressources chargé par l'agent à la demande</td><td><a href="modules/module-07.html">7</a></td></tr>
+<tr><td>SLO</td><td>Objectif chiffré de qualité de service</td><td><a href="modules/module-06.html">6</a></td></tr>
+<tr><td>SOLID</td><td>Cinq principes de conception orientée objet</td><td><a href="modules/module-02.html">2</a></td></tr>
+<tr><td>Sous-agent</td><td>Agent lancé par un autre agent, avec son propre contexte</td><td><a href="modules/module-07.html">7</a></td></tr>
+<tr><td>Spec</td><td>Description écrite de ce qu'il faut construire et de ce qui est « terminé »</td><td><a href="modules/module-11.html">11</a></td></tr>
+<tr><td>TDD</td><td>Écrire le test avant le code : test rouge, code minimal, refactoring</td><td><a href="modules/module-04.html">4</a></td></tr>
+<tr><td>Test de mutation</td><td>Technique qui modifie le code pour vérifier que les tests le détectent</td><td><a href="modules/module-04.html">4</a></td></tr>
+<tr><td>Ticket</td><td>Fiche courte décrivant une tâche : objectif, critères, périmètre, statut ; pour un agent, c'est un brief suivi</td><td><a href="modules/module-08.html">8</a></td></tr>
+<tr><td>Token</td><td>Unité de texte traitée par un modèle</td><td><a href="modules/module-07.html">7</a></td></tr>
+<tr><td>Tranche verticale</td><td>Fonctionnalité complète de bout en bout (interface, logique, base, déploiement)</td><td><a href="modules/module-11.html">11</a></td></tr>
+<tr><td>User story</td><td>Besoin décrit sous la forme « en tant que… je veux… afin de… »</td><td><a href="modules/module-11.html">11</a></td></tr>
+<tr><td>Veille</td><td>Routine légère et régulière pour se tenir à jour : quelques sources choisies, un créneau fixe, un carnet</td><td><a href="demarrer.html">Démarrer</a></td></tr>
+<tr><td>Walking skeleton</td><td>Version minimale qui traverse toute l'architecture pour valider la chaîne de livraison</td><td><a href="modules/module-11.html">11</a></td></tr>
+<tr><td>WCAG</td><td>Référentiel d'accessibilité des contenus web</td><td><a href="modules/module-11.html">11</a></td></tr>
+<tr><td>Webhook</td><td>Appel envoyé par un service à votre application quand un événement se produit</td><td><a href="modules/module-01.html">1</a></td></tr>
+<tr><td>Wireframe</td><td>Esquisse en noir et blanc de la structure d'un écran</td><td><a href="modules/module-11.html">11</a></td></tr>
+<tr><td>Worktree</td><td>Copie de travail Git séparée, utile pour des agents en parallèle</td><td><a href="modules/module-08.html">8</a></td></tr>
+<tr><td>XSS</td><td>Faille où un script injecté s'exécute dans le navigateur d'un autre utilisateur</td><td><a href="modules/module-06.html">6</a></td></tr>
+<tr><td>YAGNI</td><td>Ne pas construire ce dont on n'a pas encore besoin</td><td><a href="modules/module-02.html">2</a></td></tr>
+</tbody></table>
+
+<div class="pager"><a class="prev" href="modules/module-12.html"><small>← Précédent</small>Module 12 : gestion du client et communication</a><span style="flex:1"></span></div></article></main></div>
+<script>document.querySelectorAll('.side a.nav').forEach(function(a){a.addEventListener('click',function(){document.body.classList.remove('open')})});var on=document.querySelector('.side a.on');if(on)on.scrollIntoView({block:'center'});</script>
+</body></html>

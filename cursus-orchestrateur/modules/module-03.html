@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Module 3 : architectures et design patterns · Cursus orchestrateur</title>
+<link rel="stylesheet" href="../css/style.css"></head>
+<body><button class="menu-btn" onclick="document.body.classList.toggle('open')">☰ Menu du cursus</button>
+<div class="layout"><nav class="side"><a class="brand" href="../index.html">Cursus : orchestrateur et gestionnaire d’app<small>12 modules · 24 semaines</small></a>
+<a class="nav" href="../index.html">Accueil</a>
+<a class="nav" href="../demarrer.html">Démarrer</a>
+<h4>Le socle : savoir juger</h4>
+<a class="nav" href="../modules/module-01.html">Module 1 : fondamentaux du web et du logiciel</a>
+<a class="nav" href="../modules/module-02.html">Module 2 : lire le code et reconnaître le mauvais code</a>
+<a class="nav on" href="../modules/module-03.html">Module 3 : architectures et design patterns</a>
+<a class="nav" href="../modules/module-04.html">Module 4 : tests et qualité</a>
+<a class="nav" href="../modules/module-05.html">Module 5 : serveur, mise en ligne, DevOps et CI/CD</a>
+<a class="nav" href="../modules/module-06.html">Module 6 : sécurité, observabilité, données et conformité</a>
+<h4>Les agents IA et le pilotage</h4>
+<a class="nav" href="../modules/module-07.html">Module 7 : agents IA, définitions et fonctionnement</a>
+<a class="nav" href="../modules/module-08.html">Module 8 : orchestrer des agents</a>
+<a class="nav" href="../modules/module-09.html">Module 9 : piloter l&#x27;application en production</a>
+<h4>Les modules transversaux</h4>
+<a class="nav" href="../modules/module-10.html">Module 10 : gestion de projet</a>
+<a class="nav" href="../modules/module-11.html">Module 11 : produit et conception</a>
+<a class="nav" href="../modules/module-12.html">Module 12 : gestion du client et communication</a>
+<h4>Référence</h4>
+<a class="nav" href="../glossaire.html">Glossaire</a></nav>
+<main><article><div class="toolbar"><button onclick="window.print()">Imprimer / PDF</button><button onclick="var r=document.documentElement;var d=r.dataset.theme==='dark';r.dataset.theme=d?'light':'dark'">Clair / sombre</button></div>
+<h1>Module 3 : architectures et design patterns</h1>
+<h2>Ce que vous saurez faire</h2>
+<p>Une architecture est la façon dont on range le code : où vit chaque règle, qui a le droit d'appeler qui. Un agent choisit une architecture par défaut, souvent la plus courante dans ses données d'entraînement, pas la plus adaptée à votre produit. Votre rôle est de choisir, de l'écrire, puis de vérifier qu'elle est suivie.</p>
+<p><strong>À la fin du module, vous saurez :</strong></p>
+<ul><li>expliquer MVC, l'architecture en couches et l'architecture hexagonale sur un même cas : créer une facture ;</li><li>lire un schéma d'architecture et dire où doit vivre une règle métier ;</li><li>découper un produit en contextes avec les idées de base du DDD ;</li><li>choisir entre monolithe modulaire et microservices avec des critères, pas par mode ;</li><li>reconnaître huit design patterns dans du code PHP ;</li><li>repérer la sur-ingénierie et la faire retirer.</li></ul>
+<table><tbody><tr><td>Prérequis</td><td>Les modules 1 et 2 : trajet d'une requête, lecture de code, signaux de mauvais code.</td></tr><tr><td>Durée estimée</td><td>12 heures, sur deux semaines.</td></tr><tr><td>Lien avec Facturo</td><td>Facturo est un monolithe modulaire Symfony : Clients, Facturation, Paiement, Export, Notifications. Tous les exemples en viennent.</td></tr><tr><td>Matériel</td><td>Papier et crayon pour redessiner chaque schéma de mémoire. C'est la meilleure façon de le retenir.</td></tr></tbody></table>
+<p>Chaque architecture est montrée sur le même cas, pour que vous compariez des formes et non des histoires différentes.</p>
+<h2>Leçon 3.1 · MVC : la base que tout le monde connaît</h2>
+<p>Sans architecture écrite, chaque session d'agent range le code à sa façon. Les premières fonctionnalités passent. Les suivantes coûtent de plus en plus cher, car personne ne sait plus où est quoi. Une architecture répond à une seule question : où vit chaque règle ?</p>
+<p>MVC (<em>Modèle, Vue, Contrôleur</em>) est la plus répandue. Le <strong>modèle</strong> contient les données et les règles. La <strong>vue</strong> affiche. Le <strong>contrôleur</strong> fait le lien : il reçoit la requête, appelle le modèle, choisit la réponse. Dans Facturo, la vue est l'application React, le contrôleur est une classe Symfony, le modèle est l'entité <code>Invoice</code>.</p>
+<p>Prenons notre cas fil rouge : <strong>créer une facture brouillon</strong>.</p>
+<figure><img src="../img/m03-01.png" alt="créer une facture en MVC · 5 étapes"><figcaption>créer une facture en MVC · 5 étapes</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>Suivez les chiffres dans l'ordre. Les flèches du haut vont vers la base, celles du bas reviennent.</li><li>Le contrôleur est au milieu : tout passe par lui. C'est sa force (un seul point d'entrée) et son risque (il peut grossir).</li><li>La boîte colorée est le modèle. C'est là que doivent vivre les règles : une facture vide est refusée, le total est calculé.</li><li>La base n'est connue que du modèle. La vue ne parle jamais à PostgreSQL.</li></ol>
+<h3>Ce que cela donne en code</h3>
+<p>Le contrôleur reste court : il traduit la requête en appel et le résultat en réponse.</p>
+<pre><code>#[Route('/invoices', methods: ['POST'])]
+public function create(CreateInvoiceRequest $req): JsonResponse
+{
+    $invoice = Invoice::draft($req-&gt;clientId, $req-&gt;lines);
+    $this-&gt;em-&gt;persist($invoice);
+    $this-&gt;em-&gt;flush();
+
+    return $this-&gt;json($invoice, 201);
+}</code></pre>
+<p>Les règles sont dans le modèle.</p>
+<pre><code>public static function draft(int $clientId, array $lines): self
+{
+    if ($lines === []) {
+        throw new EmptyInvoice();
+    }
+    $invoice = new self($clientId, Status::Draft);
+    foreach ($lines as $line) {
+        $invoice-&gt;addLine($line);
+    }
+    return $invoice;
+}</code></pre>
+<h3>Forces et limites</h3>
+<table><thead><tr><th></th><th>MVC</th></tr></thead><tbody><tr><td>Forces</td><td>Simple à expliquer. Tous les frameworks le proposent. Convient très bien à un petit produit.</td></tr><tr><td>Limites</td><td>Il ne dit rien de l'organisation du métier quand il grossit. Le « modèle » devient un sac de tout.</td></tr><tr><td>Piège typique</td><td><strong>Contrôleur gras</strong> : les règles glissent dans le contrôleur parce que c'est là que l'agent écrit le plus vite.</td></tr><tr><td>Piège inverse</td><td><strong>Modèle anémique</strong> : l'entité n'a que des accesseurs et toute la logique est ailleurs.</td></tr><tr><td>Quand il suffit</td><td>Une application de gestion simple, un prototype, une équipe d'une ou deux personnes.</td></tr></tbody></table>
+<p>Pour repérer le contrôleur gras, comptez : plus de dix lignes, un <code>if</code> métier, un calcul d'argent ? C'est la leçon 2.2 du module 2 (logique au mauvais endroit).</p>
+<p><strong>À retenir</strong></p>
+<ul><li>MVC répond à : qui reçoit, qui décide, qui affiche.</li><li>Le contrôleur traduit. Le modèle décide. Si le contrôleur décide, il y a dérive.</li><li>MVC ne s'occupe pas de l'organisation d'un métier complexe : il faut alors une structure en plus.</li></ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Croire que MVC dispense de réfléchir à où mettre les règles.</li><li>Laisser grossir une seule classe <code>InvoiceController</code> qui gère tout le module.</li><li>Confondre la vue (ce qu'on affiche) avec le format de réponse de l'API : le JSON n'est pas une vue métier.</li></ul>
+<h2>Leçon 3.2 · L'architecture en couches</h2>
+<p>MVC range la requête. L'architecture en couches range le <em>métier</em>. On empile des niveaux, chacun avec une tâche, et une règle simple : une couche n'appelle que celle qui est juste en dessous.</p>
+<p>Sur le même cas, créer une facture brouillon, voici comment Facturo se range.</p>
+<figure><img src="../img/m03-02.png" alt="architecture en couches · 4 niveaux"><figcaption>architecture en couches · 4 niveaux</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>Lisez de haut en bas : la requête descend, la réponse remonte par le même chemin.</li><li>Chaque boîte donne son rôle et, à droite, la classe de Facturo qui l'incarne.</li><li>La boîte colorée est le domaine : l'endroit où vivent les règles (numérotation, TVA, immutabilité).</li><li>La dernière flèche est orange : elle montre le point faible de ce modèle. Le domaine finit par connaître la technique qui est en dessous.</li></ol>
+<h3>Le code, couche par couche</h3>
+<p>La couche de présentation ne fait que traduire.</p>
+<pre><code>public function create(CreateInvoiceRequest $req, CreateInvoiceHandler $handler): JsonResponse
+{
+    $invoice = $handler(new CreateInvoice($req-&gt;clientId, $req-&gt;lines));
+
+    return $this-&gt;json($invoice, 201);
+}</code></pre>
+<p>La couche application orchestre le cas d'usage, sans règle de calcul.</p>
+<pre><code>final class CreateInvoiceHandler
+{
+    public function __construct(private DoctrineInvoiceRepository $invoices) {}
+
+    public function __invoke(CreateInvoice $cmd): Invoice
+    {
+        $invoice = Invoice::draft($cmd-&gt;clientId, $cmd-&gt;lines);
+        $this-&gt;invoices-&gt;save($invoice);
+
+        return $invoice;
+    }
+}</code></pre>
+<p>Le domaine (<code>Invoice::draft</code>) est identique à celui de MVC. Regardez le type du constructeur : <code>DoctrineInvoiceRepository</code> est une classe concrète. Pour tester ce service, il faut une vraie base. C'est le point faible du schéma.</p>
+<h3>Ce qui va où, ce qui ne doit jamais s'y trouver</h3>
+<table><thead><tr><th>Couche</th><th>Elle contient</th><th>Elle ne doit pas contenir</th></tr></thead><tbody><tr><td>Présentation</td><td>Lecture de la requête, format de la réponse, codes HTTP</td><td>Une règle métier, une requête SQL</td></tr><tr><td>Application</td><td>L'enchaînement d'un cas d'usage, les transactions</td><td>Un calcul de TVA, du HTTP</td></tr><tr><td>Domaine</td><td>Les règles et les objets métier</td><td>Du HTTP, du SQL, un appel d'e-mail</td></tr><tr><td>Infrastructure</td><td>Base de données, e-mails, fichiers</td><td>Une décision métier</td></tr></tbody></table>
+<h3>Repérer les violations en relecture</h3>
+<ul><li>Un <code>use Symfony\Component\HttpFoundation\Request</code> dans le domaine : le métier connaît HTTP.</li><li>Un <code>use Doctrine\...</code> dans le domaine : le métier connaît la base.</li><li>Un contrôleur qui appelle directement le dépôt, en sautant la couche application.</li><li>Un appel qui remonte : l'infrastructure qui appelle un contrôleur.</li></ul>
+<p>Une commande suffit pour vérifier la première violation :</p>
+<pre><code>grep -rn "use Doctrine" src/Facturation/Domain/</code></pre>
+<p>Si elle renvoie quoi que ce soit, le domaine dépend de la base.</p>
+<h3>Forces et limites</h3>
+<ul><li><strong>Forces.</strong> Chaque niveau se comprend seul. Un agent comprend facilement la consigne « ne mets rien de métier dans le contrôleur ».</li><li><strong>Limites.</strong> Pour une action simple (lire un client), on traverse quatre couches pour rien. Et le domaine reste lié à l'infrastructure, comme le montre la flèche orange.</li></ul>
+<p><strong>À retenir</strong></p>
+<ul><li>Les couches rangent le métier : présentation, application, domaine, infrastructure.</li><li>La règle : une couche n'appelle que celle du dessous, jamais vers le haut.</li><li>Le domaine ne doit importer ni HTTP, ni la base. Une recherche dans les <code>use</code> suffit à le vérifier.</li></ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Appeler le dépôt directement depuis le contrôleur parce que « c'est plus court ».</li><li>Mettre les règles dans la couche application : elle devient un second contrôleur.</li><li>Créer quatre classes pour un simple <code>GET</code> qui lit un champ.</li></ul>
+<h2>Leçon 3.3 · L'architecture hexagonale, puis les trois côte à côte</h2>
+<p>Le point faible des couches est le sens de la dépendance : le domaine appelle la base. L'architecture hexagonale, aussi appelée <em>ports et adaptateurs</em>, inverse ce sens. C'est le « D » de SOLID du module 2.</p>
+<p>Le cœur métier écrit lui-même les interfaces dont il a besoin : les <strong>ports</strong>. Tout ce qui est technique (HTTP, base, e-mail) se branche de l'extérieur par un <strong>adaptateur</strong> qui implémente un port. Le cœur ne connaît jamais un adaptateur.</p>
+<figure><img src="../img/m03-03.png" alt="architecture hexagonale · cœur, ports, adaptateurs"><figcaption>architecture hexagonale · cœur, ports, adaptateurs</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>Au centre, le cœur : les règles de Facturo et le cas d'usage. Il ne connaît ni HTTP, ni PostgreSQL.</li><li>Les ronds sur le bord sont les ports. Un port est une interface écrite côté cœur.</li><li>À gauche, ceux qui <em>pilotent</em> l'application : le contrôleur HTTP, et aussi un test automatique.</li><li>À droite, ceux que le cœur <em>utilise</em> : la base, l'e-mail. Le même port accepte un adaptateur Doctrine en production et un adaptateur en mémoire en test.</li></ol>
+<h3>Le code</h3>
+<p>Le port est une interface écrite dans le domaine.</p>
+<pre><code>interface InvoiceRepository
+{
+    public function save(Invoice $invoice): void;
+    public function get(int $id): Invoice;
+}</code></pre>
+<p>Le cas d'usage ne connaît que le port. Comparez avec la leçon 3.2 : le type du constructeur est devenu l'interface.</p>
+<pre><code>final class CreateInvoiceHandler
+{
+    public function __construct(private InvoiceRepository $invoices) {}
+}</code></pre>
+<p>L'adaptateur de production et celui de test implémentent le même port.</p>
+<pre><code>final class DoctrineInvoiceRepository implements InvoiceRepository { /* SQL */ }
+
+final class InMemoryInvoiceRepository implements InvoiceRepository
+{
+    private array $items = [];
+
+    public function save(Invoice $invoice): void { $this-&gt;items[$invoice-&gt;id()] = $invoice; }
+    public function get(int $id): Invoice { return $this-&gt;items[$id]; }
+}</code></pre>
+<p>Le test ne nécessite plus de base de données.</p>
+<pre><code>$handler = new CreateInvoiceHandler(new InMemoryInvoiceRepository());
+$invoice = $handler(new CreateInvoice(clientId: 12, lines: [$line]));
+
+self::assertSame(Status::Draft, $invoice-&gt;status());</code></pre>
+<h3>Clean Architecture et architecture en oignon : la même famille</h3>
+<p>Vous rencontrerez aussi les noms <em>Clean Architecture</em> et <em>architecture en oignon</em> (<em>onion</em>). Ce sont des variantes de la même idée que l'hexagonale : on dessine le logiciel en cercles concentriques, avec le métier au centre, et <strong>les dépendances ne pointent que vers l'intérieur</strong>. Une classe d'un cercle intérieur ne connaît jamais le nom d'une classe d'un cercle extérieur.</p>
+<table><thead><tr><th>Cercle (du centre vers l'extérieur)</th><th>Contenu</th><th>Exemple Facturo</th></tr></thead><tbody><tr><td>Entités du domaine</td><td>Les règles qui durent aussi longtemps que le métier</td><td><code>Invoice</code>, le calcul de TVA</td></tr><tr><td>Cas d'usage</td><td>Ce que l'application fait pour un acteur</td><td><code>CreateInvoiceHandler</code></td></tr><tr><td>Adaptateurs d'interface</td><td>Ils traduisent entre le monde extérieur et le cas d'usage</td><td>Le contrôleur HTTP, <code>DoctrineInvoiceRepository</code></td></tr><tr><td>Frameworks et outils</td><td>Les détails remplaçables</td><td>Symfony, PostgreSQL, SMTP</td></tr></tbody></table>
+<p>Les différences portent sur le vocabulaire et le découpage (la Clean Architecture nomme explicitement les entités et les cas d'usage), pas sur le principe. Retenez la <strong>règle de dépendance</strong> : le métier ne dépend de rien de technique. C'est le « D » de SOLID et le rôle des ports de cette leçon. Pour un agent, c'est une consigne simple à écrire dans le fichier d'instructions, et facile à vérifier dans un diff : cherchez un <code>use</code> ou un <code>import</code> qui va du domaine vers l'infrastructure.</p>
+<h3>Les trois côte à côte</h3>
+<p>Voici le même cas, créer une facture brouillon, dans les trois architectures.</p>
+<figure><img src="../img/m03-04.png" alt="même cas dans trois architectures · 3 colonnes"><figcaption>même cas dans trois architectures · 3 colonnes</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>Comparez la hauteur des colonnes : MVC a trois boîtes, les couches quatre, l'hexagonale cinq. Plus on sépare, plus il y a de classes.</li><li>Dans la colonne de droite, la boîte colorée est le cœur. Il ne touche rien de technique : les deux ports l'entourent.</li><li>Les deux lignes du bas résument ce que chaque choix rapporte et coûte.</li></ol>
+<p><strong>À retenir</strong></p>
+<ul><li>Hexagonale = le cœur définit des ports, les adaptateurs s'y branchent. Le cœur ne dépend de rien de technique.</li><li>Le gain concret : on teste le métier sans base, sans réseau, en quelques millisecondes.</li><li>Clean Architecture et architecture en oignon sont de la même famille : les dépendances pointent vers le métier, jamais l'inverse.</li><li>Chaque séparation ajoute des classes. Elle doit rapporter plus que ce qu'elle coûte.</li></ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Créer un port pour chaque classe « au cas où » : c'est de l'abstraction inutile (module 2).</li><li>Écrire l'interface côté infrastructure : le port doit appartenir au cœur.</li><li>Appeler « hexagonale » un projet qui a seulement renommé ses dossiers.</li></ul>
+<h2>Leçon 3.4 · DDD : découper selon le métier</h2>
+<p>MVC, couches et hexagonale répondent à : comment ranger le <em>code</em> ? Le DDD (<em>Domain-Driven Design</em>, conception pilotée par le domaine) répond à une autre question : comment ranger le <em>métier</em> ? Il part du vocabulaire des experts, pas de la technique.</p>
+<p>Le DDD est un vaste sujet. Pour un orchestrateur, cinq idées suffisent à lire un projet et à détecter une dérive.</p>
+<figure><img src="../img/m03-05.png" alt="contextes bornés de Facturo · 5 contextes"><figcaption>contextes bornés de Facturo · 5 contextes</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>Chaque grande boîte est un <em>contexte borné</em> : une zone avec son vocabulaire et ses règles. Facturo en compte cinq, ce sont ses modules.</li><li>Le contexte Facturation, coloré, est le cœur : c'est là que se trouve la valeur du produit.</li><li>Les flèches portent des <em>événements</em> (« FactureEmise ») ou une information (« client »). Les contextes se parlent par là, pas en lisant les tables des autres.</li><li>La note en bas est l'idée centrale : un même mot peut changer de sens d'un contexte à l'autre.</li></ol>
+<h3>Les cinq idées, avec Facturo</h3>
+<table><thead><tr><th>Idée</th><th>En clair</th><th>Dans Facturo</th><th>Signe de dérive</th></tr></thead><tbody><tr><td>Langage commun</td><td>Les mêmes mots dans le code, les tickets et la bouche du client</td><td>« brouillon », « émise », « avoir »</td><td>Le code parle de <code>status = 2</code> et <code>credit</code></td></tr><tr><td>Contexte borné</td><td>Une zone où chaque mot a un sens précis</td><td>Clients, Facturation, Paiement, Export, Notifications</td><td>Le module Export lit directement la table <code>payment</code></td></tr><tr><td>Entité</td><td>Un objet défini par son identité</td><td><code>Invoice</code>, reconnue par son numéro</td><td>Deux factures identiques mélangées car mal identifiées</td></tr><tr><td>Objet-valeur</td><td>Un objet défini par sa valeur, non modifiable</td><td><code>Money</code>, <code>VatRate</code></td><td>Des montants passés en <code>float</code> ou en tableau brut</td></tr><tr><td>Agrégat</td><td>Un groupe d'objets modifié par une seule porte</td><td><code>Invoice</code> et ses lignes</td><td>Du code qui modifie une ligne sans passer par la facture</td></tr></tbody></table>
+<h3>Le mot « client », deux sens</h3>
+<p>Dans le contexte Clients, un client est une personne ou une société qu'on contacte : nom, e-mail, SIRET. Dans Facturation, le « client » d'une facture est une adresse et un SIRET <em>figés à la date d'émission</em>. Si Marie Giraud change d'adresse demain, ses anciennes factures ne bougent pas.</p>
+<p>Un agent qui réutilise la même classe <code>Client</code> partout casse cette règle sans le savoir.</p>
+<h3>Trois extraits</h3>
+<p>Un objet-valeur : il ne change pas, et il se valide à la création.</p>
+<pre><code>final readonly class VatRate
+{
+    private function __construct(public float $percent) {}
+
+    public static function standard(): self { return new self(20.0); }
+
+    public static function from(float $percent): self
+    {
+        return in_array($percent, [20.0, 10.0, 5.5], true)
+            ? new self($percent)
+            : throw new InvalidVatRate($percent);
+    }
+}</code></pre>
+<p>Un agrégat : on ne modifie les lignes que par la facture, qui garde la règle d'immutabilité.</p>
+<pre><code>public function addLine(Line $line): void
+{
+    if ($this-&gt;status !== Status::Draft) {
+        throw new InvoiceIsImmutable($this-&gt;number);
+    }
+    $this-&gt;lines[] = $line;
+}</code></pre>
+<p>Un événement : un fait passé, nommé au passé.</p>
+<pre><code>final readonly class InvoiceIssued
+{
+    public function __construct(public int $invoiceId, public string $number) {}
+}</code></pre>
+<h3>Quand le DDD aide, quand il alourdit</h3>
+<ul><li><strong>Il aide</strong> quand les règles sont nombreuses (numérotation, TVA, immutabilité), que le produit vit longtemps et que vous parlez avec des experts du métier.</li><li><strong>Il alourdit</strong> pour un simple formulaire qui lit et écrit une table. Dans ce cas, MVC suffit.</li><li>Vous n'avez pas besoin de tout adopter. Le vocabulaire commun et les contextes sont les deux idées les plus rentables.</li></ul>
+<p><strong>À retenir</strong></p>
+<ul><li>Le DDD range le métier : langage commun, contextes bornés, entités, objets-valeurs, agrégats.</li><li>Un mot peut avoir deux sens dans deux contextes. C'est normal, il ne faut pas les fusionner.</li><li>Les contextes communiquent par des événements ou des interfaces, jamais en lisant les tables des autres.</li></ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Appliquer tout le DDD à un petit CRUD.</li><li>Fusionner deux contextes parce qu'ils partagent un mot.</li><li>Nommer les classes d'après la technique (<code>DataManager</code>) plutôt que d'après le métier (<code>InvoiceNumbering</code>).</li></ul>
+<h2>Leçon 3.5 · Monolithe modulaire ou microservices : choisir avec des critères</h2>
+<p>Un agent propose volontiers des microservices, car c'est ce qu'il a le plus lu. Votre rôle est de demander : « pour quel problème ? ». Trois mots d'abord.</p>
+<ul><li><strong>Monolithe</strong> : une seule application, déployée d'un bloc.</li><li><strong>Monolithe modulaire</strong> : une seule application et un seul déploiement, mais découpée en modules aux frontières nettes. C'est le choix de Facturo.</li><li><strong>Microservices</strong> : plusieurs petits services, déployés séparément, qui se parlent par le réseau.</li></ul>
+<figure><img src="../img/m03-06.png" alt="choisir l&#x27;architecture · 3 questions, 4 issues"><figcaption>choisir l'architecture · 3 questions, 4 issues</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>Partez du losange du haut. Chaque question coupe la route : « oui » ou « non » mène soit à une réponse, soit à la question suivante.</li><li>On descend seulement si la question l'exige. Le titre le dit : on sépare quand il le faut, pas avant.</li><li>La boîte colorée correspond à Facturo : une équipe, un VPS, un seul déploiement, des contextes bien délimités.</li><li>« Extraire un service » est tout en bas : c'est la dernière étape, pas le point de départ.</li></ol>
+<h3>Ce qui change quand on coupe en services</h3>
+<table><thead><tr><th>Critère</th><th>Monolithe modulaire</th><th>Microservices</th></tr></thead><tbody><tr><td>Déploiement</td><td>Un seul</td><td>Un par service, à orchestrer</td></tr><tr><td>Appel entre deux parties</td><td>Un appel de fonction</td><td>Un appel réseau, qui peut échouer ou être lent</td></tr><tr><td>Données</td><td>Une base, des transactions</td><td>Une base par service, cohérence à gérer</td></tr><tr><td>Panne</td><td>Elle touche toute l'application</td><td>Elle peut rester locale, si c'est bien conçu</td></tr><tr><td>Équipes</td><td>Une équipe suffit</td><td>Utile quand plusieurs équipes avancent séparément</td></tr><tr><td>Exploitation</td><td>Un seul à superviser</td><td>Supervision, journaux et déploiement pour chaque service</td></tr><tr><td>Test</td><td>Simple, en un seul processus</td><td>Il faut aussi tester les échanges entre services</td></tr></tbody></table>
+<p>Les microservices apportent de l'indépendance. Ils la font payer en complexité d'exploitation. Pour une petite équipe, le prix dépasse souvent le bénéfice.</p>
+<h3>Les cinq questions avant de couper</h3>
+<ol><li>Des <strong>équipes distinctes</strong> travaillent-elles sur ces parties ?</li><li>Les parties ont-elles des <strong>rythmes de livraison</strong> différents ?</li><li>Une partie a-t-elle une <strong>charge ou des contraintes</strong> très différentes, <em>mesurées</em> et non supposées ?</li><li>Les <strong>outils d'exploitation</strong> (supervision, déploiement automatisé) existent-ils déjà ?</li><li>Les <strong>frontières</strong> sont-elles déjà nettes : événements, interfaces, aucune lecture de la table d'un autre module ?</li></ol>
+<p>Si plusieurs réponses sont « non », restez en monolithe modulaire. Vous pourrez couper plus tard : une frontière nette est l'étape qui rend la coupe possible.</p>
+<h3>Tenir les frontières dans Facturo</h3>
+<pre><code>src/
+  Clients/        Domain/  Application/  Infrastructure/  Api/
+  Facturation/    Domain/  Application/  Infrastructure/  Api/
+  Paiement/       Domain/  Application/  Infrastructure/  Api/
+  Export/         Domain/  Application/  Infrastructure/</code></pre>
+<p>Chaque module expose un dossier <code>Api</code> : c'est la seule porte d'entrée pour les autres. L'export ne lit pas la table <code>invoice</code>, il passe par l'interface publique de Facturation.</p>
+<pre><code>namespace App\Facturation\Api;
+
+interface InvoiceReader
+{
+    /** @return list&lt;IssuedInvoiceView&gt; */
+    public function findIssuedBetween(DateTimeImmutable $from, DateTimeImmutable $to): array;
+}</code></pre>
+<h3>Cas à discuter : l'agent propose un microservice d'export</h3>
+<p>Marie Giraud, dont le cabinet compte douze personnes, lance l'export comptable de tout un mois. L'export est lent et bloque l'API pendant quelques instants. L'agent propose de sortir le module Export dans un service séparé.</p>
+<p>Repassez par les cinq questions. Équipes distinctes : non, une seule. Rythmes différents : non. Charge différente et mesurée : pas encore. Outils d'exploitation prêts : non. Frontières nettes : oui, grâce à l'interface <code>InvoiceReader</code>.</p>
+<p>Verdict : on ne coupe pas. On déplace d'abord l'export dans une file de tâches (Redis, déjà dans la pile), exécutée par un processus séparé mais dans le même code. Le problème de blocage disparaît, et la porte reste ouverte pour une extraction ultérieure si une mesure le justifie.</p>
+<p><strong>À retenir</strong></p>
+<ul><li>Par défaut, un monolithe modulaire. On sépare quand une question l'exige, avec des mesures.</li><li>Les microservices achètent de l'indépendance au prix de l'exploitation.</li><li>Une interface publique par module, et personne ne lit les tables des autres.</li><li>Un problème de lenteur se résout souvent plus simplement : une file de tâches, un index, un cache.</li></ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Choisir les microservices « pour évoluer » sans avoir mesuré la charge.</li><li>Découper en services avant d'avoir des frontières nettes : on obtient un monolithe distribué, plus lent et plus fragile.</li><li>Laisser un module lire directement la base d'un autre « pour aller plus vite ».</li></ul>
+<h2>Leçon 3.6 · Huit design patterns à savoir reconnaître</h2>
+<p>Un <em>design pattern</em> (patron de conception) est une solution connue à un problème qui revient souvent. Ce n'est pas une bibliothèque : c'est une forme de code, avec un nom. Le nom compte, car il permet de dire en deux mots ce qu'un agent a fait.</p>
+<p>Vous n'avez pas à les écrire. Vous devez les reconnaître, comprendre leur raison d'être et sentir quand ils sont de trop.</p>
+<figure><img src="../img/m03-07.png" alt="huit design patterns · 3 familles"><figcaption>huit design patterns · 3 familles</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>Trois colonnes, trois questions : comment <em>créer</em> un objet, comment <em>assembler</em> des morceaux, comment <em>faire varier</em> un comportement.</li><li>Chaque boîte donne le problème résolu, puis la classe de Facturo qui en est l'exemple.</li><li>La colonne du milieu est la plus fournie : c'est celle qui sert à isoler la technique du métier, et la première à surveiller dans un diff.</li></ol>
+<h3>Créer</h3>
+<p><strong>Factory.</strong> Une classe ou une méthode crée l'objet et applique les règles de création. Ici, la facture fige les données du client.</p>
+<pre><code>final class InvoiceFactory
+{
+    public static function draft(Client $client, array $lines): Invoice
+    {
+        return new Invoice($client-&gt;snapshot(), $lines, Status::Draft);
+    }
+}</code></pre>
+<p><strong>Builder.</strong> On construit pas à pas un objet qui a beaucoup d'options.</p>
+<pre><code>$invoice = InvoiceBuilder::for($client)
+    -&gt;withLine('Conseil', quantity: 2, unitCents: 45000)
+    -&gt;withVat(VatRate::from(20.0))
+    -&gt;build();</code></pre>
+<h3>Assembler et brancher</h3>
+<p><strong>Adapter.</strong> On traduit l'interface d'un service tiers vers celle dont le cœur a besoin.</p>
+<pre><code>final class PaymentAdapter implements PaymentGateway
+{
+    public function __construct(private ProviderClient $provider) {}
+
+    public function charge(Money $amount, string $ref): PaymentResult
+    {
+        $r = $this-&gt;provider-&gt;createCharge($amount-&gt;cents(), $ref);
+        return new PaymentResult($r-&gt;id, $r-&gt;ok);
+    }
+}</code></pre>
+<p><strong>Decorator.</strong> On enveloppe un objet pour lui ajouter un comportement, sans le modifier.</p>
+<pre><code>final class LoggingMailer implements Mailer
+{
+    public function __construct(private Mailer $inner, private LoggerInterface $log) {}
+
+    public function send(string $to, string $subject): void
+    {
+        $this-&gt;inner-&gt;send($to, $subject);
+        $this-&gt;log-&gt;info('mail sent', ['to' =&gt; $to]);
+    }
+}</code></pre>
+<p><strong>Facade.</strong> Une seule porte simple devant plusieurs classes.</p>
+<pre><code>final class ExportFacade
+{
+    public function monthlyFec(int $year, int $month): string
+    {
+        $invoices = $this-&gt;reader-&gt;findIssuedBetween(...$this-&gt;monthBounds($year, $month));
+        return $this-&gt;fecWriter-&gt;write($invoices);
+    }
+}</code></pre>
+<p><strong>Repository.</strong> Le cas d'usage demande des objets métier, sans savoir s'il y a du SQL derrière. Vous l'avez déjà vu dans la leçon 3.3.</p>
+<pre><code>$invoice = $this-&gt;invoices-&gt;get($id);</code></pre>
+<h3>Faire varier le comportement</h3>
+<p><strong>Strategy.</strong> Plusieurs façons de faire la même chose, interchangeables. Fini le <code>if ($type === 'csv')</code>.</p>
+<pre><code>interface ExportFormat { public function render(array $invoices): string; }
+
+final class CsvFormat implements ExportFormat { /* ... */ }
+final class FecFormat implements ExportFormat { /* ... */ }
+
+$content = $format-&gt;render($invoices);</code></pre>
+<p><strong>Observer.</strong> Une chose se produit, d'autres réagissent, sans que l'émetteur les connaisse.</p>
+<pre><code>#[AsEventListener]
+final class SendInvoiceEmail
+{
+    public function __invoke(InvoiceIssued $event): void { /* envoie l'e-mail */ }
+}</code></pre>
+<h3>Le bon réflexe : quand ils sont de trop</h3>
+<table><thead><tr><th>Pattern</th><th>Utile quand</th><th>Excessif quand</th></tr></thead><tbody><tr><td>Factory</td><td>La création applique des règles</td><td>Elle ne fait que <code>new</code></td></tr><tr><td>Builder</td><td>Il y a beaucoup d'options</td><td>L'objet a deux champs</td></tr><tr><td>Adapter</td><td>Un service tiers impose son interface</td><td>Vous écrivez les deux côtés vous-même</td></tr><tr><td>Decorator</td><td>On ajoute un comportement transversal (journal, cache)</td><td>Une simple méthode suffirait</td></tr><tr><td>Facade</td><td>Plusieurs classes forment un seul geste</td><td>Elle ne fait que rappeler une autre classe</td></tr><tr><td>Repository</td><td>Le métier ne doit pas connaître la base</td><td>Un script de dix lignes</td></tr><tr><td>Strategy</td><td>Plusieurs variantes réelles existent</td><td>Une seule variante, « au cas où »</td></tr><tr><td>Observer</td><td>Plusieurs réactions indépendantes à un fait</td><td>Une seule réaction, qui doit survenir dans un ordre précis</td></tr></tbody></table>
+<p><strong>À retenir</strong></p>
+<ul><li>Un pattern est un nom donné à une forme de code. Savoir le nommer permet de critiquer et d'échanger vite.</li><li>Chaque pattern résout un problème réel. Sans ce problème, c'est de l'abstraction inutile.</li><li>Demandez à l'agent : « Quel problème ce pattern résout-il ici ? ». S'il ne sait pas répondre, retirez-le.</li></ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Utiliser un pattern parce qu'il est dans la liste, pas parce que le problème existe.</li><li>Appeler « Factory » ou « Manager » une classe qui fait autre chose : le nom doit dire la forme exacte.</li><li>Empiler trois patterns pour une fonctionnalité de dix lignes.</li></ul>
+<h2>Leçon 3.7 · La sur-ingénierie : reconnaître le trop et le faire retirer</h2>
+<p>La <em>sur-ingénierie</em> (<em>over-engineering</em>) consiste à construire plus de structure que le problème n'en demande. Interfaces, patterns et couches sont utiles quand ils résolvent un problème réel. Sans problème, ils ne font que ralentir la lecture, les tests et les changements.</p>
+<p>C'est un risque constant avec un agent : il produit du code vite, et ajouter une classe ne lui coûte rien. C'est à vous de réclamer la taille juste.</p>
+<h3>Un exemple de Facturo</h3>
+<p>Demande : « Ajouter une référence de commande facultative sur la facture, limitée à 40 caractères, non modifiable après l'émission. » Voici ce que l'agent livre.</p>
+<pre><code>src/Facturation/
+  Domain/ReferenceFieldInterface.php
+  Domain/AbstractReferenceField.php
+  Domain/ReferenceFieldFactory.php
+  Domain/ReferenceFieldValidatorStrategy.php
+  Domain/Event/ReferenceFieldChanged.php
+  Application/ReferenceFieldMapper.php
+  Application/ReferenceFieldChangedListener.php</code></pre>
+<figure><img src="../img/m03-08.png" alt="sur-ingénierie · avant / après"><figcaption>sur-ingénierie · avant / après</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>À gauche, la livraison de l'agent : sept classes pour une règle simple. Chaque nom ressemble à un pattern de la leçon 3.6.</li><li>À droite, la solution simplifiée : une propriété sur <code>Invoice</code> et une migration. Elle fait la même chose.</li><li>La note à droite rappelle la règle : trois lignes. Si la règle est aussi courte que le code qui la porte, la structure est probablement de trop.</li><li>La phrase du bas est la leçon : chaque pièce est correcte, c'est l'ensemble qui est disproportionné.</li></ol>
+<h3>La version simplifiée</h3>
+<pre><code>final class Invoice
+{
+    private ?string $orderReference = null;
+
+    public function setOrderReference(?string $ref): void
+    {
+        if ($this-&gt;status !== Status::Draft) {
+            throw new InvoiceIsImmutable($this-&gt;number);
+        }
+        if ($ref !== null &amp;&amp; mb_strlen($ref) &gt; 40) {
+            throw new OrderReferenceTooLong();
+        }
+        $this-&gt;orderReference = $ref;
+    }
+}</code></pre>
+<pre><code>ALTER TABLE invoice ADD COLUMN order_reference VARCHAR(40) NULL;</code></pre>
+<p>La règle de référence se lit en dix secondes, se teste en trois cas, et ne nécessite aucun nouveau concept.</p>
+<h3>Cinq questions pour débusquer le trop</h3>
+<table><thead><tr><th>Question</th><th>Signal d'alerte</th><th>Action</th></tr></thead><tbody><tr><td>Combien de classes pour une règle de quelques lignes ?</td><td>Plus de deux nouvelles classes</td><td>Demander de tout ramener dans la classe qui porte déjà la règle</td></tr><tr><td>Une interface a-t-elle une seule implémentation ?</td><td>Oui, et aucune deuxième n'est prévue</td><td>Supprimer l'interface</td></tr><tr><td>La demande citait-elle ce pattern ?</td><td>Non, l'agent l'a ajouté seul</td><td>Demander « quel problème résout-il ? »</td></tr><tr><td>Peut-on retirer une couche sans changer le comportement ?</td><td>Oui</td><td>La retirer</td></tr><tr><td>Un nouveau venu comprendrait-il en quelques minutes ?</td><td>Non</td><td>Simplifier avant de fusionner</td></tr></tbody></table>
+<h3>Quand ajouter de la structure, alors ?</h3>
+<p>On ne choisit pas entre « simple » et « propre ». On commence simple, et on ajoute de la structure quand un signal l'exige.</p>
+<ul><li><strong>Une règle est recopiée trois fois</strong> : on l'extrait en un seul endroit.</li><li><strong>On ne peut pas tester sans la base</strong> : on introduit un port (leçon 3.3).</li><li><strong>Deux variantes réelles existent</strong> : on introduit une stratégie.</li><li><strong>Une partie change pour d'autres raisons que le reste</strong> : on la sort dans son module.</li></ul>
+<p>Ces signaux sont des repères d'usage, pas des lois. L'important est que la structure réponde à un fait observé, jamais à une hypothèse.</p>
+<h3>Comment demander à l'agent de simplifier</h3>
+<p>Une bonne consigne nomme ce qu'on garde et ce qu'on retire.</p>
+<pre><code>Simplifie cette livraison.
+Garde : la règle (facultative, 40 caractères, non modifiable après émission) et ses tests.
+Retire : toute interface, fabrique, stratégie et événement.
+Place la règle dans Invoice et ajoute une migration SQL. Rien d'autre.</code></pre>
+<p><strong>À retenir</strong></p>
+<ul><li>La structure doit répondre à un problème observé, pas à un problème imaginé.</li><li>Compter les nouvelles classes est le test le plus rapide. Plus de deux pour une règle courte, c'est suspect.</li><li>On commence simple. On ajoute de la structure quand un signal précis l'exige.</li><li>Une consigne de simplification dit ce qu'on garde et ce qu'on retire.</li></ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Accepter un pattern parce que son nom paraît sérieux.</li><li>Tomber dans l'excès inverse : tout dans le contrôleur. Le trop peu est aussi une dérive.</li><li>Demander « simplifie » sans préciser les règles à garder : l'agent risque de retirer la règle avec la structure.</li></ul>
+<h2>Atelier guidé : choisir, dessiner et défendre l'architecture d'un nouveau module</h2>
+<p><strong>Objectif :</strong> ajouter un module « Devis » à Facturo, en choisissant l'architecture vous-même, puis vérifier que l'agent la respecte. Comptez trois heures.</p>
+<p><strong>Matériel :</strong> papier, un dépôt Facturo (ou un petit projet Symfony), un agent de code.</p>
+<ol><li><strong>Décrivez le module en cinq lignes.</strong> Un devis est créé pour un client, contient des lignes, peut être accepté ou refusé, et devient une facture une fois accepté.</li><li><strong>Choisissez l'architecture</strong> avec les trois questions de la leçon 3.5. Écrivez la réponse et la raison en deux phrases.</li><li><strong>Dessinez sur papier</strong> le parcours « créer un devis » dans l'architecture choisie, avec le même style que les schémas du module : boîtes, flèches, ce qui dépend de quoi.</li><li><strong>Rédigez les règles d'architecture</strong> dans un fichier court, à donner à l'agent. Modèle ci-dessous.</li><li><strong>Demandez à l'agent</strong> de créer le module, sur une branche dédiée. Ne le guidez pas davantage.</li><li><strong>Relisez</strong> avec la grille ci-dessous, puis avec les trois questions de relecture du module 2.</li><li><strong>Notez trois décisions</strong> : ce que vous gardez, ce que vous faites retirer, ce que vous décidez de ne pas trancher tout de suite.</li></ol>
+<p>Modèle de règles d'architecture :</p>
+<pre><code># Règles d'architecture
+- Un module = un dossier src/&lt;Module&gt;/ avec Domain, Application, Infrastructure, Api.
+- Domain n'importe ni Symfony, ni Doctrine.
+- Les modules ne se parlent que par Api/ ou par des événements.
+- Une interface n'est créée que pour un port, ou avec deux implémentations réelles.
+- Tout pattern est nommé dans la description de la PR, avec le problème qu'il résout.</code></pre>
+<p>Grille de relecture :</p>
+<table><thead><tr><th>Contrôle</th><th>Résultat</th><th>Preuve</th></tr></thead><tbody><tr><td>Le dossier Domain contient-il un <code>use Doctrine</code> ou <code>use Symfony</code> ?</td><td></td><td></td></tr><tr><td>Un module lit-il la table d'un autre ?</td><td></td><td></td></tr><tr><td>Combien de classes nouvelles pour une règle courte ?</td><td></td><td></td></tr><tr><td>Une interface n'a-t-elle qu'une implémentation ?</td><td></td><td></td></tr><tr><td>Chaque pattern nommé résout-il un problème réel ?</td><td></td><td></td></tr><tr><td>Le mot « client » a-t-il le bon sens dans le module Devis ?</td><td></td><td></td></tr></tbody></table>
+<p><strong>Résultat attendu :</strong> un schéma papier, un fichier de règles, une revue écrite et trois décisions. Gardez-les : le fichier de règles sera réutilisé pour orienter les agents.</p>
+<h2>Exercices</h2>
+<h3>Exercice 1 · Reconnaître l'architecture</h3>
+<p>Pour chaque extrait, dites quelle architecture il illustre.</p>
+<pre><code>// a
+class InvoiceController { public function create(Request $r) { $i = new Invoice(/*...*/); $this-&gt;em-&gt;persist($i); } }
+
+// b
+class CreateInvoiceHandler { public function __construct(private DoctrineInvoiceRepository $r) {} }
+
+// c : InvoiceRepository est une interface écrite dans Domain
+class CreateInvoiceHandler { public function __construct(private InvoiceRepository $r) {} }</code></pre>
+<details><summary>Corrigé</summary><p>(a) MVC, avec un contrôleur gras : il parle directement à Doctrine. (b) Couches : le cas d'usage dépend d'une classe concrète de l'infrastructure. (c) Hexagonale : le cas d'usage dépend d'un port défini par le cœur.</p></details>
+<h3>Exercice 2 · Repérer les dépendances interdites</h3>
+<p>Ces lignes sont en tête du fichier <code>src/Facturation/Domain/Invoice.php</code>. Lesquelles sont interdites, et pourquoi ?</p>
+<pre><code>namespace App\Facturation\Domain;
+
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use App\Paiement\Infrastructure\PaymentRepository;</code></pre>
+<details><summary>Corrigé</summary><p>Les trois. Doctrine lie le métier à la base. <code>Request</code> lie le métier à HTTP. <code>PaymentRepository</code> est l'infrastructure d'un autre module : la frontière est violée. Le bon passage est l'interface <code>Api</code> du module Paiement, ou un événement.</p></details>
+<h3>Exercice 3 · Répondre à une proposition de l'agent</h3>
+<p>L'agent propose : « Je crée une seule classe <code>Client</code> partagée par Clients, Facturation et Paiement, pour éviter la duplication. » Que répondez-vous ?</p>
+<details><summary>Corrigé</summary><p>Refusez. Le mot « client » n'a pas le même sens dans chaque contexte. Clients garde des contacts à jour. Facturation fige une adresse et un SIRET à la date d'émission. Paiement ne connaît qu'un identifiant et un payeur. Ces trois objets se ressemblent, mais changent pour des raisons différentes (le DRY du module 2 ne s'applique pas). Les contextes s'échangent un identifiant ou un événement.</p></details>
+<h3>Exercice 4 · Choisir</h3>
+<p>Pour chaque situation, choisissez : monolithe simple, monolithe modulaire ou extraction d'un service.</p>
+<ul><li>a. Outil interne pour deux personnes, qui liste des commandes.</li><li>b. Facturo : une équipe de trois, un VPS, cinq contextes.</li><li>c. Une plateforme avec quatre équipes. L'export subit une charge nettement plus forte, mesurée. La supervision et le déploiement automatisé existent, les frontières sont nettes.</li></ul>
+<details><summary>Corrigé</summary><p>(a) Monolithe simple, MVC suffit. (b) Monolithe modulaire : les contextes existent, mais rien ne justifie de déployer séparément. (c) Extraction du module Export en service : les cinq questions de la leçon 3.5 sont toutes « oui ».</p></details>
+<h3>Exercice 5 · Retirer le superflu</h3>
+<p>Pour « afficher le nom du client sur la facture », l'agent ajoute <code>ClientNameProviderInterface</code>, <code>ClientNameProvider</code> et <code>ClientNameProviderFactory</code>. Rédigez la consigne que vous lui envoyez.</p>
+<details><summary>Corrigé</summary><p>« Simplifie. Le nom du client est déjà figé dans la facture : expose-le par <code>Invoice::clientName()</code>. Supprime l'interface, la classe et la fabrique. Garde le test qui vérifie que le nom affiché ne change pas si le client est modifié après l'émission. » La consigne dit quoi retirer, quoi garder, et pourquoi.</p></details>
+<h2>Quiz</h2>
+<table><thead><tr><th>Question</th><th>Réponse</th><th>Pourquoi</th></tr></thead><tbody><tr><td>Dans MVC, qui doit appliquer les règles métier ?</td><td>Le modèle.</td><td>Le contrôleur traduit la requête. S'il décide, c'est une dérive.</td></tr><tr><td>Quelle est la règle des couches, et son point faible ?</td><td>Une couche n'appelle que celle du dessous. Le domaine finit par dépendre de la technique.</td><td>Le domaine appelle l'infrastructure, donc on ne le teste pas sans base.</td></tr><tr><td>Qu'est-ce qu'un port ?</td><td>Une interface écrite par le cœur, que les adaptateurs implémentent.</td><td>Le cœur ne connaît jamais les détails techniques.</td></tr><tr><td>Pourquoi ne pas fusionner les classes <code>Client</code> de Clients et de Facturation ?</td><td>Chaque contexte a son vocabulaire.</td><td>Facturation fige un instantané, Clients garde des données à jour.</td></tr><tr><td>Quand extraire un microservice ?</td><td>Quand équipes, rythmes ou charge mesurée le justifient et que les outils et frontières sont prêts.</td><td>Sinon, on ajoute de l'exploitation sans bénéfice.</td></tr><tr><td>Quel est le test le plus rapide de sur-ingénierie ?</td><td>Compter les classes nouvelles pour une règle courte.</td><td>Plus de deux classes pour trois lignes de règle est suspect.</td></tr></tbody></table>
+<h2>Checklist de fin de module</h2>
+<ul class="check"><li>J'explique MVC, les couches et l'hexagonale sur le cas « créer une facture ».</li><li>Je redessine de mémoire les schémas des leçons 3.1 à 3.3.</li><li>Je repère une dépendance interdite en lisant les <code>use</code> d'un fichier.</li><li>Je découpe un produit en contextes et je défends pourquoi « client » change de sens.</li><li>Je choisis entre monolithe simple, modulaire et services avec les cinq questions.</li><li>Je reconnais les huit patterns dans du code et je sais quand ils sont de trop.</li><li>Je demande une simplification précise : ce qu'on garde, ce qu'on retire.</li><li>J'ai écrit un fichier de règles d'architecture pour un agent.</li><li>J'ai terminé l'atelier du module Devis.</li></ul>
+<h2>Sources</h2>
+<p>Les architectures (MVC, couches, hexagonale), le DDD et les patterns sont des pratiques standard du génie logiciel. Je n'en ai pas vérifié les définitions dans une source en ligne pendant la rédaction. Pour aller plus loin, on les attribue généralement ainsi, de mémoire : l'architecture hexagonale à Alistair Cockburn, le DDD à Eric Evans, le catalogue de patterns au « Gang of Four ». Pour la Clean Architecture, Robert C. Martin (billet intitulé « The Clean Architecture », d'environ 2012) ; pour l'architecture en oignon, Jeffrey Palermo (2008) ; pour « Clean Code », Robert C. Martin (livre de 2008). Une recherche en ligne a confirmé 2005 pour Cockburn, 2008 pour Palermo et 2012 pour le billet de Martin (une source avance 2011) ; la date du livre « Clean Code » reste de mémoire. Le Repository vient plutôt du DDD que de ce catalogue. Les cinq questions avant de couper en services et les signaux d'ajout de structure sont des repères de ce cours, pas des normes. Tous les extraits de code, les noms de classes et le module Devis sont des exemples écrits pour Facturo, application fictive.</p>
+
+<div class="pager"><a class="prev" href="../modules/module-02.html"><small>← Précédent</small>Module 2 : lire le code et reconnaître le mauvais code</a><a class="next" href="../modules/module-04.html"><small>Suivant →</small>Module 4 : tests et qualité</a></div></article></main></div>
+<script>document.querySelectorAll('.side a.nav').forEach(function(a){a.addEventListener('click',function(){document.body.classList.remove('open')})});var on=document.querySelector('.side a.on');if(on)on.scrollIntoView({block:'center'});</script>
+</body></html>

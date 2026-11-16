@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cursus complet : orchestrateur et gestionnaire d&#x27;app · Cursus orchestrateur</title>
+<link rel="stylesheet" href="css/style.css"></head>
+<body><button class="menu-btn" onclick="document.body.classList.toggle('open')">☰ Menu du cursus</button>
+<div class="layout"><nav class="side"><a class="brand" href="index.html">Cursus : orchestrateur et gestionnaire d’app<small>12 modules · 24 semaines</small></a>
+<a class="nav" href="index.html">Accueil</a>
+<a class="nav on" href="demarrer.html">Démarrer</a>
+<h4>Le socle : savoir juger</h4>
+<a class="nav" href="modules/module-01.html">Module 1 : fondamentaux du web et du logiciel</a>
+<a class="nav" href="modules/module-02.html">Module 2 : lire le code et reconnaître le mauvais code</a>
+<a class="nav" href="modules/module-03.html">Module 3 : architectures et design patterns</a>
+<a class="nav" href="modules/module-04.html">Module 4 : tests et qualité</a>
+<a class="nav" href="modules/module-05.html">Module 5 : serveur, mise en ligne, DevOps et CI/CD</a>
+<a class="nav" href="modules/module-06.html">Module 6 : sécurité, observabilité, données et conformité</a>
+<h4>Les agents IA et le pilotage</h4>
+<a class="nav" href="modules/module-07.html">Module 7 : agents IA, définitions et fonctionnement</a>
+<a class="nav" href="modules/module-08.html">Module 8 : orchestrer des agents</a>
+<a class="nav" href="modules/module-09.html">Module 9 : piloter l&#x27;application en production</a>
+<h4>Les modules transversaux</h4>
+<a class="nav" href="modules/module-10.html">Module 10 : gestion de projet</a>
+<a class="nav" href="modules/module-11.html">Module 11 : produit et conception</a>
+<a class="nav" href="modules/module-12.html">Module 12 : gestion du client et communication</a>
+<h4>Référence</h4>
+<a class="nav" href="glossaire.html">Glossaire</a></nav>
+<main><article><div class="toolbar"><button onclick="window.print()">Imprimer / PDF</button><button onclick="var r=document.documentElement;var d=r.dataset.theme==='dark';r.dataset.theme=d?'light':'dark'">Clair / sombre</button></div>
+<h1>Cursus complet : orchestrateur et gestionnaire d'app</h1>
+<h2>Le B.A.-BA : chercher, vérifier, se tenir à jour</h2>
+<p>Avant de lire du code ou de piloter un agent, une compétence passe avant toutes les autres : <strong>trouver soi-même une information fiable, vérifier qu'elle est juste, et la garder à jour</strong>. C'est la première chose à savoir faire, et elle sert dans chacun des douze modules.</p>
+<h3>Pourquoi c'est la première compétence</h3>
+<ul>
+<li><strong>Un agent répond toujours, avec assurance, qu'il ait raison ou non.</strong> Il peut inventer une méthode, une option, une source (leçon 7.1). Le seul remède est de vérifier ailleurs.</li>
+<li><strong>Ce cursus peut se tromper aussi.</strong> Il a été rédigé avec l'aide d'un agent et il se date de novembre 2026. Les outils d'agents changent plus vite que n'importe quel cours.</li>
+<li><strong>Personne ne vous préviendra</strong> quand une réponse devient fausse. Un orchestrateur n'a pas à tout savoir ; il doit savoir où trouver, reconnaître une bonne réponse, et rester curieux. C'est cela, l'autonomie.</li>
+<li><strong>Un agent ne s'améliore pas à votre place.</strong> C'est vous qui transformez ses erreurs en règles.</li>
+</ul>
+<h3>1. Chercher : poser une question qui a une réponse</h3>
+<p>Une bonne question est précise : elle donne l'outil, la version et ce que vous voulez obtenir. « Comment faire un export ? » ne mène nulle part ; « Dans Symfony 7, comment renvoyer un fichier CSV en flux pour ne pas charger tout en mémoire ? » mène à une page précise. Cherchez d'abord à la source, puis élargissez. Un agent IA sert à explorer et à résumer ; il n'est jamais la preuve finale.</p>
+<table><thead><tr><th>Niveau</th><th>Source</th><th>Confiance</th><th>À utiliser pour</th></tr></thead><tbody>
+<tr><td>1</td><td>Documentation officielle de la version concernée, spécification, norme</td><td>Forte, si la version et la date correspondent</td><td>Trancher</td></tr>
+<tr><td>2</td><td>Notes de version, journal des modifications, dépôt du projet (tickets, code)</td><td>Forte pour savoir ce qui a changé</td><td>Vérifier une nouveauté ou un changement</td></tr>
+<tr><td>3</td><td>Articles, tutoriels, conférences d'auteurs identifiés</td><td>Moyenne : ils vieillissent</td><td>Comprendre, pas trancher</td></tr>
+<tr><td>4</td><td>Forums, réponses de la communauté</td><td>Variable</td><td>Trouver des pistes à vérifier</td></tr>
+<tr><td>5</td><td>Réponse d'un agent IA sans source</td><td>Plausible, non prouvée</td><td>Point de départ, jamais conclusion</td></tr>
+</tbody></table>
+<h3>2. Vérifier : trois réflexes</h3>
+<ol>
+<li><strong>Dater.</strong> De quand est cette source, de quelle version parle-t-elle ? Un modèle a une date de coupure : il peut ignorer la version récente d'une bibliothèque (leçon 7.1).</li>
+<li><strong>Recouper.</strong> Deux sources indépendantes, dont une officielle. Sinon, la conclusion reste « non confirmée ».</li>
+<li><strong>Tester.</strong> Ce qui peut s'exécuter s'exécute, dans un dossier d'essai : la commande, le test, l'exemple de code.</li>
+</ol>
+<p>Exemple Facturo : un agent affirme qu'une méthode <code>emettreAvoir</code> existe sur une facture. Trente secondes de recherche dans le code et dans la documentation montrent qu'elle n'existe pas. Sans ce réflexe, vous découvrez l'erreur en production. Posez-vous toujours : « Comment saurais-je que c'est faux ? »</p>
+<p>Notez ce que vous avez trouvé avec une fiche courte. Elle force à séparer ce qui est vérifié de ce qui est supposé.</p>
+<pre><code>Question : …
+Source 1 (officielle) : lien, date, version
+Source 2 : lien, date
+Vérifié (recoupé ou testé) : …
+Supposé : …
+Conclusion et niveau de confiance : faible / moyen / fort</code></pre>
+<h3>3. Se tenir à jour : une veille légère</h3>
+<p>Une veille tenable vaut mieux qu'une veille ambitieuse abandonnée : trente minutes par semaine, tenues pendant des mois, battent cinq heures jamais faites.</p>
+<ol>
+<li><strong>Choisissez trois à cinq sources.</strong> Les notes de version et la documentation officielle des outils que vous utilisez, le blog du fournisseur de votre agent, une ou deux personnes ou communautés reconnues. Pour la sécurité et la réglementation : les sources officielles de référence (module 6).</li>
+<li><strong>Fixez un créneau</strong> dans votre semaine : prenez-le sur l'heure de relecture du rythme conseillé.</li>
+<li><strong>Tenez un carnet de veille</strong> d'une ligne par découverte : date, source, ce que j'ai appris, ce que cela change pour mon travail, action décidée.</li>
+<li><strong>Une fois par mois,</strong> relisez le carnet. Mettez à jour votre fichier d'instructions (leçon 7.4) et vos checklists. Retirez les sources qui ne vous apprennent plus rien.</li>
+</ol>
+<p>Une règle protège de l'effet de mode : <strong>nouveau ne veut pas dire meilleur.</strong> On teste une nouveauté dans un dossier d'essai, avec un critère écrit, avant de l'adopter.</p>
+<h3>4. S'améliorer : de l'erreur à la règle</h3>
+<p>Le carnet de dérives (plus bas) ne sert à rien s'il reste un journal. Il sert quand chaque défaut qui se répète devient une <strong>règle écrite, placée là où elle sera appliquée</strong>, puis vérifiée.</p>
+<table><thead><tr><th>Ce que j'ai observé</th><th>Règle écrite</th><th>Où elle vit</th><th>Revérifié le</th></tr></thead><tbody>
+<tr><td>L'agent a modifié la gestion de session en corrigeant un libellé</td><td>« Ne touche qu'aux fichiers listés ; toute autre modification est refusée »</td><td>Brief type (leçon 8.1) et fichier d'instructions (7.4)</td><td>Un mois plus tard : l'erreur est-elle revenue ?</td></tr>
+</tbody></table>
+<p>La boucle tient en quatre gestes : <strong>noter, classer, écrire la règle, vérifier le mois suivant</strong>. Elle relie la veille (ce que j'apprends dehors) à la pratique (ce que je corrige dedans), et elle se prolonge par la revue mensuelle (leçon 9.7) et la rétrospective (leçon 10.7).</p>
+<h3>Premier exercice (30 minutes)</h3>
+<ol>
+<li>Choisissez une affirmation de ce cursus, par exemple la définition d'un hook ou d'un skill en leçon 7.4.</li>
+<li>Vérifiez-la dans la documentation officielle de l'outil, avec la fiche ci-dessus. Notez la date et la version.</li>
+<li>Y a-t-il un écart, une nuance, un point qui a changé ? Notez-le : c'est une vraie contribution.</li>
+<li>Ouvrez votre carnet de veille et écrivez-y votre premier plan : vos trois à cinq sources et votre créneau hebdomadaire.</li>
+</ol>
+<p><strong>À retenir</strong></p>
+<ul><li>Chercher, vérifier et se tenir à jour passent avant tout le reste, y compris avant le code.</li><li>Une source se date, se recoupe et, quand c'est possible, se teste.</li><li>La veille est légère et régulière ; nouveau ne veut pas dire meilleur.</li><li>Une erreur répétée devient une règle écrite, puis vérifiée.</li></ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Prendre la réponse d'un agent pour une source.</li><li>Citer une source sans date ni version.</li><li>Faire une veille pour accumuler des liens plutôt que pour changer sa pratique.</li><li>Adopter un outil parce qu'il est récent.</li><li>Tenir un carnet de dérives sans jamais en tirer de règle.</li></ul>
+<h3>Checklist du B.A.-BA</h3>
+<ul class="check"><li>Je formule une question précise, avec l'outil, la version et le résultat attendu.</li><li>Je classe une source par niveau de confiance et je vérifie sa date.</li><li>Je recoupe une affirmation avec une source officielle avant de la retenir.</li><li>Je teste ce qui peut l'être dans un dossier d'essai.</li><li>J'ai écrit mon plan de veille : trois à cinq sources et un créneau hebdomadaire.</li><li>J'ai transformé au moins une erreur répétée en règle écrite.</li></ul>
+<h2>Comment suivre ce cursus</h2>
+<p>Ce cursus apprend à décider, à déléguer à des agents IA et à vérifier ce qu'ils produisent, en douze modules et environ vingt-quatre semaines. Il reprend le sommaire du programme de formation et le développe en vrais cours : explications, exemples, schémas, exercices corrigés et quiz.</p>
+<h3>Le principe : juger avant de déléguer</h3>
+<p>Un agent écrit du code très vite, mais il ne sait pas toujours si ce code est bon. La personne qui orchestre est celle qui le voit. Les modules 1 à 6 construisent donc d'abord le jugement (lire, structurer, tester, livrer, sécuriser). Les modules 7 et 8 apprennent ensuite à travailler avec les agents, et le module 9 à piloter l'application dans la durée.</p>
+<p>Les modules 10, 11 et 12 sont transverses : gestion de projet, produit et conception, relation avec le client. On les travaille en parallèle des autres, dès la première semaine.</p>
+<h3>Comment est construit un module</h3>
+<ol>
+<li><strong>Ce que vous saurez faire</strong> : des objectifs que l'on peut vérifier, les prérequis et la durée.</li>
+<li><strong>Les leçons</strong> : une explication, un exemple concret, un schéma, puis l'essentiel à retenir.</li>
+<li><strong>L'atelier guidé</strong> : un pas-à-pas à refaire soi-même.</li>
+<li><strong>Les exercices</strong> : chacun est suivi de son corrigé. Essayez avant de lire la correction.</li>
+<li><strong>Le quiz</strong> : six questions pour s'évaluer.</li>
+<li><strong>La checklist de validation</strong> : les preuves qui montrent que le module est acquis.</li>
+</ol>
+<h3>Rythme conseillé</h3>
+<p>Six heures par semaine suffisent : deux heures de cours, trois heures de pratique, une heure de relecture de ce qu'on a produit. Un module de quatre semaines laisse ainsi le temps de refaire les exercices sans les survoler. Prenez sur l'heure de relecture les trente minutes de veille du B.A.-BA.</p>
+<p><strong>Règle d'or :</strong> on ne passe au module suivant que si l'atelier et au moins deux exercices sont refaits sans regarder le corrigé.</p>
+<h3>Quel parcours selon votre profil</h3>
+<table><thead><tr><th>Profil</th><th>À suivre en profondeur</th><th>À parcourir en diagonale</th></tr></thead><tbody>
+<tr><td>Débutant en code</td><td>Modules 1 à 6, puis 7 et 8</td><td>Modules 9 à 12 en lecture, puis en pratique</td></tr>
+<tr><td>Développeur confirmé</td><td>Modules 7 à 12</td><td>Modules 1 à 6 : lire les quiz, ne creuser que les échecs</td></tr>
+<tr><td>Chef de projet ou dirigeant</td><td>Modules 7 à 12, et le module 2</td><td>Modules 1, 3, 4, 5, 6 pour le vocabulaire et les questions à poser</td></tr>
+</tbody></table>
+<h3>Ce dont vous avez besoin</h3>
+<ul>
+<li>Un ordinateur, un éditeur de code et Git.</li>
+<li>L'accès à un agent de code, pour les ateliers des modules 7 et 8.</li>
+<li>Un dossier d'essai où recopier les exemples. Facturo, l'application des exemples, est fictive : les extraits de code sont assez courts pour être recopiés.</li>
+</ul>
+<h3>Où s'entraîner à lire du code</h3>
+<p>Le mini-jeu <a href="https://claude.ai/artifact/1aozg1BfaPHRtAnpxxTtD6">Chasse aux dérives</a> (jeu en ligne) propose dix relectures corrigées. Il accompagne le module 2 : à refaire autant de fois que nécessaire, jusqu'à repérer les problèmes sans hésiter.</p>
+<h2>Le fil rouge : Facturo</h2>
+<p>Tous les exemples du cursus viennent d'une même application inventée, Facturo, pour que chaque notion s'ajoute à la précédente. Facturo est un logiciel de facturation pour les indépendants et les petites entreprises françaises. Les noms, les chiffres et les situations sont fictifs.</p>
+<h3>Ce que fait Facturo</h3>
+<ul>
+<li>Gérer ses clients et ses devis.</li>
+<li>Émettre des factures numérotées, avec la TVA calculée.</li>
+<li>Exporter les factures en CSV pour le comptable.</li>
+<li>Faire payer en ligne, par l'intermédiaire d'un prestataire de paiement.</li>
+<li>Relancer automatiquement les factures impayées par e-mail.</li>
+</ul>
+<h3>La technique</h3>
+<table><thead><tr><th>Couche</th><th>Choix</th><th>Pourquoi ce choix</th></tr></thead><tbody>
+<tr><td>Interface</td><td>React, une application d'une seule page</td><td>Rapide pour l'utilisateur, courante sur le marché</td></tr>
+<tr><td>API</td><td>Symfony 7, PHP 8.3</td><td>Cadre solide, très répandu pour les applications de gestion</td></tr>
+<tr><td>Base de données</td><td>PostgreSQL</td><td>Transactions fiables, indispensables pour des factures</td></tr>
+<tr><td>Cache</td><td>Redis</td><td>Réponses rapides sur les listes consultées souvent</td></tr>
+<tr><td>Hébergement</td><td>Un serveur privé virtuel (VPS) et Docker</td><td>Simple, peu coûteux, maîtrisé</td></tr>
+<tr><td>Organisation du code</td><td>Monolithe modulaire</td><td>Un seul déploiement, des modules étanches</td></tr>
+</tbody></table>
+<figure><img src="img/demarrer-01.png" alt="Architecture de Facturo : cinq modules, deux stockages, deux services externes"><figcaption>architecture de Facturo · 5 modules, 2 stockages, 2 services externes</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol>
+<li>Le navigateur envoie sa requête à Nginx, qui la transmet à l'API.</li>
+<li>L'API est un seul programme, découpé en cinq modules qui ne se touchent pas directement.</li>
+<li>Le module Facturation, en bleu, porte les règles de numérotation et de TVA : c'est le cœur de Facturo.</li>
+<li>Seuls Paiement et Notifications parlent à l'extérieur.</li>
+<li>Les données durables sont dans PostgreSQL, les réponses fréquentes dans Redis.</li>
+</ol>
+<h3>Les données et les règles métier</h3>
+<table><thead><tr><th>Objet</th><th>Champs principaux</th></tr></thead><tbody>
+<tr><td>Client</td><td>id, nom, e-mail, SIRET</td></tr>
+<tr><td>Facture</td><td>id, numéro, client, lignes, total HT, taux de TVA, statut, date d'émission, date d'échéance</td></tr>
+</tbody></table>
+<p>Le statut d'une facture est brouillon, émise, payée ou annulée. Les règles que tout le code doit respecter :</p>
+<ol>
+<li>La numérotation est continue, sans trou : FAC-2026-0001, FAC-2026-0002, et ainsi de suite.</li>
+<li>Une facture émise ne se modifie plus. Pour la corriger, on émet un avoir.</li>
+<li>La TVA est de 20 % par défaut, avec 10 % et 5,5 % possibles.</li>
+<li>Les montants sont arrondis au centime.</li>
+<li>L'échéance est fixée à 30 jours.</li>
+</ol>
+<h3>Les personnages</h3>
+<ul>
+<li><strong>Marie Giraud</strong>, cliente. Elle dirige un cabinet comptable de douze personnes et utilise Facturo pour ses clients.</li>
+<li><strong>Vous</strong>, responsable du produit et orchestrateur.</li>
+<li><strong>Un agent de code</strong>, qui écrit les modifications.</li>
+<li><strong>Un agent de revue</strong>, qui relit sans avoir vu le travail de l'agent de code.</li>
+</ul>
+<h2>Carte du cursus</h2>
+<p>Le cursus se parcourt en trois groupes : un socle pour apprendre à juger, un bloc sur les agents, et trois modules transverses à mener en parallèle.</p>
+<figure><img src="img/demarrer-02.png" alt="Carte du cursus : 12 modules en 3 groupes"><figcaption>carte du cursus · 12 modules en 3 groupes</figcaption></figure>
+<p><strong>Lire la carte</strong></p>
+<ol>
+<li>Les modules 1 à 6 se suivent de gauche à droite : ils donnent les moyens de juger du code, une architecture, une livraison.</li>
+<li>Le trait sous ce premier groupe signifie que l'on passe aux agents une fois le socle acquis, pas module par module.</li>
+<li>Le module 7 explique ce qu'est un agent, le 8 apprend à l'orchestrer (en bleu : c'est le métier visé), le 9 à piloter l'application.</li>
+<li>Les modules 10, 11 et 12 n'ont pas de place fixe : on les travaille en même temps que les autres.</li>
+</ol>
+<h2>Planning sur 24 semaines</h2>
+<p>Le planning type compte six phases de quatre semaines, avec les modules transverses menés pendant toute la durée. Chaque phase se termine par un projet pratique.</p>
+<figure><img src="img/demarrer-03.png" alt="Planning type : 6 phases de 4 semaines, un volet transverse, une soutenance"><figcaption>planning type · 6 phases de 4 semaines, 1 volet transverse, 1 soutenance</figcaption></figure>
+<p><strong>Lire la frise</strong></p>
+<ol>
+<li>Les semaines 1 à 12 sont consacrées au socle : lire, structurer, livrer.</li>
+<li>Les agents entrent à la semaine 13, quand on sait déjà juger ce qu'ils produisent.</li>
+<li>La barre « Transverse » court sur les 24 semaines : projet, produit et client se travaillent en continu.</li>
+<li>Le losange marque la soutenance finale, à la semaine 24.</li>
+</ol>
+<table><thead><tr><th>Phase</th><th>Modules</th><th>Projet pratique</th></tr></thead><tbody>
+<tr><td>Lire</td><td>1, 2</td><td>Audit de lecture d'une application existante</td></tr>
+<tr><td>Structurer</td><td>3, 4</td><td>Cartographie d'architecture et plan de tests</td></tr>
+<tr><td>Livrer</td><td>5, 6</td><td>Mise en ligne avec CI/CD et supervision</td></tr>
+<tr><td>Agents IA</td><td>7</td><td>Configuration d'un agent : instructions, skill, outil externe</td></tr>
+<tr><td>Orchestrer</td><td>8</td><td>Une fonctionnalité livrée par des agents, avec revue indépendante</td></tr>
+<tr><td>Piloter</td><td>9</td><td>Feuille de route sur trois mois et tableau de bord</td></tr>
+<tr><td>Transverse</td><td>10 à 12</td><td>Cadrage, spécification et compte rendu au client sur le projet fil rouge</td></tr>
+</tbody></table>
+<h3>La soutenance finale</h3>
+<p>Trente minutes pour présenter le projet fil rouge : les choix d'architecture, le pipeline, trois erreurs d'agents repérées en revue et ce qu'elles ont appris, puis la feuille de route des trois mois suivants.</p>
+<h3>Rythme et durée</h3>
+<p>Ces durées sont une estimation pour un profil sans bases techniques. Un développeur confirmé peut condenser les phases 1 à 3 et consacrer plus de temps aux phases 4 à 6.</p>
+<h2>Règles d'usage des agents IA pendant le cursus</h2>
+<p>Pendant le cursus, un agent est un outil d'entraînement : on s'en sert pour apprendre à le diriger, jamais pour sauter l'exercice. Sept règles tiennent sur une page.</p>
+<ol>
+<li><strong>Faire d'abord, demander ensuite.</strong> Essayez l'exercice seul. Soumettez-le à un agent après, pour comparer.</li>
+<li><strong>Pas d'agent pour le quiz.</strong> Il sert à mesurer ce que vous savez, pas ce que l'agent sait.</li>
+<li><strong>Relire chaque modification avant de la garder.</strong> Un code que vous ne comprenez pas ne rentre pas dans votre projet.</li>
+<li><strong>Ne rien envoyer de sensible.</strong> Pas de mots de passe, de clés, de données personnelles réelles ni de code d'un client sans son accord.</li>
+<li><strong>Donner le minimum de droits.</strong> L'agent travaille dans un dossier d'essai, jamais sur un serveur de production.</li>
+<li><strong>Garder une trace.</strong> Conservez le brief donné, ce que l'agent a rendu et vos corrections.</li>
+<li><strong>Vérifier ce qui change vite.</strong> Pour les outils d'agents, la documentation officielle prime sur toute explication, y compris celle de ce cursus. Voir le B.A.-BA en tête de cette page.</li>
+</ol>
+<h3>Le carnet de dérives</h3>
+<p>Tenez un carnet pour chaque tâche confiée à un agent. Au bout de quelques semaines, il montre vos angles morts et les erreurs que les agents répètent. C'est aussi la matière de la boucle d'amélioration du B.A.-BA : chaque défaut qui se répète devient une règle écrite.</p>
+<table><thead><tr><th>Date</th><th>Tâche donnée</th><th>Ce que l'agent a fait</th><th>Défaut repéré</th><th>Catégorie (module 2)</th><th>Correction demandée</th></tr></thead><tbody>
+<tr><td>12/01</td><td>Corriger le libellé du bouton</td><td>A aussi modifié la gestion de session</td><td>Hors périmètre, zone sensible</td><td>Dérive de périmètre</td><td>Annuler, refaire sur ce seul fichier</td></tr>
+</tbody></table>
+<p>La ligne ci-dessus est un exemple : la date et la tâche sont fictives.</p>
+<h3>Les limites de ce cursus</h3>
+<p>Ce cursus a été rédigé avec l'aide d'un agent IA et peut contenir des erreurs : relisez-le avec le même esprit critique que celui qu'il vous demande d'avoir. Les durées sont des estimations. Les points juridiques et réglementaires ne remplacent pas l'avis d'un professionnel. Un cursus ne remplace pas la pratique sur un vrai projet, ni un collègue expérimenté qui relit votre travail.</p>
+
+<div class="pager"><a class="prev" href="index.html"><small>← Précédent</small>Accueil</a><a class="next" href="modules/module-01.html"><small>Suivant →</small>Module 1 : fondamentaux du web et du logiciel</a></div></article></main></div>
+<script>document.querySelectorAll('.side a.nav').forEach(function(a){a.addEventListener('click',function(){document.body.classList.remove('open')})});var on=document.querySelector('.side a.on');if(on)on.scrollIntoView({block:'center'});</script>
+</body></html>

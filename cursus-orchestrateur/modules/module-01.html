@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Module 1 : fondamentaux du web et du logiciel · Cursus orchestrateur</title>
+<link rel="stylesheet" href="../css/style.css"></head>
+<body><button class="menu-btn" onclick="document.body.classList.toggle('open')">☰ Menu du cursus</button>
+<div class="layout"><nav class="side"><a class="brand" href="../index.html">Cursus : orchestrateur et gestionnaire d’app<small>12 modules · 24 semaines</small></a>
+<a class="nav" href="../index.html">Accueil</a>
+<a class="nav" href="../demarrer.html">Démarrer</a>
+<h4>Le socle : savoir juger</h4>
+<a class="nav on" href="../modules/module-01.html">Module 1 : fondamentaux du web et du logiciel</a>
+<a class="nav" href="../modules/module-02.html">Module 2 : lire le code et reconnaître le mauvais code</a>
+<a class="nav" href="../modules/module-03.html">Module 3 : architectures et design patterns</a>
+<a class="nav" href="../modules/module-04.html">Module 4 : tests et qualité</a>
+<a class="nav" href="../modules/module-05.html">Module 5 : serveur, mise en ligne, DevOps et CI/CD</a>
+<a class="nav" href="../modules/module-06.html">Module 6 : sécurité, observabilité, données et conformité</a>
+<h4>Les agents IA et le pilotage</h4>
+<a class="nav" href="../modules/module-07.html">Module 7 : agents IA, définitions et fonctionnement</a>
+<a class="nav" href="../modules/module-08.html">Module 8 : orchestrer des agents</a>
+<a class="nav" href="../modules/module-09.html">Module 9 : piloter l&#x27;application en production</a>
+<h4>Les modules transversaux</h4>
+<a class="nav" href="../modules/module-10.html">Module 10 : gestion de projet</a>
+<a class="nav" href="../modules/module-11.html">Module 11 : produit et conception</a>
+<a class="nav" href="../modules/module-12.html">Module 12 : gestion du client et communication</a>
+<h4>Référence</h4>
+<a class="nav" href="../glossaire.html">Glossaire</a></nav>
+<main><article><div class="toolbar"><button onclick="window.print()">Imprimer / PDF</button><button onclick="var r=document.documentElement;var d=r.dataset.theme==='dark';r.dataset.theme=d?'light':'dark'">Clair / sombre</button></div>
+<h1>Module 1 : fondamentaux du web et du logiciel</h1>
+<h2>Ce que vous saurez faire</h2>
+<p>Ce module donne la carte du terrain : après lui, vous saurez situer un problème dans la chaîne qui va du clic d'un utilisateur jusqu'à la base de données. Vous n'apprendrez pas à tout programmer. Vous apprendrez à comprendre ce que font les agents IA et à leur poser les bonnes questions.</p>
+<p><strong>À la fin du module, vous saurez :</strong></p>
+<ul><li>décrire, sans notes, le trajet d'une requête dans Facturo ;</li><li>lire un échange HTTP et deviner d'où vient un problème grâce au code de statut ;</li><li>juger si une API est bien conçue : ressources, verbes, codes de retour ;</li><li>choisir entre une base SQL et une base de documents pour un besoin donné ;</li><li>repérer un problème N+1 dans un code et dans un journal de requêtes ;</li><li>suivre un flux Git complet : branche, commit, demande de fusion, conflit, fusion.</li></ul>
+<table><tbody><tr><td>Prérequis</td><td>Aucun en programmation. Savoir ouvrir un terminal.</td></tr><tr><td>Durée estimée</td><td>12 heures, sur deux semaines (environ 6 heures par semaine)</td></tr><tr><td>Lien avec Facturo</td><td>Ce module décrit le terrain où Facturo vit : requêtes, API, base de données, dépôt de code.</td></tr><tr><td>Matériel</td><td>Un navigateur, un terminal avec <code>curl</code> et <code>git</code>, et un petit projet à manipuler (voir ci-dessous).</td></tr></tbody></table>
+<p><strong>Rappel : Facturo.</strong> Tous les exemples du cursus viennent de Facturo, une application fictive de facturation pour indépendants et petites entreprises. Elle gère des clients, des devis et des factures, exporte un fichier CSV pour le comptable, encaisse les paiements en ligne et envoie des rappels d'impayés. Elle se compose d'une API Symfony 7 (PHP 8.3), d'un front React, d'une base PostgreSQL et d'un cache Redis, le tout dans des conteneurs Docker sur un serveur loué.</p>
+<p>Pour les ateliers, il vous faut un petit projet à manipuler. Si vous n'en avez pas, demandez à un agent IA de générer un squelette Facturo à partir de ce rappel, puis relisez-le : c'est déjà un exercice. Les noms, montants et dates de ce cursus sont inventés.</p>
+<h2>Leçon 1.1 : que se passe-t-il quand on clique sur « Exporter » ?</h2>
+<p>Un clic dans un navigateur déclenche une chaîne de sept étapes, et chaque problème se situe sur l'une d'elles. Marie Giraud, qui gère un cabinet comptable de 12 personnes, ouvre Facturo et clique sur « Exporter les factures de mars ». Quelques secondes plus tard, un fichier CSV arrive dans son dossier de téléchargements.</p>
+<p>Pour comprendre ce trajet, pensez à l'envoi d'une lettre recommandée à un service d'archives. Vous cherchez l'adresse dans un annuaire (le <strong>DNS</strong>). Vous scellez l'enveloppe pour que personne ne la lise en route (le chiffrement <strong>HTTPS</strong>). Un réceptionniste (le serveur web <strong>Nginx</strong>) la remet au bon service (l'application <strong>Symfony</strong>). Ce service demande les dossiers aux archives (la base <strong>PostgreSQL</strong>), puis renvoie la réponse par le même chemin.</p>
+<p>Le <strong>client</strong> est le programme qui envoie la demande : ici, le navigateur de Marie. Le <strong>serveur</strong> est le programme qui répond. Une <strong>requête</strong> est la demande, une <strong>réponse</strong> est ce qui revient. Tout le web fonctionne ainsi, y compris les appels entre deux logiciels.</p>
+<figure><img src="../img/m01-01.png" alt="trajet d'une requête · 7 étapes"><figcaption>trajet d'une requête · 7 étapes</figcaption></figure>
+<p><strong>Lire le schéma.</strong></p>
+<ol><li>Le navigateur de Marie prépare la demande : « donne-moi les factures de mars ».</li><li>Le DNS traduit le nom <code>facturo.example</code> en adresse IP, comme un annuaire traduit un nom en numéro.</li><li>Une connexion HTTPS chiffrée s'établit : personne ne peut lire la demande en route.</li><li>Nginx, le serveur web, reçoit la demande et la passe à l'application.</li><li>Symfony choisit le bon contrôleur, applique les règles de Facturo et interroge la base (étape 6), puis renvoie le CSV (étape 7).</li></ol>
+<p><strong>Où chercher selon le symptôme.</strong> Savoir à quel étage se trouve un problème évite de chercher au mauvais endroit.</p>
+<table><thead><tr><th>Ce que l'on observe</th><th>Étage probable</th><th>Premier réflexe</th></tr></thead><tbody><tr><td>« Ce site est introuvable »</td><td>DNS</td><td>Vérifier le nom de domaine et ses enregistrements</td></tr><tr><td>Avertissement de sécurité dans le navigateur</td><td>HTTPS</td><td>Vérifier la date d'expiration du certificat</td></tr><tr><td>Erreur 502 « Bad Gateway »</td><td>Nginx n'arrive pas à joindre l'application</td><td>Regarder si le service PHP tourne</td></tr><tr><td>Erreur 500</td><td>Code de l'application (Symfony)</td><td>Lire le journal d'erreurs de l'application</td></tr><tr><td>Page ou export très lent</td><td>Souvent la base de données</td><td>Compter et mesurer les requêtes SQL</td></tr><tr><td>Le résultat est faux mais sans erreur</td><td>La logique métier dans le code</td><td>Rejouer le cas avec des données connues</td></tr></tbody></table>
+<p><strong>À retenir.</strong></p>
+<ul><li>Une requête traverse le DNS, HTTPS, le serveur web, l'application et la base, puis revient.</li><li>Le code de statut et le symptôme indiquent l'étage où chercher.</li><li>Un agent qui modifie le code ne règle que l'étage « application » : ne lui demandez pas de réparer un certificat expiré.</li></ul>
+<p><strong>Erreurs fréquentes.</strong> Accuser le code alors que le problème est un certificat ou un nom de domaine. Relancer l'application au hasard sans lire le journal d'erreurs.</p>
+<h2>Leçon 1.2 : lire un échange HTTP</h2>
+<p>HTTP est le langage que parlent un client et un serveur, et ses codes de statut disent en un chiffre si la demande a réussi et de quel côté se trouve l'erreur. Une requête contient une méthode (ce qu'on veut faire), une adresse, des en-têtes (des informations sur la demande) et parfois un corps (des données). La réponse contient un code de statut, des en-têtes et un corps.</p>
+<p>L'outil <code>curl</code> permet de rejouer une requête depuis le terminal. L'option <code>-i</code> affiche les en-têtes de la réponse. Voici une lecture de facture dans Facturo.</p>
+<pre><code class="language-bash">curl -i https://facturo.example/api/v1/factures/42 \
+  -H "Authorization: Bearer eyJhbGciOi..."</code></pre>
+<pre><code class="language-http">HTTP/2 200
+content-type: application/json
+cache-control: private, no-store
+
+{"id":42,"numero":"FAC-2026-0042","statut":"émise",
+ "total_ht":"1250.00","taux_tva":"0.200","client_id":7}</code></pre>
+<p>La première ligne donne le statut : <code>200</code> signifie « tout va bien ». L'en-tête <code>content-type</code> dit que le corps est du JSON, un format texte que les logiciels lisent facilement. L'en-tête <code>cache-control</code> interdit à un intermédiaire de garder une copie : c'est utile pour des données de facturation.</p>
+<h3>Les codes de statut</h3>
+<p>Le premier chiffre du code indique la famille, et cette famille indique qui doit agir.</p>
+<table><thead><tr><th>Famille</th><th>Sens</th><th>Qui doit agir</th><th>Exemples dans Facturo</th></tr></thead><tbody><tr><td>2xx</td><td>Succès</td><td>Personne</td><td><code>200</code> lecture réussie, <code>201</code> facture créée, <code>204</code> brouillon supprimé (rien à renvoyer)</td></tr><tr><td>3xx</td><td>Redirection</td><td>Le client suit la nouvelle adresse</td><td><code>301</code> l'ancienne adresse <code>/api/factures</code> a changé</td></tr><tr><td>4xx</td><td>Erreur du client</td><td>Celui qui envoie la demande</td><td><code>401</code>, <code>403</code>, <code>404</code>, <code>409</code>, <code>422</code>, <code>429</code></td></tr><tr><td>5xx</td><td>Erreur du serveur</td><td>L'équipe qui exploite le serveur</td><td><code>500</code>, <code>502</code>, <code>503</code>, <code>504</code></td></tr></tbody></table>
+<p>Les quatre erreurs les plus fréquentes montrent comment le détail change le diagnostic.</p>
+<pre><code class="language-bash"># 401 : le serveur ne sait pas qui vous êtes (jeton absent ou expiré)
+curl -i https://facturo.example/api/v1/factures/42
+# HTTP/2 401   {"erreur":{"code":"non_authentifie","message":"Connexion requise."}}
+
+# 404 : cette facture n'existe pas
+curl -i https://facturo.example/api/v1/factures/99999 -H "Authorization: Bearer ..."
+# HTTP/2 404   {"erreur":{"code":"facture_introuvable","message":"Aucune facture 99999."}}
+
+# 422 : la demande est bien formée mais son contenu est invalide
+curl -i "https://facturo.example/api/v1/factures/export?mois=2026-13" -H "Authorization: Bearer ..."
+# HTTP/2 422   {"erreur":{"code":"mois_invalide","message":"Format attendu : AAAA-MM."}}
+
+# 500 : le serveur a planté, ce n'est pas la faute de l'appelant
+# HTTP/2 500   {"erreur":{"code":"erreur_interne","message":"Une erreur est survenue."}}</code></pre>
+<p>Une confusion classique : <code>401</code> signifie « je ne sais pas qui vous êtes » (authentification), et <code>403</code> signifie « je sais qui vous êtes, mais vous n'avez pas le droit » (autorisation). Si Marie lit la facture d'un autre cabinet, elle doit recevoir <code>403</code> (ou <code>404</code> pour ne pas révéler que la facture existe). Pour un agent IA, cette distinction est décisive : une fonction « connecté » sans contrôle des droits laisse chaque utilisateur lire les données de tous les autres.</p>
+<h3>Les méthodes</h3>
+<table><thead><tr><th>Méthode</th><th>Rôle</th><th>Modifie des données ?</th><th>Répéter la demande donne le même résultat ?</th></tr></thead><tbody><tr><td><code>GET</code></td><td>Lire</td><td>Non</td><td>Oui</td></tr><tr><td><code>POST</code></td><td>Créer ou déclencher une action</td><td>Oui</td><td>Non</td></tr><tr><td><code>PUT</code></td><td>Remplacer entièrement</td><td>Oui</td><td>Oui</td></tr><tr><td><code>PATCH</code></td><td>Modifier en partie</td><td>Oui</td><td>Souvent oui</td></tr><tr><td><code>DELETE</code></td><td>Supprimer</td><td>Oui</td><td>Oui</td></tr></tbody></table>
+<p>La dernière colonne s'appelle l'<strong>idempotence</strong>. Une opération idempotente répétée dix fois laisse le système dans le même état qu'après une seule fois. Supprimer le brouillon 42 deux fois laisse le brouillon supprimé. Mais un <code>POST</code> de paiement envoyé deux fois peut encaisser deux fois : nous verrons la parade à la leçon suivante.</p>
+<h3>Qui êtes-vous, et que pouvez-vous faire ?</h3>
+<p>L'<strong>authentification</strong> vérifie l'identité. Facturo en propose deux formes. Le navigateur utilise une <strong>session</strong> : le serveur donne un cookie (un petit identifiant que le navigateur renvoie à chaque requête). Les autres logiciels utilisent un <strong>jeton</strong> (token) envoyé dans l'en-tête <code>Authorization</code>, souvent au format JWT, qui contient l'identité et une date d'expiration. <strong>OAuth 2</strong> est un protocole standard qui permet à un logiciel d'agir au nom d'un utilisateur sans connaître son mot de passe : c'est ce que ferait un outil de comptabilité qui lirait les factures de Marie.</p>
+<p>L'<strong>autorisation</strong> vérifie les droits, après l'authentification. Dans Facturo, la règle est simple : une personne ne voit que les factures de son propre cabinet.</p>
+<p><strong>À retenir.</strong></p>
+<ul><li>Le premier chiffre du statut dit qui doit agir : 4xx l'appelant, 5xx le serveur.</li><li><code>401</code> signifie « qui êtes-vous ? », <code>403</code> signifie « vous n'avez pas le droit ».</li><li>Un <code>POST</code> répété peut faire deux fois l'action : il faut y penser pour les paiements.</li></ul>
+<p><strong>Erreurs fréquentes.</strong> Renvoyer un <code>200</code> avec <code>{"ok": false}</code> dans le corps : les outils croient que tout va bien. Confondre <code>401</code> et <code>403</code>. Afficher dans une erreur <code>500</code> le détail technique (nom de table, chemin de fichier) qui aide un attaquant.</p>
+<h2>Leçon 1.3 : concevoir l'API de Facturo</h2>
+<p>Une API bien conçue se devine : on peut prédire son adresse et son comportement sans lire la documentation. Une <strong>API</strong> (interface de programmation) est la porte par laquelle un logiciel en appelle un autre. Le front React de Facturo l'utilise, et demain le logiciel d'un comptable l'utilisera aussi. Le style le plus répandu s'appelle <strong>REST</strong> : chaque chose gérée (client, facture) est une <strong>ressource</strong> qui a une adresse, et le verbe HTTP dit l'action.</p>
+<p>Voici l'API de Facturo, vue comme un orchestrateur doit savoir la relire.</p>
+<table><thead><tr><th>Action métier</th><th>Requête</th><th>Succès</th><th>Erreurs attendues</th></tr></thead><tbody><tr><td>Créer un client</td><td><code>POST /api/v1/clients</code></td><td><code>201</code></td><td><code>422</code> si l'e-mail ou le SIRET est invalide</td></tr><tr><td>Lister les factures</td><td><code>GET /api/v1/factures?statut=émise&amp;page=2</code></td><td><code>200</code></td><td><code>401</code></td></tr><tr><td>Lire une facture</td><td><code>GET /api/v1/factures/42</code></td><td><code>200</code></td><td><code>404</code>, <code>403</code></td></tr><tr><td>Modifier un brouillon</td><td><code>PATCH /api/v1/factures/42</code></td><td><code>200</code></td><td><code>409</code> si la facture n'est plus un brouillon</td></tr><tr><td>Émettre une facture</td><td><code>POST /api/v1/factures/42/emission</code></td><td><code>200</code></td><td><code>409</code> si déjà émise, <code>422</code> si elle n'a aucune ligne</td></tr><tr><td>Enregistrer un paiement</td><td><code>POST /api/v1/factures/42/paiements</code></td><td><code>201</code></td><td><code>409</code> si la facture est annulée</td></tr><tr><td>Émettre un avoir</td><td><code>POST /api/v1/factures/42/avoir</code></td><td><code>201</code></td><td><code>409</code> si la facture n'est pas émise</td></tr><tr><td>Supprimer un brouillon</td><td><code>DELETE /api/v1/factures/42</code></td><td><code>204</code></td><td><code>409</code> si la facture est émise</td></tr><tr><td>Exporter un mois</td><td><code>GET /api/v1/factures/export?mois=2026-03</code></td><td><code>200</code> (CSV)</td><td><code>422</code> si le mois est invalide</td></tr></tbody></table>
+<p>Plusieurs règles se lisent dans ce tableau. Les noms sont au pluriel et décrivent des choses (<code>factures</code>), jamais des actions (<code>getFactures</code>). Les actions qui ne rentrent pas dans un simple verbe deviennent une sous-ressource (<code>/emission</code>, <code>/avoir</code>). La règle « une facture émise n'est pas modifiable » se traduit par un <code>409</code> (conflit avec l'état actuel) plutôt que par un <code>200</code> silencieux.</p>
+<p>Une bonne erreur a toujours la même forme, lisible par une personne et par un programme :</p>
+<pre><code class="language-json">{
+  "erreur": {
+    "code": "facture_non_modifiable",
+    "message": "Une facture émise ne peut pas être modifiée. Émettez un avoir."
+  }
+}</code></pre>
+<h3>Trois points qui font la différence</h3>
+<p><strong>La pagination.</strong> Une liste de 20 000 factures ne se renvoie pas d'un bloc. L'API en donne 50 à la fois et dit où trouver la suite : <code>GET /api/v1/factures?page=2&amp;limite=50</code> renvoie un champ <code>"total": 1342</code> et un champ <code>"page": 2</code>. Sans pagination, un agent produit souvent un code qui marche sur 10 lignes de test et s'effondre en production.</p>
+<p><strong>L'idempotence des paiements.</strong> Si Marie double-clique sur « Payer » ou si le réseau coupe puis réessaie, le <code>POST</code> part deux fois. La parade est une <strong>clé d'idempotence</strong> : le client joint un identifiant unique (<code>Idempotency-Key: 7c1e...</code>) et le serveur, s'il le reconnaît, renvoie la première réponse au lieu de refaire l'action.</p>
+<p><strong>Le versionnage et le contrat.</strong> L'adresse contient <code>/v1/</code> pour pouvoir un jour publier une <code>/v2/</code> sans casser les logiciels qui utilisent la <code>/v1/</code>. Le <strong>contrat</strong> de l'API se décrit dans un fichier au format <strong>OpenAPI</strong> : la liste des adresses, des paramètres et des réponses. C'est le document à donner à un agent avant de lui faire écrire le front ou un test, car il évite qu'il invente des champs.</p>
+<figure><img src="../img/m01-02.png" alt="cycle de vie d'une facture · 4 états, 4 appels d'API"><figcaption>cycle de vie d'une facture · 4 états, 4 appels d'API</figcaption></figure>
+<p><strong>Lire le schéma.</strong></p>
+<ol><li>Un <code>POST /factures</code> crée une facture au statut <strong>brouillon</strong>. Tant qu'elle l'est, on peut la modifier ou la supprimer.</li><li><code>POST /emission</code> la fait passer à <strong>émise</strong> : elle reçoit son numéro (FAC-2026-0042) et devient figée.</li><li><code>POST /paiements</code> l'amène à <strong>payée</strong> quand le montant est encaissé.</li><li>Pour corriger une facture émise, <code>POST /avoir</code> crée un avoir et passe la facture à <strong>annulée</strong>. Aucune flèche ne revient en arrière.</li></ol>
+<p>Le schéma sert aussi de test de lecture : si un agent propose un <code>PATCH</code> sur une facture émise, vous voyez immédiatement qu'aucune flèche ne l'autorise.</p>
+<p><strong>À retenir.</strong></p>
+<ul><li>Une bonne API a des noms au pluriel, des verbes HTTP justes et des erreurs au format constant.</li><li>Les règles métier (numérotation, facture figée) se traduisent en états, en transitions et en codes <code>409</code>.</li><li>Pagination, clé d'idempotence et contrat OpenAPI sont les trois choses à exiger d'un agent qui écrit une API.</li></ul>
+<p><strong>Erreurs fréquentes.</strong> Mettre l'action dans l'adresse (<code>/factures/delete?id=5</code>). Tout faire en <code>POST</code>. Renvoyer toute la liste sans pagination. Laisser le front décider seul si une facture est modifiable : la règle doit aussi être vérifiée côté serveur.</p>
+<h2>Leçon 1.4 : SQL, documents et cache</h2>
+<p>Une base de données est le seul endroit où les erreurs coûtent cher, car on ne peut pas « ré-exécuter » une facture perdue. Il faut donc savoir lire un schéma, une requête et une transaction. Facturo utilise <strong>PostgreSQL</strong>, une base <strong>relationnelle</strong> : les données sont rangées dans des tables (comme des feuilles de calcul) reliées entre elles par des clés.</p>
+<h3>Lire un schéma</h3>
+<pre><code class="language-sql">CREATE TABLE client (
+  id     SERIAL PRIMARY KEY,
+  nom    TEXT NOT NULL,
+  email  TEXT NOT NULL,
+  siret  CHAR(14) NOT NULL
+);
+
+CREATE TABLE facture (
+  id             SERIAL PRIMARY KEY,
+  numero         TEXT UNIQUE,                       -- NULL tant que c'est un brouillon
+  client_id      INT NOT NULL REFERENCES client(id),
+  total_ht       NUMERIC(12,2) NOT NULL,
+  taux_tva       NUMERIC(4,3) NOT NULL DEFAULT 0.200,
+  statut         TEXT NOT NULL DEFAULT 'brouillon',
+  date_emission  DATE,
+  date_echeance  DATE
+);
+
+CREATE TABLE ligne_facture (
+  id          SERIAL PRIMARY KEY,
+  facture_id  INT NOT NULL REFERENCES facture(id),
+  libelle     TEXT NOT NULL,
+  quantite    NUMERIC(10,2) NOT NULL,
+  prix_unit   NUMERIC(12,2) NOT NULL
+);</code></pre>
+<p>Les mots à repérer : <code>PRIMARY KEY</code> (l'identifiant unique d'une ligne), <code>REFERENCES</code> (une <strong>clé étrangère</strong> : une facture pointe vers un client qui doit exister), <code>UNIQUE</code> (deux factures ne peuvent pas avoir le même numéro), <code>NOT NULL</code> (la valeur est obligatoire). Notez que les montants sont en <code>NUMERIC</code> et non en nombre à virgule flottante : <code>0.1 + 0.2</code> donne <code>0.30000000000000004</code> dans la plupart des langages, ce qui est inacceptable pour des euros.</p>
+<h3>Interroger : la jointure</h3>
+<p>Une <strong>jointure</strong> (<code>JOIN</code>) combine deux tables. Pour l'export de Marie, on veut le nom du client à côté de chaque facture de mars :</p>
+<pre><code class="language-sql">SELECT f.numero, c.nom, f.total_ht, f.taux_tva
+FROM facture f
+JOIN client c ON c.id = f.client_id
+WHERE f.statut = 'émise'
+  AND f.date_emission &gt;= '2026-03-01'
+  AND f.date_emission &lt;  '2026-04-01'
+ORDER BY f.numero;</code></pre>
+<p>La borne haute est <code>&lt; '2026-04-01'</code> et non <code>&lt;= '2026-03-31'</code> : cette forme reste juste même si la colonne contient une heure. Un <strong>index</strong> accélère ce genre de recherche, comme l'index d'un livre : <code>CREATE INDEX ON facture (date_emission);</code>. Sans lui, la base lit toutes les factures à chaque export.</p>
+<h3>Protéger la numérotation : la transaction</h3>
+<p>Une <strong>transaction</strong> regroupe plusieurs opérations en un bloc qui réussit en entier ou échoue en entier. Cette propriété, avec trois autres, forme l'acronyme <strong>ACID</strong> (atomicité, cohérence, isolation, durabilité). Facturo en a besoin pour la règle « numérotation continue sans trou » :</p>
+<pre><code class="language-sql">BEGIN;
+  UPDATE compteur_numero SET dernier = dernier + 1
+  WHERE annee = 2026 RETURNING dernier;          -- renvoie 43
+  UPDATE facture
+  SET numero = 'FAC-2026-0043', statut = 'émise',
+      date_emission = CURRENT_DATE,
+      date_echeance = CURRENT_DATE + 30
+  WHERE id = 981 AND statut = 'brouillon';
+COMMIT;</code></pre>
+<p>Si le serveur plante entre les deux <code>UPDATE</code>, rien n'est enregistré : le compteur revient à 42 et aucun numéro n'est perdu. Un compteur automatique de base (<code>SEQUENCE</code>) ne convient pas ici, car il saute des valeurs quand une transaction échoue. C'est un exemple où un agent peut proposer la solution la plus courante et fausse pour la règle métier : c'est vous qui connaissez la règle.</p>
+<h3>Quand un document convient mieux</h3>
+<p>Les bases dites <strong>NoSQL</strong> regroupent des familles très différentes : documents (MongoDB), clé-valeur (Redis), colonnes, graphes. Leur point commun est de ne pas imposer le modèle en tables. Facturo en a un bon usage : le <strong>journal d'événements</strong>, où chaque action est enregistrée telle quelle.</p>
+<pre><code class="language-json">{ "type": "facture_emise",  "facture": "FAC-2026-0043", "par": "user_7",
+  "quand": "2026-03-14T09:12:00Z", "details": { "total_ht": "1250.00" } }
+{ "type": "rappel_envoye", "facture": "FAC-2026-0031", "par": "systeme",
+  "quand": "2026-03-15T08:00:00Z", "details": { "canal": "email", "numero_rappel": 2 } }</code></pre>
+<p>Le contenu de <code>details</code> change selon le type d'événement, on n'y fait presque jamais de jointure, et on ajoute des lignes sans jamais les modifier. Un document est alors plus simple qu'une table avec 30 colonnes presque vides. PostgreSQL sait aussi stocker du JSON (type <code>JSONB</code>), ce qui permet de garder une seule base.</p>
+<table><thead><tr><th>Besoin</th><th>Choix raisonnable</th><th>Pourquoi</th></tr></thead><tbody><tr><td>Clients, factures, lignes, paiements</td><td>Tables SQL</td><td>Liens forts, règles d'intégrité, transactions</td></tr><tr><td>Journal d'événements, historique d'e-mails</td><td>Documents (ou <code>JSONB</code>)</td><td>Forme variable, écriture seule</td></tr><tr><td>Total du mois affiché sur le tableau de bord</td><td>Cache Redis</td><td>Calcul coûteux, lu souvent</td></tr><tr><td>Paramètres d'affichage d'un utilisateur</td><td>Document ou <code>JSONB</code></td><td>Forme libre, jamais joint</td></tr></tbody></table>
+<p>Le <strong>cache</strong> garde le résultat d'un calcul pour ne pas le refaire. Facturo met en cache le total du mois pendant 5 minutes. Le risque est de montrer une donnée périmée : après un paiement, le tableau de bord peut afficher l'ancien total jusqu'à cinq minutes. Il faut donc savoir ce que l'on accepte de montrer en retard, et ne jamais mettre en cache un montant utilisé pour décider d'un paiement.</p>
+<h3>Changer la base sans casser la production</h3>
+<p>Une <strong>migration</strong> est une modification versionnée du schéma, exécutée par un script. Pour ajouter un mode de paiement à la facture, on avance en trois temps : ajouter la colonne facultative, remplir les anciennes lignes, puis la rendre obligatoire. Chaque étape est compatible avec la version du code déjà en ligne, ce qui permet de déployer sans coupure et de revenir en arrière.</p>
+<p><strong>À retenir.</strong></p>
+<ul><li>Un schéma se lit par ses clés : clé primaire, clé étrangère, contrainte d'unicité.</li><li>Une transaction protège une règle métier qui touche plusieurs lignes, comme la numérotation continue.</li><li>SQL pour les données liées et strictes, documents pour les événements à forme libre, cache pour ce qui est cher et lu souvent.</li></ul>
+<p><strong>Erreurs fréquentes.</strong> Stocker de l'argent en nombre à virgule flottante. Choisir NoSQL « parce que c'est moderne » pour des données très liées. Oublier l'index d'une colonne souvent filtrée. Modifier le schéma directement en production sans migration versionnée.</p>
+<h2>Leçon 1.5 : le problème N+1, ou pourquoi l'export est lent</h2>
+<p>Le défaut de performance le plus fréquent dans le code d'un agent est une boucle qui interroge la base à chaque tour. On l'appelle <strong>N+1</strong> : une requête pour obtenir la liste de N lignes, puis N requêtes, une par ligne, pour compléter chacune. Imaginez un livreur qui rapporte un colis à la fois au lieu de charger le camion.</p>
+<p>Voici l'export de Marie, tel qu'un agent pourrait l'écrire au premier essai.</p>
+<pre><code class="language-php">$factures = $connection-&gt;fetchAllAssociative(
+    'SELECT * FROM facture WHERE date_emission &gt;= :debut AND date_emission &lt; :fin',
+    ['debut' =&gt; '2026-03-01', 'fin' =&gt; '2026-04-01']
+);
+
+$lignes = [];
+foreach ($factures as $f) {
+    // une requête par facture
+    $client = $connection-&gt;fetchAssociative(
+        'SELECT nom FROM client WHERE id = :id',
+        ['id' =&gt; $f['client_id']]
+    );
+    $lignes[] = [$f['numero'], $client['nom'], $f['total_ht']];
+}</code></pre>
+<p>Le code est correct, lisible, et passe le test sur 3 factures. En production, avec 200 factures en mars, le journal des requêtes montre ceci :</p>
+<pre><code class="language-text">SELECT * FROM facture WHERE date_emission &gt;= '2026-03-01' AND date_emission &lt; '2026-04-01'
+SELECT nom FROM client WHERE id = 7
+SELECT nom FROM client WHERE id = 12
+SELECT nom FROM client WHERE id = 7
+SELECT nom FROM client WHERE id = 7
+... (196 lignes de plus)</code></pre>
+<p>Cela fait 201 requêtes. Si chaque aller-retour coûte environ 2 millisecondes (chiffre d'exemple), l'export prend près de 400 ms à 200 factures, et plusieurs secondes à 5 000. Le client 7 est même interrogé plusieurs fois pour rien. Le signe qui doit vous alerter à la lecture : <strong>une requête à l'intérieur d'une boucle</strong>.</p>
+<p>La correction fait faire le travail à la base, en une fois :</p>
+<pre><code class="language-php">$lignes = $connection-&gt;fetchAllNumeric(
+    'SELECT f.numero, c.nom, f.total_ht
+       FROM facture f
+       JOIN client c ON c.id = f.client_id
+      WHERE f.statut = :statut
+        AND f.date_emission &gt;= :debut AND f.date_emission &lt; :fin
+      ORDER BY f.numero',
+    ['statut' =&gt; 'émise', 'debut' =&gt; '2026-03-01', 'fin' =&gt; '2026-04-01']
+);</code></pre>
+<figure><img src="../img/m01-03.png" alt="N+1 contre jointure · 201 requêtes contre 1"><figcaption>N+1 contre jointure · 201 requêtes contre 1</figcaption></figure>
+<p><strong>Lire le schéma.</strong></p>
+<ol><li>À gauche, Symfony envoie une requête pour la liste, puis une requête par facture : chaque flèche est un aller-retour vers la base.</li><li>Chaque aller-retour a un coût fixe, même pour une toute petite réponse. Le coût total croît avec le nombre de factures.</li><li>À droite, une seule requête avec jointure ramène tout. La base est conçue pour ce travail et le fait en une dizaine de millisecondes (chiffre d'exemple).</li></ol>
+<p><strong>Comment le détecter.</strong> Ne comptez pas sur un test avec 3 factures. Trois moyens, du plus simple au plus fiable : lire le code à la recherche d'une requête dans une boucle, regarder le nombre de requêtes affiché par la barre de débogage de Symfony pendant l'export, ou écrire un test qui impose une limite.</p>
+<pre><code class="language-php">public function testExportDe200FacturesFaitAuPlusDeuxRequetes(): void
+{
+    $this-&gt;creerFactures(200);
+    $compteur = $this-&gt;compteurDeRequetes();
+
+    $this-&gt;export-&gt;csv('2026-03');
+
+    $this-&gt;assertLessThanOrEqual(2, $compteur-&gt;total());
+}</code></pre>
+<p><strong>Ce qu'il faut dire à l'agent.</strong> « Remplace la boucle par une jointure. Ajoute un test qui vérifie que l'export de 200 factures exécute au plus 2 requêtes. » Une consigne chiffrée et testable est bien plus efficace que « rends-le plus rapide ».</p>
+<p><strong>À retenir.</strong></p>
+<ul><li>Une requête dans une boucle est le signal à chercher en premier.</li><li>Un test avec peu de données ne révèle pas le problème : il faut tester avec un volume réaliste.</li><li>Une limite chiffrée (« au plus 2 requêtes ») est un critère de réussite vérifiable.</li></ul>
+<p><strong>Erreurs fréquentes.</strong> Mettre en cache le résultat pour masquer un N+1 au lieu de le corriger. Charger toutes les colonnes (<code>SELECT *</code>) alors que l'export n'en utilise que trois.</p>
+<h2>Leçon 1.6 : Git, branches et demandes de fusion</h2>
+<p>Git garde l'historique de chaque fichier du projet et permet à plusieurs personnes (ou agents) de travailler en parallèle sans s'écraser. Un <strong>commit</strong> est une photo datée du projet, accompagnée d'un message. Une <strong>branche</strong> est une ligne de travail parallèle : on y essaie des changements sans toucher à la ligne de référence, appelée <code>main</code>. Une <strong>pull request</strong> (sur GitLab, on dit <strong>merge request</strong>) est la proposition de fusionner une branche dans <code>main</code> : elle déclenche les tests et la revue.</p>
+<p>Voici le cycle d'un agent qui ajoute le filtre par mois à l'export.</p>
+<pre><code class="language-bash">git switch -c feature/export-csv          # créer la branche et s'y placer
+git add src/Export/ExportFactures.php     # préparer le fichier
+git commit -m "Export CSV : filtrer par mois"
+git push -u origin feature/export-csv     # envoyer la branche au serveur</code></pre>
+<p>Trois commandes servent à lire plus qu'à écrire : <code>git log --oneline -5</code> liste les cinq derniers commits, <code>git diff main</code> montre ce qui diffère de <code>main</code>, et <code>git blame src/Billing/FactureCalculator.php</code> indique qui a modifié chaque ligne, et dans quel commit. Cette dernière est précieuse pour comprendre pourquoi une ligne étrange existe.</p>
+<figure><img src="../img/m01-04.png" alt="branche et pull request · 4 étapes de contrôle"><figcaption>branche et pull request · 4 étapes de contrôle</figcaption></figure>
+<p><strong>Lire le schéma.</strong></p>
+<ol><li>La branche <code>feature/export-csv</code> part de <code>main</code> au deuxième commit et reçoit trois commits de travail.</li><li>Pendant ce temps, <code>main</code> ne bouge pas, ou bouge sans rapport avec ce travail.</li><li>La pull request propose de ramener les trois commits dans <code>main</code>.</li><li>Avant la fusion, les tests automatiques doivent être verts et une personne doit approuver le changement.</li></ol>
+<h3>Un conflit, pas à pas</h3>
+<p>Un <strong>conflit</strong> apparaît quand deux branches modifient la même ligne : Git ne sait pas laquelle garder et demande à une personne de trancher. Sur sa branche, l'agent a transformé la constante du taux de TVA en nombre. Entre-temps, quelqu'un l'a transformée en chaîne sur <code>main</code>.</p>
+<ol><li>On met la branche à jour : <code>git merge main</code>. Git répond <code>CONFLICT (content): Merge conflict in src/Billing/FactureCalculator.php</code>.</li><li>On ouvre le fichier. Git a marqué les deux versions :</li></ol>
+<pre><code class="language-text">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+    private const TAUX_PAR_DEFAUT = 0.20;
+=======
+    private const TAUX_PAR_DEFAUT = '0.20';
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; main</code></pre>
+<ol><li>On comprend les deux intentions. Au-dessus de <code>=======</code>, c'est la branche de l'agent : un nombre à virgule. En dessous, c'est <code>main</code> : une chaîne, voulue pour éviter les erreurs d'arrondi. La règle de Facturo (montants au centime) donne raison à <code>main</code>.</li><li>On garde la bonne version, on supprime les trois lignes de marqueurs, puis on relance les tests.</li><li>On enregistre : <code>git add src/Billing/FactureCalculator.php</code>, puis <code>git commit</code>. Le conflit est résolu.</li></ol>
+<p>Pour annuler un changement déjà partagé, utilisez <code>git revert &lt;commit&gt;</code>, qui crée un commit inverse et garde l'historique. Les commandes qui réécrivent l'historique (<code>git reset --hard</code>, <code>git push --force</code>) effacent le travail des autres : elles sont réservées à ce que vous maîtrisez, jamais à une branche partagée.</p>
+<p><strong>Les bonnes habitudes.</strong> Branches courtes (un ou deux jours), un sujet par branche, un message de commit qui dit pourquoi. Une <code>main</code> protégée : aucune fusion sans tests verts ni revue. Un fichier <code>.gitignore</code> qui exclut les secrets et les dossiers générés.</p>
+<p><strong>À retenir.</strong></p>
+<ul><li>Une branche isole le travail, la pull request le soumet au contrôle, <code>main</code> ne reçoit que du vérifié.</li><li>Un conflit n'est pas une erreur : c'est une question posée à quelqu'un qui connaît la règle métier.</li><li><code>git blame</code> et <code>git log</code> répondent à « pourquoi ce code est-il là ? ».</li></ul>
+<p><strong>Erreurs fréquentes.</strong> Un commit « modifications diverses » de 40 fichiers, impossible à relire. Un mot de passe commité par accident : même supprimé ensuite, il reste dans l'historique et doit être changé. Résoudre un conflit en gardant systématiquement sa version.</p>
+<h2>Leçon 1.7 : terminal, configuration et secrets</h2>
+<p>Savoir où regarder dans un projet vaut mieux que savoir tout écrire. Le <strong>terminal</strong> est la fenêtre où l'on tape des commandes : les agents IA y travaillent en permanence, et vous devez pouvoir lire ce qu'ils y font. Six commandes suffisent pour explorer Facturo.</p>
+<table><thead><tr><th>Commande</th><th>Ce qu'elle fait</th><th>Exemple dans Facturo</th></tr></thead><tbody><tr><td><code>ls</code></td><td>Liste les fichiers d'un dossier</td><td><code>ls src/</code> montre les modules : Clients, Facturation, Paiement, Export, Notifications</td></tr><tr><td><code>cd</code></td><td>Entre dans un dossier</td><td><code>cd src/Export</code></td></tr><tr><td><code>cat</code> ou <code>less</code></td><td>Affiche un fichier</td><td><code>less src/Export/ExportFactures.php</code></td></tr><tr><td><code>grep -rn</code></td><td>Cherche un texte dans tous les fichiers</td><td><code>grep -rn "factures/export" src/</code> trouve où la route est définie</td></tr><tr><td><code>tail -n 50</code></td><td>Affiche la fin d'un fichier</td><td><code>tail -n 50 var/log/prod.log</code> montre les 50 dernières lignes du journal</td></tr><tr><td><code>git status</code></td><td>Dit ce qui a changé</td><td>Voir ce que l'agent a touché avant de relire</td></tr></tbody></table>
+<p>Le projet lui-même se lit par quelques fichiers à l'endroit habituel.</p>
+<table><thead><tr><th>Fichier ou dossier</th><th>Ce qu'on y trouve</th></tr></thead><tbody><tr><td><code>composer.json</code></td><td>Les bibliothèques PHP dont dépend l'API</td></tr><tr><td><code>package.json</code></td><td>Les bibliothèques JavaScript du front React</td></tr><tr><td><code>config/routes/</code></td><td>Les adresses de l'API et le code qui les traite</td></tr><tr><td><code>src/</code></td><td>Le code de l'application, un dossier par module</td></tr><tr><td><code>tests/</code></td><td>Les tests automatiques</td></tr><tr><td><code>docker-compose.yml</code></td><td>Les services que l'application lance : API, base, cache</td></tr><tr><td><code>.env.example</code></td><td>La liste des réglages attendus, sans leurs valeurs secrètes</td></tr></tbody></table>
+<h3>Configuration et secrets</h3>
+<p>Le même code tourne sur votre poste, sur le serveur de test et en production, avec des réglages différents : adresse de la base, clé du service de paiement, serveur d'e-mails. Ces réglages vivent dans des <strong>variables d'environnement</strong>, c'est-à-dire des valeurs fournies à l'application de l'extérieur plutôt qu'écrites dans le code. Un <strong>secret</strong> est une valeur qui donne un accès : mot de passe, clé d'API, jeton.</p>
+<pre><code class="language-bash"># .env.example : commité, sans aucune vraie valeur
+DATABASE_URL=postgresql://facturo:CHANGE_ME@db:5432/facturo
+PAIEMENT_CLE_SECRETE=CHANGE_ME
+MAILER_DSN=smtp://CHANGE_ME@mail.example:587</code></pre>
+<p>Le fichier avec les vraies valeurs (<code>.env.local</code>) est listé dans <code>.gitignore</code> pour ne jamais être envoyé dans le dépôt. Si un secret est commité par erreur, le supprimer ne suffit pas : il reste dans l'historique de Git. Il faut le considérer comme compromis, le révoquer chez le fournisseur et en créer un nouveau. C'est le cas n°2 du mini-jeu <em>Chasse aux dérives</em>, et l'une des fautes les plus communes des agents.</p>
+<h3>Les dépendances</h3>
+<p>Une <strong>dépendance</strong> est du code écrit par d'autres que votre projet utilise. Elle est listée dans <code>composer.json</code> (PHP) ou <code>package.json</code> (JavaScript), et les versions exactes installées sont figées dans un fichier de verrouillage (<code>composer.lock</code>, <code>package-lock.json</code>). Ce verrou garantit que tout le monde installe les mêmes versions. Une mise à jour de version majeure peut changer le comportement d'une bibliothèque : elle se fait dans une branche dédiée, avec les tests. Un agent qui ajoute une dépendance pour une tâche simple mérite toujours la question : « le langage ne le fait-il pas déjà ? ».</p>
+<p><strong>À retenir.</strong></p>
+<ul><li>On explore un projet par le terminal, les fichiers de configuration et les dossiers <code>src/</code> et <code>tests/</code>.</li><li>Un secret n'est jamais dans le code : variable d'environnement, <code>.gitignore</code>, et révocation en cas de fuite.</li><li>Toute nouvelle dépendance est une décision, pas un détail.</li></ul>
+<p><strong>Erreurs fréquentes.</strong> Commiter <code>.env</code> avec les vraies valeurs. Laisser un agent mettre à jour toutes les dépendances d'un coup. Copier une clé de production dans le poste de développement.</p>
+<h2>Atelier guidé : suivre un export de bout en bout</h2>
+<p>Cet atelier relie toutes les leçons : vous suivez l'export de Marie depuis le navigateur jusqu'au code, comme le ferait un orchestrateur qui reprend un bug. Comptez une heure. Chaque étape dit ce que vous devez observer.</p>
+<ol><li><strong>Observer dans le navigateur.</strong> Ouvrez les outils de développement (touche F12), onglet « Réseau », puis cliquez sur « Exporter ». <em>Résultat attendu :</em> une ligne <code>GET /api/v1/factures/export?mois=2026-03</code>, statut <code>200</code>, type <code>text/csv</code>.</li><li><strong>Rejouer avec curl.</strong> Copiez la requête (clic droit, « Copier en tant que cURL ») et exécutez-la dans le terminal avec <code>-i</code>. <em>Résultat attendu :</em> les mêmes en-têtes, dont <code>content-disposition: attachment; filename="factures-2026-03.csv"</code>.</li><li><strong>Provoquer un 401.</strong> Relancez la commande sans l'en-tête <code>Authorization</code>. <em>Résultat attendu :</em> <code>401</code> et un message d'erreur au format <code>{"erreur": {...}}</code>.</li><li><strong>Provoquer un 422.</strong> Remettez le jeton et changez le mois en <code>2026-13</code>. <em>Résultat attendu :</em> <code>422</code> avec le code <code>mois_invalide</code>.</li><li><strong>Retrouver le code.</strong> Dans le projet, lancez <code>grep -rn "factures/export" src/</code>. <em>Résultat attendu :</em> un seul fichier, le contrôleur ci-dessous.</li><li><strong>Lire le contrôleur.</strong> Pour chaque bloc, dites à voix haute ce qu'il fait.</li><li><strong>Regarder les requêtes SQL.</strong> Ouvrez le journal de développement ou la barre de débogage de Symfony pendant l'export. <em>Résultat attendu :</em> soit 1 ou 2 requêtes (bon), soit une longue liste de <code>SELECT nom FROM client</code> (c'est un N+1).</li><li><strong>Écrire le compte rendu.</strong> En cinq lignes : le trajet, le résultat du test 401, celui du test 422, le nombre de requêtes, et ce que vous demanderiez à l'agent s'il fallait améliorer quelque chose.</li></ol>
+<pre><code class="language-php">#[Route('/api/v1/factures/export', methods: ['GET'])]
+public function export(Request $request, ExportFactures $export): Response
+{
+    $mois = (string) $request-&gt;query-&gt;get('mois', '');
+    if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $mois)) {
+        return $this-&gt;json(['erreur' =&gt; [
+            'code' =&gt; 'mois_invalide',
+            'message' =&gt; 'Format attendu : AAAA-MM.',
+        ]], 422);
+    }
+
+    return new Response($export-&gt;csv($mois), 200, [
+        'Content-Type' =&gt; 'text/csv; charset=utf-8',
+        'Content-Disposition' =&gt; 'attachment; filename="factures-' . $mois . '.csv"',
+    ]);
+}</code></pre>
+<p><strong>Comment lire ce contrôleur.</strong> La première ligne déclare l'adresse et la méthode acceptée. Le bloc <code>if</code> vérifie que le mois ressemble à <code>2026-03</code> et renvoie <code>422</code> sinon : c'est la validation de l'entrée. Le <code>return</code> final appelle le service d'export puis renvoie un fichier téléchargeable avec le statut <code>200</code>. Le contrôleur ne contient pas de règle métier : il passe la main à <code>ExportFactures</code>, ce que l'on regarde de plus près au module 3.</p>
+<h2>Exercices</h2>
+<p>Chaque exercice se fait d'abord sans regarder le corrigé. Notez votre réponse par écrit, puis comparez.</p>
+<h3>Exercice 1 : où est le problème ?</h3>
+<p>Pour chaque symptôme observé sur Facturo, indiquez l'étage probable (DNS, HTTPS, serveur web, application, base de données) et le premier réflexe.</p>
+<ul><li>a) Le navigateur affiche « connexion non sécurisée ».</li><li>b) Erreur <code>502 Bad Gateway</code> sur toutes les pages.</li><li>c) L'export de mars met 12 secondes alors qu'il en prenait 1 le mois dernier.</li><li>d) Depuis ce matin, toutes les requêtes du front reçoivent <code>401</code>.</li><li>e) Un utilisateur ne peut plus ouvrir le site : « adresse introuvable ».</li><li>f) Le CSV de mars contient des factures de février.</li></ul>
+<details><summary>Corrigé</summary>
+<table><thead><tr><th>Symptôme</th><th>Étage</th><th>Premier réflexe</th></tr></thead><tbody><tr><td>a</td><td>HTTPS</td><td>Le certificat a probablement expiré : vérifier sa date de fin</td></tr><tr><td>b</td><td>Serveur web</td><td>Nginx ne joint plus l'application : vérifier que le service PHP tourne</td></tr><tr><td>c</td><td>Base de données</td><td>Compter les requêtes (N+1) et vérifier les index : le volume a grandi</td></tr><tr><td>d</td><td>Application (authentification)</td><td>Le jeton ou la clé qui le signe a changé ou expiré : regarder le déploiement du matin</td></tr><tr><td>e</td><td>DNS</td><td>Vérifier l'enregistrement du domaine : il a peut-être expiré ou été modifié</td></tr><tr><td>f</td><td>Application (logique)</td><td>Contrôler les bornes de dates et le fuseau horaire dans la requête</td></tr></tbody></table>
+<p>Le symptôme (d) mérite une remarque : il touche tout le monde en même temps, donc la cause est commune (un changement) et non individuelle (un mot de passe oublié).</p>
+</details>
+<h3>Exercice 2 : critiquer une API</h3>
+<p>Un agent propose ces quatre points d'entrée. Dites ce qui ne va pas et proposez la correction.</p>
+<pre><code class="language-text">GET  /api/getFactures
+POST /api/factures/delete?id=5
+GET  /api/factures/5/payer
+POST /api/factures   → réponse : 200 {"ok": false, "msg": "client inconnu"}</code></pre>
+<details><summary>Corrigé</summary>
+<ol><li><code>GET /api/getFactures</code> met un verbe dans l'adresse et omet la version. Correction : <code>GET /api/v1/factures</code>.</li><li><code>POST /api/factures/delete?id=5</code> utilise <code>POST</code> pour supprimer et met l'action dans l'adresse. Correction : <code>DELETE /api/v1/factures/5</code>, qui répond <code>204</code> pour un brouillon et <code>409</code> pour une facture émise.</li><li><code>GET /api/factures/5/payer</code> est le plus grave : un <code>GET</code> ne doit jamais modifier des données, car un navigateur ou un robot peut le rejouer sans le vouloir. Correction : <code>POST /api/v1/factures/5/paiements</code>, avec une clé d'idempotence.</li><li>Le <code>200</code> avec <code>"ok": false</code> annonce un succès alors que la demande a échoué. Correction : <code>422</code> (ou <code>404</code> si le client n'existe pas) avec l'objet d'erreur standard.</li></ol>
+</details>
+<h3>Exercice 3 : SQL, document ou cache ?</h3>
+<p>Pour chaque besoin de Facturo, choisissez un type de stockage et justifiez en une phrase.</p>
+<ul><li>a) Les factures et leurs lignes.</li><li>b) L'historique de tous les rappels envoyés, dont le contenu varie selon le canal (e-mail, SMS).</li><li>c) Le nombre de factures impayées affiché sur le tableau de bord, consulté des milliers de fois par jour.</li><li>d) Le solde exact à encaisser quand Marie clique sur « Payer ».</li></ul>
+<details><summary>Corrigé</summary>
+<ul><li>a) Tables SQL : les données sont très liées (facture, lignes, client) et soumises à des règles strictes.</li><li>b) Document ou <code>JSONB</code> : la forme varie et on ne fait qu'ajouter des lignes.</li><li>c) Cache Redis, avec une durée de vie courte : le calcul est répétitif et un retard de quelques minutes est acceptable.</li><li>d) Jamais de cache : le montant décisionnel se lit toujours dans la base, au moment du paiement, sinon on peut faire payer un ancien montant.</li></ul>
+</details>
+<h3>Exercice 4 : repérer le N+1</h3>
+<p>L'envoi des rappels d'impayés produit ce journal de requêtes. Combien de requêtes pour 400 factures impayées ? Comment corriger ?</p>
+<pre><code class="language-text">SELECT id, client_id, total_ht FROM facture WHERE statut = 'émise' AND date_echeance &lt; CURRENT_DATE
+SELECT email FROM client WHERE id = 3
+SELECT email FROM client WHERE id = 8
+SELECT email FROM client WHERE id = 3
+SELECT email FROM client WHERE id = 15
+SELECT email FROM client WHERE id = 8</code></pre>
+<details><summary>Corrigé</summary>
+<p>C'est un N+1 : une requête pour la liste, puis une par facture, soit 401 requêtes pour 400 factures. Les clients 3 et 8 sont même lus deux fois. Deux corrections possibles : une jointure (<code>JOIN client c ON c.id = f.client_id</code>) qui ramène l'e-mail avec la facture, ou une seule requête <code>WHERE id IN (...)</code> sur les clients distincts. On ajoute un test qui impose « au plus 2 requêtes » pour 400 factures.</p>
+</details>
+<h3>Exercice 5 : trancher un conflit</h3>
+<p>Voici un conflit dans <code>FactureCalculator.php</code>. Que faites-vous ?</p>
+<pre><code class="language-text">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+    $echeance = $emission-&gt;modify('+45 days');
+=======
+    $echeance = $emission-&gt;modify('+30 days');
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; main</code></pre>
+<details><summary>Corrigé</summary>
+<p>La règle de Facturo est une échéance à 30 jours : la version de <code>main</code> est cohérente avec elle. Mais ne tranchez pas à la place de la personne qui décide : demandez pourquoi la branche utilise 45. Si c'est une dérive de l'agent, gardez 30. Si c'est une évolution voulue (un client négocie 45 jours), la règle change et il faut mettre à jour les tests et la documentation. Un conflit sur une règle métier est toujours une question pour le responsable du produit, pas seulement pour le développeur.</p>
+</details>
+<h2>Quiz d'auto-évaluation</h2>
+<p>Répondez à voix haute, puis lisez la réponse. Une question ratée indique la leçon à relire.</p>
+<table><thead><tr><th>Question</th><th>Réponse</th><th>Pourquoi</th></tr></thead><tbody><tr><td>1. Un export renvoie <code>502</code>. Dans quel étage cherchez-vous en premier ?</td><td>Le serveur web : Nginx n'arrive pas à joindre l'application</td><td><code>502</code> signifie qu'un serveur intermédiaire a reçu une mauvaise réponse de l'application derrière lui (leçon 1.1)</td></tr><tr><td>2. Quelle différence entre <code>401</code> et <code>403</code> ?</td><td><code>401</code> : identité inconnue. <code>403</code> : identité connue mais droit refusé</td><td>L'une concerne l'authentification, l'autre l'autorisation (leçon 1.2)</td></tr><tr><td>3. Pourquoi <code>GET /factures/5/payer</code> est-il une mauvaise conception ?</td><td>Un <code>GET</code> ne doit jamais modifier de données</td><td>Un robot ou un navigateur peut rejouer un <code>GET</code> sans le vouloir et encaisser deux fois (leçons 1.2 et 1.3)</td></tr><tr><td>4. Pourquoi la numérotation de factures passe-t-elle par une transaction et non par un compteur automatique ?</td><td>Une transaction annulée ne consomme pas de numéro, alors qu'un compteur automatique saute des valeurs</td><td>Le droit français exige un numéro unique sur une séquence chronologique et continue, et Facturo s'interdit tout trou (leçon 1.4)</td></tr><tr><td>5. Quel signal à la lecture révèle un problème N+1 ?</td><td>Une requête à l'intérieur d'une boucle</td><td>Chaque tour de boucle fait un aller-retour avec la base : le coût croît avec le volume (leçon 1.5)</td></tr><tr><td>6. Un mot de passe a été commité puis supprimé au commit suivant. Est-ce réglé ?</td><td>Non : il reste dans l'historique, il faut le révoquer et en créer un nouveau</td><td>Git garde tout, et toute personne ayant accès au dépôt peut le retrouver (leçons 1.6 et 1.7)</td></tr></tbody></table>
+<h2>Checklist de validation</h2>
+<p>Le module est validé quand vous cochez chaque ligne sans aide. La preuve finale : expliquer à voix haute, sans notes, ce qui se passe quand un utilisateur valide un formulaire, et où chercher quand « ça ne marche pas ».</p>
+<ul class="check"><li>Je décris le trajet d'une requête : DNS, HTTPS, serveur web, application, base, retour.</li><li>Je lis un échange <code>curl -i</code> et je dis qui doit agir selon le code de statut.</li><li>Je distingue <code>401</code> et <code>403</code>, <code>409</code> et <code>422</code>.</li><li>Je repère dans une API un verbe mal choisi, une action dans l'adresse, un <code>200</code> trompeur.</li><li>J'explique pourquoi la pagination et la clé d'idempotence sont nécessaires.</li><li>Je lis un schéma SQL (clés, contraintes) et une jointure simple.</li><li>Je choisis entre tables, documents et cache pour un besoin, avec une raison.</li><li>Je repère un N+1 dans un code et dans un journal de requêtes, et je formule un critère de test.</li><li>Je crée une branche, je résous un conflit simple et je sais quand demander l'avis du métier.</li><li>Je sais où vivent les secrets et ce qu'il faut faire s'ils fuient.</li><li>J'ai écrit le compte rendu de l'atelier en cinq lignes.</li></ul>
+<h2>Sources</h2>
+<ul><li><a href="https://bofip.impots.gouv.fr/export/pdf/319741">BOFiP-Impôts, règles de facturation</a> : les paragraphes 70 et 90 rappellent que le 7° du I de l'article 242 nonies A de l'annexe II au CGI exige un numéro unique basé sur une séquence chronologique et continue. Page ouverte le 13 novembre 2026.</li></ul>
+<p>Les autres faits du module (codes HTTP, idempotence, propriétés ACID, comportement de PostgreSQL) sont des connaissances techniques standard, non sourcées ici. Les chiffres de durée (400 ms, 10 ms) sont des exemples inventés.</p>
+
+<div class="pager"><a class="prev" href="../demarrer.html"><small>← Précédent</small>Cursus complet : orchestrateur et gestionnaire d&#x27;app</a><a class="next" href="../modules/module-02.html"><small>Suivant →</small>Module 2 : lire le code et reconnaître le mauvais code</a></div></article></main></div>
+<script>document.querySelectorAll('.side a.nav').forEach(function(a){a.addEventListener('click',function(){document.body.classList.remove('open')})});var on=document.querySelector('.side a.on');if(on)on.scrollIntoView({block:'center'});</script>
+</body></html>

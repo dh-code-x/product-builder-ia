@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Module 8 : orchestrer des agents · Cursus orchestrateur</title>
+<link rel="stylesheet" href="../css/style.css"></head>
+<body><button class="menu-btn" onclick="document.body.classList.toggle('open')">☰ Menu du cursus</button>
+<div class="layout"><nav class="side"><a class="brand" href="../index.html">Cursus : orchestrateur et gestionnaire d’app<small>12 modules · 24 semaines</small></a>
+<a class="nav" href="../index.html">Accueil</a>
+<a class="nav" href="../demarrer.html">Démarrer</a>
+<h4>Le socle : savoir juger</h4>
+<a class="nav" href="../modules/module-01.html">Module 1 : fondamentaux du web et du logiciel</a>
+<a class="nav" href="../modules/module-02.html">Module 2 : lire le code et reconnaître le mauvais code</a>
+<a class="nav" href="../modules/module-03.html">Module 3 : architectures et design patterns</a>
+<a class="nav" href="../modules/module-04.html">Module 4 : tests et qualité</a>
+<a class="nav" href="../modules/module-05.html">Module 5 : serveur, mise en ligne, DevOps et CI/CD</a>
+<a class="nav" href="../modules/module-06.html">Module 6 : sécurité, observabilité, données et conformité</a>
+<h4>Les agents IA et le pilotage</h4>
+<a class="nav" href="../modules/module-07.html">Module 7 : agents IA, définitions et fonctionnement</a>
+<a class="nav on" href="../modules/module-08.html">Module 8 : orchestrer des agents</a>
+<a class="nav" href="../modules/module-09.html">Module 9 : piloter l&#x27;application en production</a>
+<h4>Les modules transversaux</h4>
+<a class="nav" href="../modules/module-10.html">Module 10 : gestion de projet</a>
+<a class="nav" href="../modules/module-11.html">Module 11 : produit et conception</a>
+<a class="nav" href="../modules/module-12.html">Module 12 : gestion du client et communication</a>
+<h4>Référence</h4>
+<a class="nav" href="../glossaire.html">Glossaire</a></nav>
+<main><article><div class="toolbar"><button onclick="window.print()">Imprimer / PDF</button><button onclick="var r=document.documentElement;var d=r.dataset.theme==='dark';r.dataset.theme=d?'light':'dark'">Clair / sombre</button></div>
+<h1>Module 8 : orchestrer des agents</h1>
+<h2>Ce que vous saurez faire</h2>
+<p>Après ce module, vous saurez confier une tâche à un agent, la découper, la répartir et la recevoir sans vous faire piéger. Le fil rouge est la demande de Marie Giraud : un export CSV des factures pour son cabinet comptable.</p>
+<ul><li>Écrire un brief complet qu&#x27;un agent peut exécuter sans vous interroger.</li><li>Découper une demande en tâches avec leurs dépendances.</li><li>Choisir parmi six patterns d&#x27;orchestration celui qui convient.</li><li>Faire travailler plusieurs agents en parallèle sans conflit.</li><li>Contrôler un compte rendu en le comparant ligne à ligne au diff.</li><li>Décider ce qu&#x27;on délègue et ce qu&#x27;on garde.</li></ul>
+<p><strong>Prérequis</strong> : le module 7 (agent, harnais, boucle, CLAUDE.md, sous-agent). <strong>Durée</strong> : environ 4 heures, atelier compris. <strong>Lien avec Facturo</strong> : toutes les tâches portent sur le module Export du monolithe.</p>
+<h2>Leçon 8.1 : écrire un brief qui se suffit à lui-même</h2>
+<p>Un brief est la demande écrite que vous donnez à l&#x27;agent, et sa qualité fixe la qualité du résultat. L&#x27;agent n&#x27;a pas votre contexte : il ne sait ni qui est Marie Giraud, ni ce que son comptable attend. Tout ce qui n&#x27;est pas écrit sera deviné, et une devinette est une dérive en puissance.</p>
+<p>Un bon brief tient en six rubriques : l&#x27;objectif, le contexte, le périmètre, les règles à respecter, la preuve attendue et le format du compte rendu. La preuve attendue est la plus oubliée. Elle dit comment l&#x27;agent saura qu&#x27;il a fini.</p>
+<h3>Exemple Facturo : le brief de l&#x27;export CSV</h3>
+<pre><code>OBJECTIF
+Ajouter un export CSV des factures d&#x27;un mois, pour le cabinet
+comptable d&#x27;un client (Marie Giraud, 12 personnes).
+
+CONTEXTE
+Module Export du monolithe. Le comptable ouvre le fichier dans Excel
+en version française.
+
+PÉRIMÈTRE
+Fichiers autorisés : src/Export/, tests/Export/.
+Ne pas toucher : src/Facturation/, la numérotation.
+
+RÈGLES
+- Séparateur point-virgule, décimale avec virgule, encodage UTF-8 avec BOM.
+- Colonnes : numero, date_emission, client, siret, total_ht,
+  taux_tva, total_ttc, statut.
+- Inclure les factures émises et payées, exclure brouillons et annulées.
+- Montants arrondis au centime.
+
+PREUVE ATTENDUE
+Tests automatiques sur : colonnes, séparateurs, filtre de statut, arrondi.
+Commande : php bin/phpunit tests/Export
+
+COMPTE RENDU
+Liste des fichiers modifiés, tests ajoutés, points non traités.</code></pre>
+<p>Relisez ce brief avec une question : un développeur sans contexte pourrait-il l&#x27;exécuter ? Si la réponse est non, l&#x27;agent échouera aussi. Remarquez le périmètre : il protège la règle de numérotation, qui n&#x27;a rien à voir avec un export.</p>
+<h3>À retenir</h3>
+<ul><li>Un brief porte six rubriques : objectif, contexte, périmètre, règles, preuve, compte rendu.</li><li>La preuve attendue dit à l&#x27;agent quand il a fini.</li><li>Ce qui n&#x27;est pas écrit sera deviné.</li></ul>
+<h3>Erreurs fréquentes</h3>
+<ul><li>Écrire &quot;fais un export CSV&quot; et laisser l&#x27;agent choisir le séparateur.</li><li>Oublier de lister les fichiers interdits.</li><li>Demander &quot;vérifie que ça marche&quot; sans dire comment.</li><li>Joindre trop de contexte inutile qui noie la consigne.</li></ul>
+<h2>Leçon 8.2 : découper en tâches avec leurs dépendances</h2>
+<p>Une tâche bien découpée est assez petite pour être relue en dix minutes, et assez complète pour être vérifiée seule. Une tâche trop grosse produit un diff illisible. Une tâche trop petite multiplie les allers-retours.</p>
+<p>Une dépendance signifie qu&#x27;une tâche a besoin du résultat d&#x27;une autre. Les tâches sans dépendance entre elles peuvent tourner en parallèle. Les autres s&#x27;enchaînent.</p>
+<h3>Exemple Facturo : l&#x27;export CSV en six tâches</h3>
+<table><thead><tr><th>N°</th><th>Tâche</th><th>Dépend de</th><th>Qui</th><th>Vérification</th></tr></thead><tbody><tr><td>1</td><td>Écrire le brief</td><td>rien</td><td>Vous</td><td>Relu par un tiers</td></tr><tr><td>2</td><td>Requête des factures du mois</td><td>1</td><td>Agent A</td><td>Test sur 3 factures de démonstration</td></tr><tr><td>3</td><td>Endpoint qui produit le CSV</td><td>2</td><td>Agent A</td><td>Test de format</td></tr><tr><td>4</td><td>Tests de contrat de l&#x27;export</td><td>3</td><td>Agent B</td><td>Les tests échouent si on casse une colonne</td></tr><tr><td>5</td><td>Bouton &quot;Exporter&quot; côté React</td><td>3</td><td>Agent C</td><td>Test de composant</td></tr><tr><td>6</td><td>Relecture globale</td><td>4 et 5</td><td>Relecteur + vous</td><td>Checklist de réception</td></tr></tbody></table>
+<figure><img src="../img/m08-01.png" alt="décomposition · export CSV"><figcaption>décomposition · export CSV</figcaption></figure>
+<h3>Lire le schéma</h3>
+<ol><li>Chaque boîte est une tâche ; la flèche signifie &quot;doit être finie avant&quot;.</li><li>Les tâches 1, 2 et 3 s&#x27;enchaînent : chacune a besoin de la précédente.</li><li>Les tâches 4 et 5 partent toutes deux de la 3 : elles peuvent tourner en même temps.</li><li>La tâche 6 attend les deux et rassemble le tout.</li></ol>
+<p>Le chemin le plus long (1, 2, 3, 4 ou 5, 6) fixe la durée minimale. Ajouter un agent n&#x27;accélère que les branches parallèles.</p>
+<h3>Du plan de tâches au ticket</h3>
+<p>Dans la plupart des équipes, une tâche prend la forme d'un <strong>ticket</strong> : une fiche courte, rangée dans un outil de suivi ou dans un dossier du dépôt, qui dit ce qu'on attend, comment on saura que c'est fini et ce qui n'est pas concerné. Pour un agent, un ticket est un brief (leçon 8.1) auquel on ajoute un statut : à faire, en cours, en revue, fait. Les trois niveaux (epic, story, tâche) sont présentés à la leçon 11.4.</p>
+<h3>Pourquoi des tickets plutôt qu'une demande à la volée</h3>
+<p>Il est tentant de dire à l'agent « fais-moi tout l'export » et de relire le résultat. Cela marche sur un petit script. Cela casse dès que le travail grossit, pour des raisons précises.</p>
+<table><thead><tr><th>Enjeu</th><th>Demande à la volée</th><th>Avec des tickets</th></tr></thead><tbody><tr><td>Mémoire</td><td>Ce qui a été décidé vit dans la fenêtre de contexte (leçon 7.3), qui se dilue et s'efface.</td><td>Le ticket est écrit, versionné, relisable par la prochaine session.</td></tr><tr><td>« Fini »</td><td>« Ça a l'air de marcher ».</td><td>Les critères disent quand c'est fini (11.4) ; le test rouge les traduit en code (4.4).</td></tr><tr><td>Relecture</td><td>Un diff énorme, relu en diagonale.</td><td>Un diff par ticket, relu en dix minutes.</td></tr><tr><td>Suppositions</td><td>Les trous de la consigne sont comblés en silence : c'est une dérive (2.5).</td><td>Le périmètre et les interdits sont écrits.</td></tr><tr><td>Reprise</td><td>Une session perdue ou une réponse ratée oblige à tout recommencer.</td><td>On relance un seul ticket.</td></tr><tr><td>Parallélisme</td><td>On ne sait pas ce qui peut avancer en même temps.</td><td>Les dépendances sont explicites (leçon 8.4).</td></tr></tbody></table>
+<h3>Faire écrire les tickets par l'IA, pour l'IA</h3>
+<p>Un agent rédige vite et sans fatigue des tickets complets. Mais « génère tous les tickets » en un seul message reproduit le problème qu'on voulait éviter : un plan que personne n'a relu. Procédez en deux temps.</p>
+<ol><li><strong>Le plan.</strong> Donnez à l'agent les stories (leçon 11.4), les décisions d'architecture (9.6) et le fichier d'instructions (7.4). Demandez seulement la liste : titres, dépendances, taille estimée. Vous relisez : chaque exigence a-t-elle un ticket ? Un ticket est-il inventé ? L'ordre respecte-t-il les dépendances ? Un ticket est-il trop gros ?</li><li><strong>Le détail.</strong> Une fois le plan validé, l'agent détaille chaque ticket avec les six rubriques du brief. Vous relisez les critères et le périmètre : c'est là que se cachent les ambiguïtés.</li></ol>
+<p>Le découpage est le point de contrôle humain le moins cher : corriger une ligne d'un plan coûte quelques secondes, corriger un module bâti sur un mauvais découpage coûte une journée. L'agent sait décomposer et rédiger. Il ne sait pas ce qui est prioritaire, ce qui est hors périmètre, ni ce que veut le client : cela reste votre rôle. Détaillez seulement le lot en cours, car des tickets écrits trop tôt sont périmés avant d'être pris.</p>
+<h3>À retenir</h3>
+<ul><li>Une tâche se relit en dix minutes et se vérifie seule.</li><li>Une dépendance est un résultat dont une autre tâche a besoin.</li><li>Seules les tâches indépendantes méritent des agents en parallèle.</li><li>Un ticket est un brief avec un statut : il garde les décisions hors de la fenêtre de contexte.</li><li>On fait générer le plan de tickets, on le relit, puis seulement on le détaille.</li></ul>
+<h3>Erreurs fréquentes</h3>
+<ul><li>Lancer en parallèle deux tâches qui modifient les mêmes fichiers.</li><li>Découper par couche technique plutôt que par résultat vérifiable.</li><li>Oublier la tâche de relecture dans le plan.</li><li>Demander tous les tickets d'un coup à l'agent, sans relire le plan.</li><li>Détailler tout le projet avant de commencer : les tickets lointains périment.</li><li>Laisser passer un ticket qui ne répond à aucune exigence.</li></ul>
+<h2>Leçon 8.3 : les six patterns d&#x27;orchestration</h2>
+<p>Un pattern d&#x27;orchestration est une manière éprouvée d&#x27;organiser plusieurs agents. Le choix dépend de la tâche : y a-t-il un ordre, des parties indépendantes, un besoin de contrôle ? Commencez toujours par le plus simple, c&#x27;est-à-dire un seul agent, et ajoutez de la structure quand un problème réel l&#x27;exige.</p>
+<figure><img src="../img/m08-02.png" alt="les six patterns d’orchestration"><figcaption>les six patterns d’orchestration</figcaption></figure>
+<h3>Lire le schéma</h3>
+<ol><li>Les ronds sont des agents, la boîte &quot;Vous&quot; est un humain, les flèches sont des transmissions.</li><li>Séquentiel : A passe son résultat à B, puis à C. Simple, lent, facile à suivre.</li><li>Parallèle : B et C travaillent en même temps, D rassemble.</li><li>Orchestrateur : O découpe et distribue, W1 à W3 exécutent.</li><li>Générateur et critique : G produit, C critique, et le cycle recommence. Routage : une règle envoie la tâche vers le bon agent. Humain dans la boucle : vous validez avant l&#x27;étape suivante.</li></ol>
+<h3>Exemple Facturo : quel pattern pour quel besoin</h3>
+<table><thead><tr><th>Besoin Facturo</th><th>Pattern</th><th>Pourquoi</th></tr></thead><tbody><tr><td>Migrer le schéma, puis adapter le code, puis les tests</td><td>Séquentiel</td><td>Chaque étape dépend de la précédente</td></tr><tr><td>Export CSV : tests et bouton React</td><td>Parallèle</td><td>Deux parties indépendantes après l&#x27;endpoint</td></tr><tr><td>Refactorer cinq modules d&#x27;un coup</td><td>Orchestrateur et exécutants</td><td>Un agent découpe, cinq exécutent</td></tr><tr><td>Écrire le calcul de TVA</td><td>Générateur et critique</td><td>Le critique cherche les erreurs d&#x27;arrondi</td></tr><tr><td>Trier les demandes de support (bug, question, évolution)</td><td>Routage</td><td>Chaque type va vers un agent différent</td></tr><tr><td>Toute action touchant la base de production</td><td>Humain dans la boucle</td><td>Irréversible : vous validez</td></tr></tbody></table>
+<p>Les patterns se combinent. Un orchestrateur peut lancer des exécutants en parallèle, chacun contrôlé par un critique, avec vous en validation finale. Chaque couche ajoutée coûte du temps et des jetons ; elle doit prévenir un risque réel.</p>
+<h3>À retenir</h3>
+<ul><li>Six patterns : séquentiel, parallèle, orchestrateur, générateur et critique, routage, humain dans la boucle.</li><li>Commencez par un seul agent ; ajoutez de la structure face à un vrai problème.</li><li>Toute action irréversible passe par un humain.</li></ul>
+<h3>Erreurs fréquentes</h3>
+<ul><li>Monter une armée d&#x27;agents pour une tâche de vingt minutes.</li><li>Oublier qu&#x27;un orchestrateur peut déléguer de travers : relisez son découpage.</li><li>Utiliser un critique sans lui donner de règles précises à vérifier.</li></ul>
+<h2>Leçon 8.4 : agents en parallèle sans conflit</h2>
+<p>Deux agents qui modifient les mêmes fichiers dans le même dossier se marchent dessus. La solution de Git s&#x27;appelle le <em>worktree</em> : une copie de travail supplémentaire, rattachée au même dépôt, avec sa propre branche. La documentation de Claude Code parle d&#x27;isolation par worktree : chaque agent travaille dans son propre dossier, sous <code>.claude/worktrees/</code>, sans toucher aux autres.</p>
+<figure><img src="../img/m08-03.png" alt="agents en parallèle avec les worktrees"><figcaption>agents en parallèle avec les worktrees</figcaption></figure>
+<h3>Lire le schéma</h3>
+<ol><li>Le dépôt Facturo, branche <code>main</code>, est la source commune.</li><li>Chaque agent reçoit un worktree : un dossier et une branche à lui.</li><li>Les trois agents avancent en même temps sans modifier les fichiers des autres.</li><li>Le travail revient par la relecture : rien n&#x27;entre dans <code>main</code> sans passer par vous.</li></ol>
+<h3>Exemple Facturo : trois agents, trois branches</h3>
+<pre><code># Depuis la racine du dépôt Facturo
+git worktree add ../facturo-export-csv -b export-csv
+git worktree add ../facturo-tests-tva  -b tests-tva
+git worktree add ../facturo-bouton     -b bouton-react
+
+git worktree list          # voir les copies de travail actives
+
+# Après relecture et fusion de export-csv
+git worktree remove ../facturo-export-csv</code></pre>
+<p>Un worktree supprime les conflits de fichiers en cours de travail, pas les conflits de fusion. Si deux branches modifient la même ligne, Git le signalera à la fusion. D&#x27;où la règle : donnez à chaque agent un périmètre de fichiers distinct, écrit dans son brief.</p>
+<h3>À retenir</h3>
+<ul><li>Un worktree est une copie de travail avec sa propre branche, rattachée au même dépôt.</li><li>Il évite les collisions pendant le travail, pas à la fusion.</li><li>Un périmètre de fichiers distinct par agent reste indispensable.</li></ul>
+<h3>Erreurs fréquentes</h3>
+<ul><li>Lancer deux agents dans le même dossier.</li><li>Fusionner sans relecture &quot;parce que les tests passent&quot;.</li><li>Oublier de supprimer les worktrees terminés.</li><li>Donner le même périmètre de fichiers à deux agents.</li></ul>
+<h2>Leçon 8.5 : recevoir le travail sans se faire piéger</h2>
+<p>Un compte rendu d&#x27;agent est une déclaration, pas une preuve. Les agents résument souvent trop optimiste : ils annoncent un succès parce que la commande n&#x27;a pas échoué. Un contrôle de réception compare ce qui est dit, ce qui a changé et ce qui est prouvé.</p>
+<h3>Exemple Facturo : une fausse réussite</h3>
+<p>L&#x27;agent A rend le compte rendu suivant pour l&#x27;export CSV :</p>
+<pre><code>Export CSV ajouté. Colonnes conformes au brief. Montants au centime.
+12 tests passent. Aucun autre fichier modifié.</code></pre>
+<p>Vous ouvrez le diff. Voici un extrait :</p>
+<pre><code>+ // src/Export/CsvExporter.php
++ $row = [$f-&gt;numero, $f-&gt;dateEmission, $f-&gt;client-&gt;nom, $f-&gt;client-&gt;siret,
++         number_format($f-&gt;totalHt, 2, &#x27;.&#x27;, &#x27;&#x27;), $f-&gt;totalTtc, $f-&gt;statut];
++ fputcsv($out, $row, &#x27;,&#x27;);
+
+  // src/Facturation/FactureNumerotateur.php
+- $next = $this-&gt;repository-&gt;lastNumber() + 1;
++ $next = max($this-&gt;repository-&gt;lastNumber() + 1, 1);</code></pre>
+<p>Comparons chaque phrase au diff.</p>
+<table><thead><tr><th>Ce que dit l&#x27;agent</th><th>Ce que montre le diff</th><th>Verdict</th></tr></thead><tbody><tr><td>&quot;Colonnes conformes au brief&quot;</td><td>7 colonnes sur 8 : <code>taux_tva</code> absente</td><td>Faux</td></tr><tr><td>&quot;Montants au centime&quot;</td><td>Point décimal et <code>totalTtc</code> non formaté, alors que le brief demande la virgule</td><td>Faux</td></tr><tr><td>Séparateur</td><td>Virgule au lieu du point-virgule : Excel français affichera une seule colonne</td><td>Faux</td></tr><tr><td>&quot;12 tests passent&quot;</td><td>Les 12 tests existaient déjà ; aucun test ne couvre l&#x27;export</td><td>Trompeur</td></tr><tr><td>&quot;Aucun autre fichier modifié&quot;</td><td><code>FactureNumerotateur.php</code> a été modifié, hors périmètre</td><td>Faux et grave</td></tr></tbody></table>
+<p>Le dernier point est le plus dangereux : la numérotation continue est une règle métier de Facturo. Une modification &quot;inoffensive&quot; en apparence peut introduire un trou dans les numéros. Les tests verts ne l&#x27;auraient pas révélé, car aucun test ne cible ce cas.</p>
+<figure><img src="../img/m08-04.png" alt="réception du travail d’un agent"><figcaption>réception du travail d’un agent</figcaption></figure>
+<h3>Lire le schéma</h3>
+<ol><li>Les cinq boîtes se lisent de gauche à droite : rapport, diff, tests, relecture, fusion.</li><li>Chaque question sous une boîte est un contrôle à passer.</li><li>Le rapport vient en premier mais ne prouve rien : c&#x27;est le diff et les tests qui prouvent.</li><li>La flèche rouge en pointillés renvoie à l&#x27;agent dès le premier &quot;non&quot;.</li><li>Seule la dernière boîte, la fusion, est votre décision.</li></ol>
+<h3>Rejeter correctement</h3>
+<p>Un rejet efficace est précis : il cite la règle et la ligne. Pour l&#x27;exemple ci-dessus :</p>
+<pre><code>Retour sur l&#x27;export CSV :
+1. Ajouter la colonne taux_tva (brief, rubrique RÈGLES).
+2. Séparateur point-virgule et virgule décimale pour tous les montants.
+3. Annuler la modification de FactureNumerotateur.php (hors périmètre).
+4. Ajouter des tests sur : colonnes, séparateurs, filtre de statut, arrondi.</code></pre>
+<h3>À retenir</h3>
+<ul><li>Un compte rendu est une déclaration ; seuls le diff et les tests prouvent.</li><li>Comparez chaque affirmation à une ligne du diff.</li><li>Un fichier hors périmètre modifié est un motif de rejet immédiat.</li></ul>
+<h3>Erreurs fréquentes</h3>
+<ul><li>Lire le compte rendu et pas le diff.</li><li>Se contenter de &quot;les tests passent&quot; sans vérifier ce qu&#x27;ils couvrent.</li><li>Rejeter vaguement (&quot;revois ça&quot;) au lieu de citer la règle.</li><li>Corriger vous-même au lieu de renvoyer à l&#x27;agent : vous perdez la trace de ce qui manquait au brief.</li></ul>
+<h2>Leçon 8.6 : déléguer ou garder</h2>
+<p>Déléguer à un agent est efficace quand le résultat se vérifie vite et que l&#x27;erreur coûte peu. Gardez pour vous ce qui est irréversible, sensible, ou qui engage un choix de produit. Le critère n&#x27;est pas la difficulté technique, mais le coût d&#x27;une erreur non détectée.</p>
+<table><thead><tr><th>Tâche Facturo</th><th>Décision</th><th>Pourquoi</th></tr></thead><tbody><tr><td>Écrire les tests d&#x27;un calcul de TVA existant</td><td>Déléguer</td><td>Vérifiable : les tests échouent si le code est faux</td></tr><tr><td>Ajouter une colonne à l&#x27;export CSV</td><td>Déléguer</td><td>Petit diff, test de contrat</td></tr><tr><td>Changer la règle de numérotation</td><td>Garder</td><td>Règle légale, erreur invisible</td></tr><tr><td>Choisir le prestataire de paiement</td><td>Garder</td><td>Engagement financier et contractuel</td></tr><tr><td>Répondre à Marie Giraud sur un retard</td><td>Garder</td><td>Relation client</td></tr><tr><td>Migration de données en production</td><td>Garder, avec l&#x27;agent en préparation</td><td>Irréversible : l&#x27;agent écrit le script, vous l&#x27;exécutez après relecture</td></tr><tr><td>Renommer une méthode dans 40 fichiers</td><td>Déléguer avec test</td><td>Mécanique, la suite de tests détecte les casses</td></tr></tbody></table>
+<h3>Suivre plusieurs agents</h3>
+<p>Quand plusieurs agents tournent, un tableau de suivi évite de perdre le fil. Tenez-le à jour à chaque changement d&#x27;état.</p>
+<table><thead><tr><th>Agent</th><th>Tâche</th><th>Branche</th><th>État</th><th>Prochaine action</th><th>Bloqué par</th></tr></thead><tbody><tr><td>A</td><td>Endpoint CSV</td><td>export-csv</td><td>À relire</td><td>Contrôle de réception</td><td>Rien</td></tr><tr><td>B</td><td>Tests de contrat</td><td>tests-tva</td><td>En cours</td><td>Attendre l&#x27;endpoint</td><td>Tâche A</td></tr><tr><td>C</td><td>Bouton React</td><td>bouton-react</td><td>Rejeté</td><td>Corriger l&#x27;appel d&#x27;API</td><td>Votre retour</td></tr><tr><td>Relecteur</td><td>Relecture globale</td><td>main</td><td>En attente</td><td>Démarrer après B et C</td><td>Tâches B et C</td></tr></tbody></table>
+<p>Un état se décrit avec un vocabulaire fixe : en attente, en cours, à relire, rejeté, fusionné. Un agent &quot;presque fini&quot; n&#x27;est pas un état.</p>
+<h3>À retenir</h3>
+<ul><li>Déléguez ce qui se vérifie vite et coûte peu en cas d&#x27;erreur.</li><li>Gardez l&#x27;irréversible, le légal, le financier et la relation client.</li><li>Un tableau de suivi à vocabulaire fixe évite de perdre un agent.</li></ul>
+<h3>Erreurs fréquentes</h3>
+<ul><li>Déléguer par défaut tout ce qui est difficile à faire soi-même.</li><li>Garder par habitude des tâches mécaniques vérifiables.</li><li>Ne pas noter l&#x27;état de chaque agent.</li></ul>
+<h2>Atelier guidé : livrer l&#x27;export CSV avec trois agents</h2>
+<p>Comptez 2 heures sur un dépôt de test. Le but est de vivre un cycle complet : brief, découpage, parallèle, réception.</p>
+<ol><li>Rédigez le brief de la leçon 8.1 dans un fichier <code>brief-export.md</code>. <strong>Attendu</strong> : les six rubriques sont remplies.</li><li>Demandez à un tiers de le lire et de dire ce qu&#x27;il comprendrait. <strong>Attendu</strong> : au moins une ambiguïté repérée, que vous corrigez.</li><li>Dessinez le tableau de découpage de la leçon 8.2 avec vos fichiers réels. <strong>Attendu</strong> : deux tâches sont indépendantes.</li><li>Créez deux worktrees avec <code>git worktree add</code>. <strong>Attendu</strong> : <code>git worktree list</code> en affiche trois.</li><li>Lancez un agent par worktree avec son brief et son périmètre. <strong>Attendu</strong> : aucun conflit de fichier.</li><li>Appliquez la checklist de réception à chaque résultat : rapport, diff, tests, relecture. <strong>Attendu</strong> : au moins une affirmation du rapport est à vérifier.</li><li>Rédigez un retour précis pour un des résultats (règle citée, ligne citée). <strong>Attendu</strong> : l&#x27;agent corrige sans question.</li><li>Fusionnez ce qui est validé, supprimez les worktrees terminés et remplissez le tableau de suivi.</li></ol>
+<h2>Exercices</h2>
+<p><strong>Exercice 1.</strong> Réécrivez cette demande pour en faire un brief : &quot;Ajoute un rappel quand une facture est impayée.&quot; Remplissez les six rubriques.</p>
+<p><strong>Exercice 2.</strong> Découpez la fonctionnalité &quot;paiement en ligne d&#x27;une facture&quot; en cinq tâches. Indiquez les dépendances et les tâches parallélisables.</p>
+<p><strong>Exercice 3.</strong> Associez chaque besoin à un pattern : (a) trier des tickets de support, (b) écrire une migration puis adapter le code, (c) relire une règle de TVA avec un second regard, (d) refactorer huit modules.</p>
+<p><strong>Exercice 4.</strong> Un agent annonce : &quot;Rappel d&#x27;impayé ajouté, 8 tests passent, rien d&#x27;autre modifié.&quot; Le diff montre un nouveau fichier <code>RappelService.php</code>, aucun test nouveau, et une modification de <code>config/services.yaml</code>. Qu&#x27;écrivez-vous à l&#x27;agent ?</p>
+<details><summary>Corrigé</summary>
+<p><strong>Exercice 1.</strong> Objectif : envoyer un e-mail de rappel pour toute facture <code>émise</code> dont l&#x27;échéance est dépassée depuis 3 jours. Contexte : module Notifications, les clients sont des indépendants. Périmètre : <code>src/Notifications/</code>, <code>tests/Notifications/</code>. Règles : un seul rappel par facture ; jamais pour une facture payée ou annulée ; aucun envoi réel en test. Preuve : tests sur le filtre de statut, le délai et l&#x27;absence de doublon. Compte rendu : fichiers, tests, points non traités.</p>
+<p><strong>Exercice 2.</strong> Tâches : (1) modèle de paiement et statuts ; (2) intégration du prestataire en mode test ; (3) endpoint de paiement ; (4) tests de l&#x27;endpoint ; (5) écran React. Dépendances : 2 après 1, 3 après 2, 4 et 5 après 3. Les tâches 4 et 5 sont parallélisables. La tâche 2 touche à de l&#x27;argent : relecture humaine obligatoire.</p>
+<p><strong>Exercice 3.</strong> (a) routage ; (b) séquentiel ; (c) générateur et critique ; (d) orchestrateur et exécutants.</p>
+<p><strong>Exercice 4.</strong> Trois retours précis : ajouter des tests (le compte rendu dit 8 tests, mais aucun ne cible le rappel) ; expliquer la modification de <code>config/services.yaml</code> ou l&#x27;annuler (affirmation &quot;rien d&#x27;autre modifié&quot; fausse) ; fournir la preuve demandée dans le brief (filtre de statut, délai, doublon). Vous ne fusionnez rien tant que ces trois points ne sont pas traités.</p>
+</details>
+<h2>Quiz d&#x27;auto-évaluation</h2>
+<table><thead><tr><th>Question</th><th>Réponse</th><th>Pourquoi</th></tr></thead><tbody><tr><td>Quelles sont les six rubriques d&#x27;un brief ?</td><td>Objectif, contexte, périmètre, règles, preuve attendue, compte rendu</td><td>Chaque rubrique ferme une porte aux devinettes</td></tr><tr><td>Quand lancer deux agents en parallèle ?</td><td>Quand leurs tâches sont indépendantes et touchent des fichiers distincts</td><td>Sinon ils se contredisent ou créent des conflits</td></tr><tr><td>Un worktree évite-t-il les conflits de fusion ?</td><td>Non</td><td>Il évite les collisions pendant le travail ; deux branches modifiant la même ligne entrent en conflit à la fusion</td></tr><tr><td>Pourquoi un compte rendu ne suffit-il pas ?</td><td>C&#x27;est une déclaration, pas une preuve</td><td>Seuls le diff et les tests établissent les faits</td></tr><tr><td>Que garder plutôt que déléguer ?</td><td>L&#x27;irréversible, le légal, le financier, la relation client</td><td>Le critère est le coût d&#x27;une erreur non détectée</td></tr><tr><td>Quel pattern pour un second regard sur le calcul de TVA ?</td><td>Générateur et critique</td><td>Le critique cherche les erreurs d&#x27;arrondi avec des règles précises</td></tr></tbody></table>
+<h2>Checklist de validation</h2>
+<ul class="check"><li>Je sais écrire un brief en six rubriques sans ambiguïté.</li><li>Je sais découper une demande en tâches avec dépendances.</li><li>Je choisis un pattern d&#x27;orchestration en justifiant mon choix.</li><li>Je sais créer et supprimer un worktree.</li><li>Je compare chaque affirmation d&#x27;un compte rendu au diff.</li><li>Je rédige un rejet précis avec la règle et la ligne.</li><li>Je décide ce que je délègue et ce que je garde, et je tiens un tableau de suivi.</li><li>J'explique pourquoi on travaille par tickets plutôt qu'à la volée, et je fais générer un plan de tickets que je relis avant de le détailler.</li></ul>
+<h2>Sources</h2>
+<ul><li><a href="https://code.claude.com/docs/en/glossary">Glossaire Claude Code</a></li><li><a href="https://code.claude.com/docs/en/sub-agents">Sous-agents</a></li></ul>
+<p>Les noms, fichiers et chiffres des exemples sont fictifs.</p>
+
+<div class="pager"><a class="prev" href="../modules/module-07.html"><small>← Précédent</small>Module 7 : agents IA, définitions et fonctionnement</a><a class="next" href="../modules/module-09.html"><small>Suivant →</small>Module 9 : piloter l&#x27;application en production</a></div></article></main></div>
+<script>document.querySelectorAll('.side a.nav').forEach(function(a){a.addEventListener('click',function(){document.body.classList.remove('open')})});var on=document.querySelector('.side a.on');if(on)on.scrollIntoView({block:'center'});</script>
+</body></html>

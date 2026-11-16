@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Module 2 : lire le code et reconnaître le mauvais code · Cursus orchestrateur</title>
+<link rel="stylesheet" href="../css/style.css"></head>
+<body><button class="menu-btn" onclick="document.body.classList.toggle('open')">☰ Menu du cursus</button>
+<div class="layout"><nav class="side"><a class="brand" href="../index.html">Cursus : orchestrateur et gestionnaire d’app<small>12 modules · 24 semaines</small></a>
+<a class="nav" href="../index.html">Accueil</a>
+<a class="nav" href="../demarrer.html">Démarrer</a>
+<h4>Le socle : savoir juger</h4>
+<a class="nav" href="../modules/module-01.html">Module 1 : fondamentaux du web et du logiciel</a>
+<a class="nav on" href="../modules/module-02.html">Module 2 : lire le code et reconnaître le mauvais code</a>
+<a class="nav" href="../modules/module-03.html">Module 3 : architectures et design patterns</a>
+<a class="nav" href="../modules/module-04.html">Module 4 : tests et qualité</a>
+<a class="nav" href="../modules/module-05.html">Module 5 : serveur, mise en ligne, DevOps et CI/CD</a>
+<a class="nav" href="../modules/module-06.html">Module 6 : sécurité, observabilité, données et conformité</a>
+<h4>Les agents IA et le pilotage</h4>
+<a class="nav" href="../modules/module-07.html">Module 7 : agents IA, définitions et fonctionnement</a>
+<a class="nav" href="../modules/module-08.html">Module 8 : orchestrer des agents</a>
+<a class="nav" href="../modules/module-09.html">Module 9 : piloter l&#x27;application en production</a>
+<h4>Les modules transversaux</h4>
+<a class="nav" href="../modules/module-10.html">Module 10 : gestion de projet</a>
+<a class="nav" href="../modules/module-11.html">Module 11 : produit et conception</a>
+<a class="nav" href="../modules/module-12.html">Module 12 : gestion du client et communication</a>
+<h4>Référence</h4>
+<a class="nav" href="../glossaire.html">Glossaire</a></nav>
+<main><article><div class="toolbar"><button onclick="window.print()">Imprimer / PDF</button><button onclick="var r=document.documentElement;var d=r.dataset.theme==='dark';r.dataset.theme=d?'light':'dark'">Clair / sombre</button></div>
+<h1>Module 2 : lire le code et reconnaître le mauvais code</h1>
+<h2>Ce que vous saurez faire</h2>
+<p>Ce module est le cœur du cursus : un agent IA écrit du code en quelques minutes, et la valeur d'un orchestrateur tient dans sa capacité à voir ce qui ne va pas. Lire du code se travaille comme un sport : par la pratique, avec une méthode. Vous apprendrez la méthode, les signaux à repérer et la manière de formuler votre avis.</p>
+<p><strong>À la fin du module, vous saurez :</strong></p>
+<ul><li>lire un fichier inconnu et dire en deux phrases ce qu'il fait ;</li><li>reconnaître et nommer dix signaux de mauvais code (les <em>code smells</em>) ;</li><li>utiliser SOLID, DRY, KISS et YAGNI comme grille de lecture, sans en faire des dogmes ;</li><li>repérer les six formes de dérive d'un agent ;</li><li>relire un diff et décider : approuver, demander une correction ou refuser ;</li><li>rédiger un commentaire de revue clair : constat, risque, suggestion.</li></ul>
+<table><tbody><tr><td>Prérequis</td><td>Le module 1 : trajet d'une requête, API, base de données, Git.</td></tr><tr><td>Durée estimée</td><td>14 heures, sur deux semaines, dont au moins 5 heures de lecture de code réel.</td></tr><tr><td>Lien avec Facturo</td><td>Tous les extraits viennent du module Facturation : calcul, émission, numérotation.</td></tr><tr><td>Entraînement</td><td>Le mini-jeu <a href="https://claude.ai/artifact/1aozg1BfaPHRtAnpxxTtD6">Chasse aux dérives</a> (jeu en ligne) : dix cas de relecture avec explication. Jouez-y après chaque leçon.</td></tr></tbody></table>
+<p>Le code des extraits est volontairement court. Si vous ne connaissez pas PHP, ce n'est pas grave : le but est de lire la forme, les noms et la logique, pas de maîtriser la syntaxe.</p>
+<h2>Leçon 2.1 · Lire un fichier inconnu en cinq passes</h2>
+<p>Un agent vous livre un fichier de 200 lignes. Si vous le lisez de haut en bas, vous vous noyez dans le détail avant de comprendre l'intention. Les bons relecteurs vont du large vers le détail, en cinq passes.</p>
+<p>Chaque passe répond à une seule question. Les trois premières prennent quelques minutes et ne demandent presque aucune logique.</p>
+<figure><img src="../img/m02-01.png" alt="méthode de lecture · 5 passes"><figcaption>méthode de lecture · 5 passes</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>Partez du haut : la première passe est la plus large et la moins coûteuse.</li><li>Descendez d'une marche à la fois. Chaque boîte est plus étroite, car vous regardez de moins en moins de code.</li><li>Ne sautez pas de passe. Lire les cas limites sans connaître le chemin nominal produit de fausses alertes.</li><li>La boîte colorée est la sortie : un verdict écrit, pas une impression.</li></ol>
+<h3>Démonstration sur un fichier de Facturo</h3>
+<p>L'agent de code vient de livrer le service qui émet une facture. Voici le fichier.</p>
+<pre><code>final class InvoiceIssuer
+{
+    public function __construct(
+        private InvoiceRepository $invoices,
+        private NumberGenerator $numbers,
+        private Clock $clock,
+    ) {}
+
+    public function issue(int $invoiceId): Invoice
+    {
+        $invoice = $this-&gt;invoices-&gt;get($invoiceId);
+        if ($invoice-&gt;status() !== Status::Draft) {
+            throw new InvoiceNotDraft($invoiceId);
+        }
+        $invoice-&gt;assignNumber($this-&gt;numbers-&gt;next());
+        $invoice-&gt;markIssued($this-&gt;clock-&gt;now());
+        $this-&gt;invoices-&gt;save($invoice);
+        return $invoice;
+    }
+}</code></pre>
+<table><thead><tr><th>Passe</th><th>Ce que vous faites</th><th>Ce que vous constatez</th></tr></thead><tbody><tr><td>1. Contexte</td><td>Lire le chemin, le nom, <code>git log</code></td><td>Le fichier est dans <code>Facturation/Application</code> : c'est un cas d'usage. L'agent l'a ajouté ce matin, avec son test.</td></tr><tr><td>2. Signatures</td><td>Lire le constructeur et les méthodes publiques</td><td>Trois dépendances : dépôt, générateur de numéros, horloge. Une seule méthode publique : <code>issue()</code>.</td></tr><tr><td>3. Chemin nominal</td><td>Suivre le cas normal</td><td>Charge la facture, vérifie qu'elle est en brouillon, lui donne un numéro, la marque émise, l'enregistre.</td></tr><tr><td>4. Cas limites</td><td>Poser les questions qui fâchent</td><td>Facture introuvable : que fait <code>get()</code> ? Deux émissions en même temps : deux numéros identiques ? Facture sans ligne : rien ne l'empêche ici.</td></tr><tr><td>5. Verdict</td><td>Écrire deux phrases</td><td>« Ce service fait passer une facture de brouillon à émise, avec son numéro. Il ne protège ni la concurrence ni la facture vide. »</td></tr></tbody></table>
+<p>Le verdict de la passe 5 devient immédiatement une demande à l'agent : « Entoure l'émission d'une transaction et refuse une facture sans ligne. Ajoute les deux tests. » Vous n'avez écrit aucune ligne de code, et vous avez trouvé deux vrais défauts.</p>
+<p><strong>À retenir</strong></p>
+<ul><li>Lisez du large vers le détail : contexte, signatures, chemin nominal, cas limites, verdict.</li><li>Un verdict tient en deux phrases. S'il n'y arrive pas, le fichier fait trop de choses.</li><li>Le plus gros risque se cache dans les cas limites, pas dans le chemin nominal.</li><li>Lisez aussi les tests : ils disent ce que l'agent a cru devoir protéger.</li></ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Commencer par la ligne 1 et lire tout, sans jamais prendre de recul.</li><li>Juger le fichier sur son style plutôt que sur son comportement.</li><li>Faire confiance au message de commit ou au résumé de l'agent sans ouvrir le code.</li><li>Relire seulement le diff, sans ouvrir le fichier entier autour.</li></ul>
+<h2>Leçon 2.2 · Dix signaux de mauvais code, première moitié : la structure</h2>
+<p>Un <em>code smell</em> (« mauvaise odeur ») est un signe que le code pose problème, même s'il fonctionne. Ce n'est pas une preuve de bug. C'est une alerte qui mérite un regard.</p>
+<p>Les agents produisent ces signaux de façon régulière, car ils optimisent « ça marche » avant « c'est facile à changer ». Voici les dix, en deux familles. Cette leçon traite la première, la suivante la seconde.</p>
+<figure><img src="../img/m02-02.png" alt="les dix signaux · 2 familles"><figcaption>les dix signaux · 2 familles</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>Les cinq boîtes de gauche concernent le découpage : où se trouve chaque morceau de logique.</li><li>Les cinq de droite concernent la lecture : un lecteur pressé peut se tromper ou être trompé.</li><li>Chaque boîte donne un symptôme court. Cherchez-le dans les diffs que vous relisez.</li><li>Un seul signal ne condamne pas un fichier. Trois ou quatre ensemble, oui.</li></ol>
+<h3>1 · Duplication</h3>
+<p>Le même calcul existe à deux endroits. Le jour où la règle change, l'un des deux est oublié.</p>
+<pre><code>// FacturationController.php
+$ttc = round($ht * (1 + $taux / 100), 2);
+
+// PdfExporter.php
+$ttc = round($ht * (1 + $taux / 100), 2);</code></pre>
+<p>Après : la règle vit dans la facture, et tout le monde l'appelle.</p>
+<pre><code>// Invoice.php
+public function totalTtc(): Money
+{
+    return $this-&gt;totalHt-&gt;plusPercent($this-&gt;vatRate);
+}</code></pre>
+<p>Attention : DRY (<em>Don't Repeat Yourself</em>) vise la duplication de <em>connaissance</em>, pas de lignes. Deux blocs qui se ressemblent mais évoluent pour des raisons différentes peuvent rester séparés.</p>
+<h3>2 · Fonction ou classe géante</h3>
+<p>Une méthode fait tout. On ne peut ni la tester par morceaux, ni la relire sans y passer vingt minutes.</p>
+<pre><code>public function create(Request $r): Response
+{
+    // 1. valider la requête
+    // 2. charger le client
+    // 3. calculer lignes, TVA et totaux
+    // 4. enregistrer en base
+    // 5. envoyer l'e-mail
+    // 6. construire la réponse JSON
+}</code></pre>
+<p>Ce squelette montre six responsabilités dans une seule méthode, souvent longue de plus de 150 lignes. Après : un cas d'usage court qui délègue.</p>
+<pre><code>public function __invoke(CreateInvoiceCommand $cmd): Invoice
+{
+    $client  = $this-&gt;clients-&gt;get($cmd-&gt;clientId);
+    $invoice = Invoice::draft($client, $cmd-&gt;lines);
+    $this-&gt;invoices-&gt;save($invoice);
+    return $invoice;
+}</code></pre>
+<p>La validation reste à l'entrée de l'API, l'e-mail passe par un événement, la réponse JSON par un transformateur.</p>
+<h3>3 · Couplage fort</h3>
+<p>Le service construit lui-même ses dépendances. On ne peut plus les remplacer, donc plus les tester sans envoyer de vrais e-mails.</p>
+<pre><code>final class InvoiceIssuer
+{
+    public function issue(Invoice $invoice): void
+    {
+        $mailer = new SmtpMailer('smtp.facturo.fr');
+        $mailer-&gt;send($invoice-&gt;clientEmail(), 'Votre facture');
+    }
+}</code></pre>
+<p>Après : la dépendance arrive de l'extérieur, derrière une interface.</p>
+<pre><code>final class InvoiceIssuer
+{
+    public function __construct(private Mailer $mailer) {}
+
+    public function issue(Invoice $invoice): void
+    {
+        $this-&gt;mailer-&gt;send($invoice-&gt;clientEmail(), 'Votre facture');
+    }
+}</code></pre>
+<p>En test, on passe un faux <code>Mailer</code> qui note les envois. En production, Symfony injecte le vrai.</p>
+<h3>4 · Logique au mauvais endroit</h3>
+<p>Une règle métier se retrouve dans le contrôleur, le composant React ou la requête SQL. C'est la dérive la plus fréquente chez les agents.</p>
+<pre><code>// FacturationController.php
+$invoice-&gt;dateEcheance = $issuedAt-&gt;modify('+30 days');</code></pre>
+<p>Le délai de 30 jours est une règle de Facturo. Elle appartient à la facture, pas au contrôleur.</p>
+<pre><code>// Invoice.php
+public function markIssued(DateTimeImmutable $at): void
+{
+    $this-&gt;issuedAt = $at;
+    $this-&gt;dueDate  = $at-&gt;modify('+30 days');
+    $this-&gt;status   = Status::Issued;
+}</code></pre>
+<p>Si demain Marie Giraud demande un délai de 45 jours pour ses clients, une seule méthode change.</p>
+<h3>5 · Abstraction inutile</h3>
+<p>L'agent ajoute des couches « au cas où » : interface, classe abstraite, usine. Pour une seule implémentation, c'est du bruit.</p>
+<pre><code>interface NumberGeneratorInterface {}
+abstract class AbstractNumberGenerator implements NumberGeneratorInterface {}
+final class DefaultNumberGenerator extends AbstractNumberGenerator {}
+final class NumberGeneratorFactory {}</code></pre>
+<p>Après : une classe, un rôle. On extraira une interface le jour où une deuxième implémentation existera.</p>
+<pre><code>final class InvoiceNumberGenerator
+{
+    public function next(int $year): string { /* FAC-2026-0001 */ }
+}</code></pre>
+<p>Ce principe s'appelle YAGNI (<em>You Aren't Gonna Need It</em>) : ne construisez pas ce dont personne n'a besoin aujourd'hui.</p>
+<p><strong>À retenir</strong></p>
+<ul><li>Un smell est une alerte, pas un verdict. Il mérite une question à l'agent.</li><li>Duplication, fonction géante, couplage, logique mal placée et abstraction inutile touchent le découpage.</li><li>Demandez toujours : « Où cette règle doit-elle vivre ? »</li></ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Fusionner deux blocs qui se ressemblent mais ne changent pas pour la même raison.</li><li>Accepter une couche d'abstraction parce qu'elle « fait propre ».</li><li>Mesurer la qualité au nombre de lignes plutôt qu'au nombre de responsabilités.</li></ul>
+<h2>Leçon 2.3 · Dix signaux de mauvais code, seconde moitié : la lecture et la fiabilité</h2>
+<p>Ces cinq signaux ne gênent pas forcément le fonctionnement aujourd'hui. Ils trompent le lecteur ou cachent les pannes de demain. Ce sont souvent ceux qui passent inaperçus en relecture rapide.</p>
+<h3>6 · Nombres et textes magiques</h3>
+<p>Une valeur est écrite en dur, sans nom. On ne sait ni d'où elle vient, ni où d'autre elle apparaît.</p>
+<pre><code>if ($invoice-&gt;status === 'paid') { /* ... */ }
+$ttc = $ht * 1.2;</code></pre>
+<p>Le <code>1.2</code> cache que Facturo gère aussi 10 % et 5,5 %. Le texte <code>'paid'</code> accepte toutes les fautes de frappe. Après : des noms, à un seul endroit.</p>
+<pre><code>enum Status: string
+{
+    case Draft = 'draft';
+    case Issued = 'issued';
+    case Paid = 'paid';
+    case Cancelled = 'cancelled';
+}
+
+const DEFAULT_VAT_RATE = 20;</code></pre>
+<h3>7 · Noms vagues</h3>
+<p>Un nom doit dire <em>ce que fait</em> le code, pas <em>comment</em>. <code>process</code>, <code>handle</code>, <code>data</code>, <code>tmp</code>, <code>manager</code> ne disent rien.</p>
+<pre><code>public function process(array $data): array
+{
+    $tmp = [];
+    foreach ($data as $d) { /* ... */ }
+    return $tmp;
+}</code></pre>
+<p>Après : on lit l'intention sans ouvrir le corps.</p>
+<pre><code>public function computeTotals(array $lines): Totals</code></pre>
+<p>Test simple : si vous avez besoin du mot « et » pour décrire une fonction, elle fait deux choses.</p>
+<h3>8 · Erreurs avalées</h3>
+<p>Un <code>catch</code> vide, ou un <code>catch</code> qui ne fait que renvoyer « ok ». L'échec disparaît, et personne ne sait que quelque chose a cassé.</p>
+<pre><code>try {
+    $this-&gt;invoices-&gt;markPaid($id);
+} catch (\Throwable $e) {
+}
+return new Response('ok', 200);</code></pre>
+<p>Si Marie Giraud règle sa facture et que la mise à jour échoue, Facturo répond « tout va bien » au service de paiement. La facture reste « émise » et Marie reçoit une relance injuste.</p>
+<figure><img src="../img/m02-03.png" alt="erreur avalée vs erreur visible · 2 flux"><figcaption>erreur avalée vs erreur visible · 2 flux</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>La ligne du haut montre le code défectueux : l'échec du statut est capturé par un <code>catch</code> vide (boîte rouge).</li><li>La réponse 200 dit au service de paiement que tout s'est bien passé. Il n'insistera pas.</li><li>La ligne du bas montre la correction : l'erreur est journalisée puis relancée (boîte verte).</li><li>La réponse d'erreur permet un nouvel essai, donc la facture finit par passer à « payée ».</li></ol>
+<p>Le code corrigé :</p>
+<pre><code>try {
+    $this-&gt;invoices-&gt;markPaid($id);
+} catch (\Throwable $e) {
+    $this-&gt;logger-&gt;error('markPaid failed', ['invoice' =&gt; $id, 'error' =&gt; $e]);
+    throw $e;
+}</code></pre>
+<h3>9 · Effets de bord cachés</h3>
+<p>Une fonction dont le nom promet de lire fait aussi écrire. Le lecteur ne s'y attend pas, et un simple affichage modifie des données.</p>
+<pre><code>public function getInvoice(int $id): Invoice
+{
+    $invoice = $this-&gt;repo-&gt;find($id);
+    $invoice-&gt;markViewed();
+    $this-&gt;repo-&gt;save($invoice);
+    return $invoice;
+}</code></pre>
+<p>Après : la lecture reste une lecture, l'écriture a son propre nom.</p>
+<pre><code>public function getInvoice(int $id): Invoice
+{
+    return $this-&gt;repo-&gt;get($id);
+}
+
+public function recordView(int $id): void { /* ... */ }</code></pre>
+<p>C'est le même principe que les méthodes HTTP sûres du module 1 : un GET ne doit rien modifier.</p>
+<h3>10 · Code mort</h3>
+<p>Du code que plus rien n'appelle, gardé « au cas où ». Les agents le laissent souvent après une refonte.</p>
+<pre><code>// ancienne version, gardée au cas où
+public function oldComputeTotal(array $lines): float { /* ... */ }</code></pre>
+<p>Le code mort trompe : on le lit, on le croit utilisé, on le modifie pour rien. Supprimez-le. Git garde l'historique.</p>
+<p><strong>À retenir</strong></p>
+<ul><li>Un nom, un type ou une constante bien placés remplacent un commentaire.</li><li>Toute erreur capturée doit être soit traitée, soit journalisée et relancée. Jamais ignorée.</li><li>Une méthode qui s'appelle « lire » ne doit rien écrire.</li><li>Demandez à l'agent de supprimer ce qui n'est plus utilisé.</li></ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Accepter un <code>catch</code> vide parce qu'« il ne plante plus ». C'est pire : la panne devient invisible.</li><li>Renommer sans relire les tests et les appels : un renommage doit rester complet.</li><li>Laisser un agent « nettoyer » en supprimant aussi du code utile. Vérifiez avec la recherche dans le projet.</li></ul>
+<h2>Leçon 2.4 · SOLID, DRY, KISS, YAGNI : une grille de lecture</h2>
+<p>Ces quatre sigles sont des questions à poser, pas des lois à appliquer. Vous n'avez pas à coder en SOLID. Vous devez savoir reconnaître quand un code les viole, et quand les respecter coûterait plus cher que ce que ça rapporte.</p>
+<p>Prenons un service que l'agent aurait écrit dans un premier jet.</p>
+<pre><code>final class InvoiceService
+{
+    public function issue(int $id): void
+    {
+        $row = $this-&gt;db-&gt;fetch('SELECT * FROM invoice WHERE id = ?', [$id]);
+        $total = 0;
+        foreach ($row['lines'] as $l) { $total += $l['qty'] * $l['price']; }
+        $number = 'FAC-' . date('Y') . '-' . $this-&gt;nextNumber();
+        $pdf = (new Dompdf())-&gt;loadHtml($this-&gt;render($row, $total));
+        mail($row['email'], 'Votre facture', 'Ci-joint', $pdf);
+        $this-&gt;db-&gt;exec('UPDATE invoice SET status = ?, number = ?', ['issued', $number]);
+    }
+}</code></pre>
+<p>Cette classe change si le calcul change, si le format du numéro change, si le PDF change, si l'e-mail change. Cinq raisons de changer, donc cinq risques de casser les quatre autres.</p>
+<figure><img src="../img/m02-04.png" alt="avant / après · découpage en responsabilités"><figcaption>avant / après · découpage en responsabilités</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>À gauche, la classe d'origine : cinq responsabilités empilées dans une seule boîte.</li><li>La flèche montre le découpage. On ne réécrit pas la logique, on la range.</li><li>Au centre, <code>InvoiceIssuer</code> ne calcule rien. Il appelle les autres dans l'ordre (c'est le fichier de la leçon 2.1).</li><li>À droite, chaque classe a une seule raison de changer et peut être testée seule.</li></ol>
+<h3>SOLID en cinq questions</h3>
+<p>SOLID regroupe cinq principes de conception objet. Chacun se lit comme une question.</p>
+<table><thead><tr><th>Lettre</th><th>Principe</th><th>Question à poser en relecture</th><th>Exemple Facturo</th></tr></thead><tbody><tr><td>S</td><td>Responsabilité unique</td><td>Cette classe a-t-elle une seule raison de changer ?</td><td>Le calcul de TVA change avec la loi, le PDF avec le logo : deux classes.</td></tr><tr><td>O</td><td>Ouvert / fermé</td><td>Ajouter un cas oblige-t-il à modifier du code qui marche ?</td><td>Un nouvel export (CSV, FEC) est une nouvelle classe, pas un <code>if</code> de plus.</td></tr><tr><td>L</td><td>Substitution de Liskov</td><td>Peut-on remplacer une classe par sa sœur sans surprise ?</td><td>Un <code>FakeMailer</code> de test doit se comporter comme <code>SmtpMailer</code> pour l'appelant.</td></tr><tr><td>I</td><td>Ségrégation des interfaces</td><td>L'interface impose-t-elle des méthodes inutiles à ceux qui l'utilisent ?</td><td><code>Mailer</code> expose <code>send()</code> et rien d'autre.</td></tr><tr><td>D</td><td>Inversion des dépendances</td><td>Le métier dépend-il d'un détail technique ?</td><td><code>InvoiceIssuer</code> dépend de l'interface <code>Mailer</code>, pas de <code>SmtpMailer</code>.</td></tr></tbody></table>
+<p>En pratique, S et D se repèrent le plus facilement dans un diff. O, L et I demandent plus d'expérience. Commencez par S et D.</p>
+<h3>Les trois autres sigles</h3>
+<table><thead><tr><th>Sigle</th><th>Sens</th><th>La question</th><th>Le piège</th></tr></thead><tbody><tr><td>DRY</td><td><em>Don't Repeat Yourself</em></td><td>Cette règle existe-t-elle à un seul endroit ?</td><td>Fusionner du code qui se ressemble mais change pour des raisons différentes.</td></tr><tr><td>KISS</td><td><em>Keep It Simple</em></td><td>Y a-t-il plus simple qui fasse la même chose ?</td><td>Confondre simple et court : une ligne énigmatique n'est pas simple.</td></tr><tr><td>YAGNI</td><td><em>You Aren't Gonna Need It</em></td><td>Ce code répond-il à un besoin d'aujourd'hui ?</td><td>Ne rien prévoir du tout alors qu'un besoin certain arrive la semaine prochaine.</td></tr></tbody></table>
+<h3>Quand les principes se contredisent</h3>
+<p>DRY pousse à factoriser. KISS et YAGNI poussent à attendre. Une heuristique courante dit de tolérer deux copies et de factoriser à la troisième, quand la forme commune est enfin visible. Ce n'est pas une loi, c'est un repère.</p>
+<p>En relecture, tranchez avec une question : « Si cette règle change, combien d'endroits dois-je modifier ? » Un seul : bien. Deux ou trois et aucun test ne vous prévient : refusez.</p>
+<h3>Et « Clean Code » ?</h3>
+<p>« Clean Code » désigne un ensemble de pratiques d'écriture popularisées par un livre du même nom : des noms qui disent l'intention, des fonctions courtes qui font une seule chose, peu de paramètres, pas de duplication, des commentaires qui expliquent le <em>pourquoi</em> plutôt que de répéter le code, des erreurs traitées plutôt qu'avalées. C'est la grille des leçons 2.2 et 2.3 vue depuis l'auteur : les dix signaux de mauvais code sont les symptômes que ces pratiques évitent, et SOLID en est le versant objet.</p>
+<p>Avec des agents, l'enjeu double. Un agent lit votre code comme contexte avant de l'étendre, et il tend à imiter le style qu'il y trouve. Des noms vagues et des fonctions géantes lui donnent un mauvais modèle ; un code propre rend ses propositions plus justes et vos relectures plus rapides. Comme SOLID, c'est une grille de lecture, pas un dogme : éclater une logique simple en dix fichiers « pour faire court » viole KISS.</p>
+<p><strong>À retenir</strong></p>
+<ul><li>SOLID, DRY, KISS et YAGNI sont des questions de relecture, pas des objectifs.</li><li>Commencez par S (une raison de changer) et D (le métier ne dépend pas d'un détail).</li><li>Quand deux principes se contredisent, mesurez le coût du changement futur.</li><li>« Clean Code » rassemble les pratiques des leçons 2.2 à 2.4 : noms clairs, fonctions courtes, pas de duplication. Un code propre est aussi un meilleur contexte pour un agent.</li></ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Exiger SOLID partout, y compris sur un script de dix lignes.</li><li>Citer un sigle pour imposer son avis. Un commentaire de revue décrit un risque concret.</li><li>Prendre un fichier court pour un fichier simple.</li></ul>
+<h2>Leçon 2.5 · Les six formes de dérive d'un agent</h2>
+<p>Une <em>dérive</em> est un écart entre ce que vous avez demandé et ce que l'agent a livré. Le code peut être propre, testé et pourtant faux pour votre projet. Cette leçon donne les six formes à chercher, avec le signal qui les trahit.</p>
+<p>Un agent ne dérive pas par mauvaise volonté. Il combine ce qu'il voit dans le dépôt et ce qu'il devine du reste. Tout ce qui n'est pas écrit, il l'invente.</p>
+<figure><img src="../img/m02-05.png" alt="les six dérives d&#x27;un agent · grille 3 x 2"><figcaption>les six dérives d'un agent · grille 3 x 2</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>Les trois boîtes du haut se voient souvent d'un coup d'œil dans le diff : couche, style, taille de la modification.</li><li>Les trois du bas demandent d'ouvrir des fichiers précis : le fichier de dépendances, le dossier de tests, la spécification.</li><li>Chaque boîte donne un exemple tiré de Facturo. Cherchez la même forme dans vos propres relectures.</li><li>La boîte encadrée est la plus dangereuse : rien ne casse, mais l'application ne fait plus ce qui a été décidé.</li></ol>
+<h3>Repérer chaque dérive, et l'empêcher</h3>
+<table><thead><tr><th>Dérive</th><th>Signal dans le diff</th><th>Question à poser à l'agent</th><th>Garde-fou</th></tr></thead><tbody><tr><td>Architecture</td><td>Un <code>use</code> d'une couche qui ne devrait pas être connue</td><td>« Pourquoi ce contrôleur appelle-t-il la base ? »</td><td>Règles d'architecture écrites et vérifiées en CI</td></tr><tr><td>Conventions</td><td>Nommage ou format différent du reste du dossier</td><td>« Quel fichier voisin as-tu suivi ? »</td><td>Formateur et analyseur statique automatiques</td></tr><tr><td>Périmètre</td><td>Des fichiers sans rapport avec la demande</td><td>« Pourquoi ce fichier change-t-il ? »</td><td>Une demande, un objectif, une branche</td></tr><tr><td>Dépendances</td><td>Une ligne en plus dans <code>composer.json</code> ou <code>package.json</code></td><td>« Que fait ce paquet que le code existant ne fait pas ? »</td><td>Liste de dépendances validée à la main, audit en CI</td></tr><tr><td>Tests</td><td>Des tests supprimés, commentés, ou des assertions plus faibles</td><td>« Pourquoi ce test a-t-il changé ? »</td><td>Règle : tout test modifié est justifié dans la description</td></tr><tr><td>Spécification</td><td>Un comportement qui contredit un critère d'acceptation</td><td>« Quel critère couvre ce cas ? »</td><td>Critères écrits avant le code, test dérivé par un humain</td></tr></tbody></table>
+<h3>Trois commandes pour inspecter un diff</h3>
+<p>Avant de lire une ligne de code, regardez la forme de la modification. Ces trois commandes prennent une minute.</p>
+<pre><code>git diff --stat main...feature/echeance          # périmètre : combien de fichiers ?
+git diff main...feature/echeance -- composer.json  # dépendances ajoutées ?
+git diff main...feature/echeance -- tests/       # tests supprimés ou affaiblis ?</code></pre>
+<h3>Exemple : une dérive en chaîne</h3>
+<p>Vous demandez à l'agent : « Permettre un délai de paiement propre à chaque client. » Il livre une branche qui touche quatorze fichiers. Le <code>--stat</code> montre que l'export comptable a changé : périmètre.</p>
+<p>Vous ouvrez <code>composer.json</code> : un paquet de calcul de dates est apparu : dépendance. Dans <code>tests/</code>, un test de numérotation a été supprimé : tests. Trois dérives en deux minutes, sans avoir lu la logique métier.</p>
+<p>La décision la plus saine est de refuser la branche et de redemander plus petit : une demande, un objectif.</p>
+<p><strong>À retenir</strong></p>
+<ul><li>Six dérives à connaître : architecture, conventions, périmètre, dépendances, tests, spécification.</li><li>Les cinq premières se voient dans le diff. La sixième demande de relire la décision d'origine.</li><li>Un garde-fou automatique vaut mieux qu'une vigilance humaine. Les deux se cumulent.</li></ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Juger la branche sur ses tests verts alors que l'agent a modifié les tests.</li><li>Laisser passer « une petite amélioration en passant ». Elle change le périmètre de la revue.</li><li>Ne pas relire la spécification d'origine avant de valider un comportement.</li></ul>
+<h2>Leçon 2.6 · Relire un diff d'agent : trois cas</h2>
+<p>Un <em>diff</em> montre ce qui change entre deux versions. C'est la pièce que vous lisez le plus souvent : l'agent a travaillé, vous jugez ce qu'il propose. Trois cas, trois décisions : approuver, refuser, poser une question.</p>
+<p>Pour chaque cas, appliquez les mêmes trois questions, dans le même ordre.</p>
+<figure><img src="../img/m02-06.png" alt="décision de relecture · 3 questions, 4 issues"><figcaption>décision de relecture · 3 questions, 4 issues</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>Partez du haut et suivez la colonne de gauche. Chaque losange est une question, la réponse « non » sort vers la droite.</li><li>Le périmètre vient en premier : un diff trop large ne se relit pas, donc on le refuse avant de lire le détail.</li><li>Les tests viennent ensuite : ils sont la preuve que l'agent propose. S'ils sont faibles, il n'y a rien à juger.</li><li>La conformité à la spécification est en dernier. En cas de doute, la bonne réponse est de poser la question.</li></ol>
+<h3>Cas A : le diff qu'on approuve</h3>
+<p>Demande : « La date d'échéance doit être calculée à l'émission, à 30 jours. »</p>
+<pre><code>--- a/src/Facturation/Domain/Invoice.php
++++ b/src/Facturation/Domain/Invoice.php
+     $this-&gt;issuedAt = $at;
++    $this-&gt;dueDate  = $at-&gt;modify('+30 days');
+     $this-&gt;status   = Status::Issued;
+--- a/tests/Facturation/InvoiceTest.php
++++ b/tests/Facturation/InvoiceTest.php
++    public function testDueDateIsThirtyDaysAfterIssue(): void
++    {
++        $invoice = InvoiceFactory::draft();
++        $invoice-&gt;markIssued(new DateTimeImmutable('2026-03-01'));
++        self::assertEquals('2026-03-31', $invoice-&gt;dueDate()-&gt;format('Y-m-d'));
++    }</code></pre>
+<p>Verdict : <strong>approuver</strong>. Deux fichiers, une demande. La règle vit dans la facture, pas dans un contrôleur. Le test vérifie une date précise, pas seulement « non nulle ».</p>
+<h3>Cas B : le diff qu'on refuse</h3>
+<p>Demande : « Arrondir les montants au centime dans l'export CSV. »</p>
+<pre><code>--- a/composer.json
++++ b/composer.json
++        "moneyphp/money": "^4.0",
+--- a/src/Export/CsvExporter.php
+-        $ttc = $ht * (1 + $taux / 100);
++        $ttc = Money::EUR($ht)-&gt;multiply(1 + $taux / 100)-&gt;getAmount();
+--- a/src/Facturation/NumberGenerator.php
+-        return sprintf('FAC-%d-%04d', $year, $seq);
++        return sprintf('FAC-%d-%05d', $year, $seq);
+--- a/tests/Facturation/NumberGeneratorTest.php
+-    public function testFormatIsFacYearFourDigits(): void</code></pre>
+<p>Verdict : <strong>refuser</strong>. Il y a quatre problèmes dans ce diff :</p>
+<ul><li>une dépendance ajoutée pour un problème que <code>round($x, 2)</code> résout ;</li><li>une modification du format de numéro, sans rapport avec l'export : périmètre ;</li><li>ce nouveau format casse la règle « FAC-2026-0001 » de Facturo ;</li><li>le test qui l'aurait signalé a été supprimé.</li></ul>
+<p>Message à l'agent : « Refus. Ne change que l'arrondi de l'export, sans nouvelle dépendance, et ne touche pas à la numérotation. Restaure le test supprimé. »</p>
+<h3>Cas C : le diff ambigu</h3>
+<p>Demande : « Ne plus envoyer de relance quand la facture est payée. »</p>
+<pre><code> public function send(Invoice $invoice): void
+ {
++    if ($invoice-&gt;status() === Status::Paid) {
++        return;
++    }
+     $this-&gt;mailer-&gt;send($invoice-&gt;clientEmail(), 'Relance');
+ }</code></pre>
+<p>Verdict : <strong>poser la question</strong>. Le diff fait ce qu'on a demandé, il est court et lisible. Mais il laisse deux trous :</p>
+<ul><li>une facture « annulée » ou « brouillon » recevrait encore une relance. La règle n'est pas écrite : c'est à vous, product owner, de trancher ;</li><li>aucun test n'accompagne la modification.</li></ul>
+<p>Message à l'agent : « Seules les factures émises doivent être relancées. Remplace la condition par un test sur le statut « émise » et ajoute un test par statut. » Vous avez posé la question, puis donné la règle.</p>
+<table><thead><tr><th>Cas</th><th>Décision</th><th>Raison en une phrase</th></tr></thead><tbody><tr><td>A</td><td>Approuver</td><td>Une demande, une règle bien placée, un test précis.</td></tr><tr><td>B</td><td>Refuser</td><td>Dépendance, numérotation touchée et test supprimé : trois dérives.</td></tr><tr><td>C</td><td>Poser la question</td><td>Code correct, mais une règle métier non écrite et pas de test.</td></tr></tbody></table>
+<p><strong>À retenir</strong></p>
+<ul><li>Trois questions, dans l'ordre : périmètre, tests, conformité.</li><li>Refuser est une décision normale. Un refus bien formulé coûte une minute et évite une dette.</li><li>Quand une règle métier manque, c'est vous qui la fournissez. L'agent ne peut pas la deviner.</li></ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Approuver parce que le diff « a l'air propre » sans compter les fichiers touchés.</li><li>Corriger soi-même un diff refusé : l'agent n'apprend pas, et vous perdez du temps.</li><li>Demander « améliore ça » sans dire quoi. Une consigne floue produit un nouveau diff flou.</li></ul>
+<h2>Leçon 2.7 · Écrire une revue de PR utile</h2>
+<p>Une <em>PR</em> (<em>pull request</em>, demande de fusion) propose d'ajouter une branche à la version principale. La revue est l'étape où vous dites oui, non ou pas encore. Un bon commentaire fait gagner un aller-retour. Un mauvais en fait perdre trois.</p>
+<p>Un agent n'a pas de mémoire de la discussion. Chaque commentaire doit donc se suffire à lui-même : où, quoi, pourquoi, que faire.</p>
+<figure><img src="../img/m02-07.png" alt="anatomie d&#x27;un commentaire de revue · 3 parties + 3 étiquettes"><figcaption>anatomie d'un commentaire de revue · 3 parties + 3 étiquettes</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>En haut, le commentaire à éviter : il juge sans rien dire. L'auteur ne sait ni où, ni pourquoi, ni comment corriger.</li><li>Au milieu, la bonne forme en trois temps : ce qu'on voit, ce qu'on risque, ce qu'on propose.</li><li>En bas, une étiquette de gravité placée en tête. Elle dit si la remarque bloque la fusion.</li><li>La dernière boîte est colorée : c'est la piste qui permet à l'agent d'agir sans vous reposer de question.</li></ol>
+<h3>Un modèle à copier</h3>
+<pre><code>[bloquant | à corriger | suggestion] fichier:ligne
+Constat : ce que je vois.
+Risque : ce qui peut arriver à Facturo ou à un client.
+Piste : ce que je propose.</code></pre>
+<h3>Exemple : la revue d'une PR de paiement</h3>
+<p>La PR s'intitule « Marquer la facture payée à réception du webhook ». Elle touche quatre fichiers. Voici cinq commentaires rédigés avec le modèle.</p>
+<table><thead><tr><th>Où</th><th>Étiquette</th><th>Commentaire</th></tr></thead><tbody><tr><td><code>PaymentWebhookController.php:38</code></td><td>Bloquant</td><td>Le <code>catch</code> est vide. Si la mise à jour échoue, Facturo répond 200 et le prestataire n'insiste pas. La facture reste « émise » alors que Marie a payé. Journalise l'erreur puis relance l'exception.</td></tr><tr><td><code>PaymentWebhookController.php:22</code></td><td>Bloquant</td><td>Le webhook peut arriver deux fois pour un même paiement. Que se passe-t-il à la seconde réception ? Rends <code>markPaid</code> idempotent et ajoute un test avec deux appels.</td></tr><tr><td><code>Invoice.php:91</code></td><td>À corriger</td><td>Le statut est comparé au texte <code>'paid'</code>. Utilise <code>Status::Paid</code>, comme dans le reste du fichier.</td></tr><tr><td><code>composer.json</code></td><td>À corriger</td><td>Le paquet ajouté sert sur une seule ligne. Utilise la fonction standard <code>parse_url()</code> et retire la dépendance.</td></tr><tr><td><code>PaymentWebhookControllerTest.php</code></td><td>Suggestion</td><td>Bon test pour la signature invalide. Tu peux le passer en jeu de données pour couvrir d'autres signatures.</td></tr></tbody></table>
+<p>Le dernier commentaire est un compliment avec une piste. Dire ce qui est bien appris à l'agent (et à vos collègues) ce qu'il faut refaire.</p>
+<h3>Avant / après : réécrire un commentaire</h3>
+<table><thead><tr><th>Commentaire faible</th><th>Ce qui manque</th><th>Version utile</th></tr></thead><tbody><tr><td>« Pas clair. »</td><td>Où ? Quoi ?</td><td>« <code>computeTotals</code> renvoie un tableau sans clés nommées. Renvoie un objet <code>Totals</code> pour qu'on lise <code>totals-&gt;ttc</code>. »</td></tr><tr><td>« Ça ne respecte pas SOLID. »</td><td>Le risque concret</td><td>« <code>InvoiceService</code> envoie l'e-mail et génère le PDF. Un changement de logo risque de casser l'envoi. Extrais <code>PdfRenderer</code>. »</td></tr><tr><td>« Pourquoi ce choix ? »</td><td>La question réelle</td><td>« Pourquoi une transaction ici et pas dans <code>cancel()</code> ? Les deux modifient la facture. »</td></tr></tbody></table>
+<h3>Cinq règles de relecteur</h3>
+<ul><li>Un commentaire, une idée. Deux problèmes, deux commentaires.</li><li>Parlez du code, pas de l'auteur. Pas « tu as oublié », mais « ce cas n'est pas géré ».</li><li>Citez la règle du projet quand elle existe : « voir la règle de numérotation continue ».</li><li>Terminez par une décision nette : « Demande de modifications » ou « Approuvé ».</li><li>Si vous hésitez entre bloquant et suggestion, demandez-vous : « Est-ce que je suis prêt à voir ça en production ? »</li></ul>
+<h3>S'entraîner</h3>
+<p>Le mini-jeu <a href="https://claude.ai/artifact/1aozg1BfaPHRtAnpxxTtD6">Chasse aux dérives</a> (jeu en ligne) propose des cas de relecture avec explication. Jouez-y après cette leçon, puis réécrivez vous-même vos réponses sous la forme constat, risque, piste.</p>
+<p><strong>À retenir</strong></p>
+<ul><li>Un commentaire utile se suffit à lui-même : où, constat, risque, piste.</li><li>L'étiquette de gravité évite que tout paraisse égal.</li><li>Un compliment précis est un commentaire de revue à part entière.</li></ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Écrire des commentaires qui citent un sigle (SOLID, DRY) sans montrer le risque concret.</li><li>Tout marquer « bloquant » : l'auteur ne sait plus ce qui compte.</li><li>Reformuler dix fois la même remarque au lieu de donner une piste claire.</li></ul>
+<h2>Atelier guidé : relire une branche livrée par un agent</h2>
+<p><strong>Objectif :</strong> produire une vraie revue écrite, du début à la fin, sur une petite fonctionnalité de Facturo. Comptez deux heures.</p>
+<p><strong>Matériel :</strong> un dépôt Facturo (ou tout petit projet Symfony), un agent de code, un terminal, un éditeur de texte.</p>
+<ol><li><strong>Choisissez la demande.</strong> Prenez : « Ajouter un champ « référence de commande » sur la facture, affiché sur le PDF. » Écrivez-la en trois phrases, avec des critères d'acceptation : la référence est facultative, limitée à 40 caractères, jamais modifiable après l'émission.</li><li><strong>Lancez l'agent</strong> sur une branche dédiée, <code>feature/reference-commande</code>. Ne l'aidez pas.</li><li><strong>Inspectez la forme du diff</strong> avec les trois commandes de la leçon 2.5. Notez le nombre de fichiers et les surprises.</li><li><strong>Lisez le fichier principal en cinq passes</strong> (leçon 2.1). Écrivez le verdict en deux phrases.</li><li><strong>Cherchez les dix signaux</strong> des leçons 2.2 et 2.3, puis les six dérives de la leçon 2.5. Remplissez la grille ci-dessous.</li><li><strong>Rédigez au moins trois commentaires</strong> avec le modèle constat, risque, piste, et une étiquette de gravité pour chacun.</li><li><strong>Renvoyez la revue à l'agent</strong>, laissez-le corriger, puis relisez le nouveau diff avec les trois questions de la leçon 2.6.</li><li><strong>Concluez</strong> par une décision écrite : approuvé, modifications demandées ou refusé, avec une phrase de raison.</li></ol>
+<p>Grille à copier :</p>
+<table><thead><tr><th>Contrôle</th><th>Résultat</th><th>Preuve (fichier, ligne)</th></tr></thead><tbody><tr><td>Périmètre : nombre de fichiers touchés</td><td></td><td></td></tr><tr><td>Dépendances ajoutées</td><td></td><td></td></tr><tr><td>Tests ajoutés, modifiés ou supprimés</td><td></td><td></td></tr><tr><td>Règle de la référence respectée (40 caractères, non modifiable après émission)</td><td></td><td></td></tr><tr><td>Signaux de mauvais code repérés (parmi les dix)</td><td></td><td></td></tr><tr><td>Dérives repérées (parmi les six)</td><td></td><td></td></tr><tr><td>Décision et raison en une phrase</td><td></td><td></td></tr></tbody></table>
+<p><strong>Résultat attendu :</strong> une revue de trois commentaires au moins, un verdict en deux phrases et une décision. Gardez-la : elle servira de modèle pour le module 5.</p>
+<h2>Exercices</h2>
+<h3>Exercice 1 · Nommer le signal</h3>
+<p>Pour chaque extrait, donnez le ou les signaux de mauvais code (leçons 2.2 et 2.3).</p>
+<pre><code>// a
+$tmp = $d['a'] * 1.2;
+
+// b
+try { $this-&gt;invoices-&gt;markPaid($id); } catch (\Exception $e) { /* TODO */ }
+
+// c
+final class InvoiceManager { /* 600 lignes : calcul, PDF, e-mail, export */ }</code></pre>
+<details><summary>Corrigé</summary><p>(a) Nombre magique (<code>1.2</code>) et nom vague (<code>$tmp</code>, <code>$d</code>). Facturo gère aussi 10 % et 5,5 %. (b) Erreur avalée : le <code>catch</code> ne fait rien, le <code>TODO</code> ne change rien. (c) Classe géante, et nom vague : <code>Manager</code> ne dit pas ce que fait la classe. Elle porte au moins quatre responsabilités.</p></details>
+<h3>Exercice 2 · Écrire un verdict</h3>
+<p>Lisez ce fichier avec les cinq passes, puis écrivez un verdict en deux phrases.</p>
+<pre><code>public function cancel(int $id): void
+{
+    $invoice = $this-&gt;invoices-&gt;get($id);
+    $invoice-&gt;setStatus(Status::Cancelled);
+    $this-&gt;invoices-&gt;save($invoice);
+}</code></pre>
+<details><summary>Corrigé</summary><p>« Ce service passe n'importe quelle facture à annulée. Il ne vérifie pas le statut actuel : or une facture émise est immuable et ne peut être corrigée que par un avoir. » Au passage, la méthode <code>setStatus()</code> permet de contourner toutes les règles. Une méthode <code>cancel()</code> sur la facture, qui refuse l'annulation d'une facture émise, serait plus sûre.</p></details>
+<h3>Exercice 3 · Classer les dérives</h3>
+<p>Associez chaque observation à l'une des six dérives.</p>
+<ul><li>a. Une ligne apparaît dans <code>composer.json</code>.</li><li>b. Un contrôleur appelle <code>$pdo-&gt;query(...)</code> directement.</li><li>c. <code>getTotal</code> devient <code>get_total</code> dans un seul fichier.</li><li>d. Le test <code>testCannotEditIssuedInvoice</code> a disparu.</li><li>e. L'agent a aussi modifié la numérotation en traitant l'export.</li><li>f. Une facture émise peut de nouveau être modifiée, tous les tests sont verts.</li></ul>
+<details><summary>Corrigé</summary><p>a : dépendances. b : architecture. c : conventions. d : tests. e : périmètre. f : spécification. Le cas d et le cas f sont liés : l'agent a pu supprimer le test pour que le comportement interdit passe.</p></details>
+<h3>Exercice 4 · Rédiger un commentaire</h3>
+<p>Écrivez un commentaire de revue pour ce diff, avec une étiquette, un constat, un risque et une piste.</p>
+<pre><code>+    // InvoiceController.php:57
++    $total = 0;
++    foreach ($lines as $l) { $total += $l['qty'] * $l['price'] * 1.2; }
++    return $total;</code></pre>
+<details><summary>Corrigé</summary><p>« [bloquant] <code>InvoiceController.php:57</code>. Constat : le calcul de TVA est écrit dans le contrôleur, avec le taux 1.2 en dur. Risque : Facturo gère aussi 10 % et 5,5 %. Une facture à taux réduit serait fausse, et le montant ne serait pas arrondi au centime. Piste : appelle <code>Invoice::totalTtc()</code>, qui lit le taux de la facture et arrondit. » Le commentaire cite le lieu, nomme le risque métier et indique le chemin.</p></details>
+<h3>Exercice 5 · Décider</h3>
+<p>L'agent résume sa PR : « Relance automatique à J+7. Trois fichiers modifiés, deux tests ajoutés. J'ai aussi supprimé un test d'export devenu inutile. » Que faites-vous ?</p>
+<details><summary>Corrigé</summary><p>Demandez une correction. Le périmètre dépasse la demande (l'export n'a rien à voir avec la relance) et la suppression d'un test n'est pas justifiée autrement que par l'agent. Message : « Restaure le test d'export. S'il est réellement obsolète, explique pourquoi dans une PR séparée. » Les deux tests ajoutés sont un bon point : mentionnez-le.</p></details>
+<h2>Quiz</h2>
+<table><thead><tr><th>Question</th><th>Réponse</th><th>Pourquoi</th></tr></thead><tbody><tr><td>Dans quel ordre lit-on un fichier inconnu ?</td><td>Contexte, signatures, chemin nominal, cas limites, verdict.</td><td>On va du large au détail, pour ne pas se noyer dans les lignes.</td></tr><tr><td>Un <code>catch</code> vide appartient à quelle famille de signaux ?</td><td>Lisibilité et fiabilité : erreur avalée.</td><td>L'échec disparaît, et personne ne sait qu'il a eu lieu.</td></tr><tr><td>Que signifie le D de SOLID ?</td><td>Inversion des dépendances : le métier dépend d'interfaces, pas de détails techniques.</td><td>On peut remplacer l'e-mail ou la base, notamment en test.</td></tr><tr><td>Quelle dérive est la plus difficile à repérer dans un diff ?</td><td>La dérive de spécification.</td><td>Le code compile et les tests passent, mais le comportement contredit la décision.</td></tr><tr><td>Quelles sont les trois questions avant d'approuver un diff, dans l'ordre ?</td><td>Périmètre, tests, conformité à la spécification.</td><td>On va du plus rapide à vérifier au plus fin.</td></tr><tr><td>Que contient un bon commentaire de revue ?</td><td>Une étiquette, un constat, un risque et une piste.</td><td>L'agent peut agir sans poser de question.</td></tr></tbody></table>
+<h2>Checklist de fin de module</h2>
+<ul class="check"><li>Je lis un fichier inconnu en cinq passes et je rédige un verdict en deux phrases.</li><li>Je reconnais les dix signaux de mauvais code et je sais donner un exemple de chacun.</li><li>Je sais poser les questions SOLID, DRY, KISS et YAGNI sans les utiliser comme des dogmes.</li><li>Je nomme les six formes de dérive et je sais où les chercher dans un diff.</li><li>Je lance les trois commandes d'inspection avant de lire une ligne de code.</li><li>Je décide : approuver, demander une correction, refuser ou poser une question.</li><li>J'écris des commentaires avec une étiquette, un constat, un risque et une piste.</li><li>J'ai terminé l'atelier et gardé ma revue comme modèle.</li><li>J'ai joué à la Chasse aux dérives au moins une fois.</li></ul>
+<h2>Sources</h2>
+<p>Les principes (SOLID, DRY, KISS, YAGNI), la liste des signaux de mauvais code et la forme de la revue sont des pratiques courantes du génie logiciel. Je ne les ai pas vérifiés dans une source en ligne pendant la rédaction de ce module. La heuristique de factoriser à la troisième répétition est un repère d'usage, pas une règle normative. Tous les extraits de code, la PR de paiement et les noms de classes sont des exemples écrits pour Facturo, application fictive. Le paquet <code>moneyphp/money</code> n'est cité qu'à titre d'illustration.</p>
+
+<div class="pager"><a class="prev" href="../modules/module-01.html"><small>← Précédent</small>Module 1 : fondamentaux du web et du logiciel</a><a class="next" href="../modules/module-03.html"><small>Suivant →</small>Module 3 : architectures et design patterns</a></div></article></main></div>
+<script>document.querySelectorAll('.side a.nav').forEach(function(a){a.addEventListener('click',function(){document.body.classList.remove('open')})});var on=document.querySelector('.side a.on');if(on)on.scrollIntoView({block:'center'});</script>
+</body></html>

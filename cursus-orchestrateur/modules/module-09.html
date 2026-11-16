@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Module 9 : piloter l&#x27;application en production · Cursus orchestrateur</title>
+<link rel="stylesheet" href="../css/style.css"></head>
+<body><button class="menu-btn" onclick="document.body.classList.toggle('open')">☰ Menu du cursus</button>
+<div class="layout"><nav class="side"><a class="brand" href="../index.html">Cursus : orchestrateur et gestionnaire d’app<small>12 modules · 24 semaines</small></a>
+<a class="nav" href="../index.html">Accueil</a>
+<a class="nav" href="../demarrer.html">Démarrer</a>
+<h4>Le socle : savoir juger</h4>
+<a class="nav" href="../modules/module-01.html">Module 1 : fondamentaux du web et du logiciel</a>
+<a class="nav" href="../modules/module-02.html">Module 2 : lire le code et reconnaître le mauvais code</a>
+<a class="nav" href="../modules/module-03.html">Module 3 : architectures et design patterns</a>
+<a class="nav" href="../modules/module-04.html">Module 4 : tests et qualité</a>
+<a class="nav" href="../modules/module-05.html">Module 5 : serveur, mise en ligne, DevOps et CI/CD</a>
+<a class="nav" href="../modules/module-06.html">Module 6 : sécurité, observabilité, données et conformité</a>
+<h4>Les agents IA et le pilotage</h4>
+<a class="nav" href="../modules/module-07.html">Module 7 : agents IA, définitions et fonctionnement</a>
+<a class="nav" href="../modules/module-08.html">Module 8 : orchestrer des agents</a>
+<a class="nav on" href="../modules/module-09.html">Module 9 : piloter l&#x27;application en production</a>
+<h4>Les modules transversaux</h4>
+<a class="nav" href="../modules/module-10.html">Module 10 : gestion de projet</a>
+<a class="nav" href="../modules/module-11.html">Module 11 : produit et conception</a>
+<a class="nav" href="../modules/module-12.html">Module 12 : gestion du client et communication</a>
+<h4>Référence</h4>
+<a class="nav" href="../glossaire.html">Glossaire</a></nav>
+<main><article><div class="toolbar"><button onclick="window.print()">Imprimer / PDF</button><button onclick="var r=document.documentElement;var d=r.dataset.theme==='dark';r.dataset.theme=d?'light':'dark'">Clair / sombre</button></div>
+<h1>Module 9 : piloter l&#x27;application en production</h1>
+<h2>Ce que vous saurez faire</h2>
+<p>Après ce module, vous saurez piloter la vie d&#x27;une application : choisir quoi faire, mesurer, suivre les coûts et décider par écrit. Le fil rouge est Facturo, avec un backlog de huit idées et peu de capacité pour les traiter.</p>
+<ul><li>Construire une feuille de route en trois horizons.</li><li>Prioriser un backlog avec une matrice, MoSCoW et RICE.</li><li>Lire quatre indicateurs de livraison et en tirer des décisions.</li><li>Tenir un registre de dette technique.</li><li>Suivre les coûts mensuels d&#x27;une application.</li><li>Rédiger une décision d&#x27;architecture (ADR) et arbitrer entre construire et acheter.</li></ul>
+<p><strong>Prérequis</strong> : les modules 7 et 8. <strong>Durée</strong> : environ 4 heures. <strong>Lien avec Facturo</strong> : toutes les données chiffrées sont fictives et propres au fil rouge.</p>
+<h2>Leçon 9.1 : la feuille de route en trois horizons</h2>
+<p>Une feuille de route décrit où va le produit, sans promettre de dates qu&#x27;on ne peut pas tenir. Les trois horizons (maintenant, ensuite, plus tard) évitent ce piège. Plus l&#x27;horizon est loin, moins le contenu est précis, et c&#x27;est volontaire.</p>
+<p>L&#x27;horizon &quot;maintenant&quot; est engagé : on sait ce qu&#x27;on fait et pourquoi. &quot;Ensuite&quot; est probable mais peut changer. &quot;Plus tard&quot; regroupe des idées dont on n&#x27;est pas sûr.</p>
+<figure><img src="../img/m09-01.png" alt="feuille de route en trois horizons"><figcaption>feuille de route en trois horizons</figcaption></figure>
+<h3>Lire le schéma</h3>
+<ol><li>Trois colonnes se lisent de gauche à droite : le temps avance.</li><li>La colonne &quot;Maintenant&quot; est surlignée : c&#x27;est la seule dont vous répondez.</li><li>Sous chaque titre, le niveau de certitude : engagé, probable, incertain.</li><li>Une idée peut glisser d&#x27;une colonne à l&#x27;autre ; ce n&#x27;est pas un échec, c&#x27;est le but.</li></ol>
+<h3>Exemple Facturo</h3>
+<p>Marie Giraud demande le paiement en ligne. Vous ne le promettez pas pour &quot;décembre&quot; : il est dans &quot;Ensuite&quot;, avec la phrase &quot;prévu dans les 2 à 3 mois, sous réserve du choix du prestataire&quot;. Marie sait où en est sa demande, et vous gardez de la marge.</p>
+<h3>À retenir</h3>
+<ul><li>Trois horizons : maintenant (engagé), ensuite (probable), plus tard (incertain).</li><li>Moins c&#x27;est proche, moins c&#x27;est précis.</li><li>On promet l&#x27;ordre et l&#x27;intention, pas une date lointaine.</li></ul>
+<h3>Erreurs fréquentes</h3>
+<ul><li>Donner une date ferme sur une idée de la colonne &quot;Plus tard&quot;.</li><li>Remplir &quot;Maintenant&quot; avec dix sujets.</li><li>Ne jamais réviser la feuille de route.</li></ul>
+<h2>Leçon 9.2 : prioriser le backlog</h2>
+<p>Prioriser, c&#x27;est choisir ce qu&#x27;on ne fait pas. Trois outils complémentaires aident : la matrice valeur et effort pour une première vue, MoSCoW pour classer par engagement, RICE pour comparer avec des chiffres. Aucun ne décide à votre place ; ils rendent la discussion explicite.</p>
+<p>Voici le backlog de Facturo, avec des notes fictives de 1 à 5.</p>
+<table><thead><tr><th>Lettre</th><th>Idée</th><th>Valeur (1 à 5)</th><th>Effort (1 à 5)</th></tr></thead><tbody><tr><td>A</td><td>Export CSV</td><td>5</td><td>2</td></tr><tr><td>B</td><td>Rappels d&#x27;impayés</td><td>4</td><td>2</td></tr><tr><td>C</td><td>Paiement en ligne</td><td>5</td><td>5</td></tr><tr><td>D</td><td>Devis vers facture</td><td>4</td><td>3</td></tr><tr><td>E</td><td>Multi-devises</td><td>2</td><td>5</td></tr><tr><td>F</td><td>Signature de devis</td><td>3</td><td>4</td></tr><tr><td>G</td><td>Mode sombre</td><td>1</td><td>1</td></tr><tr><td>H</td><td>Tableau de bord du CA</td><td>3</td><td>3</td></tr></tbody></table>
+<figure><img src="../img/m09-02.png" alt="matrice valeur et effort"><figcaption>matrice valeur et effort</figcaption></figure>
+<h3>Lire le schéma</h3>
+<ol><li>L&#x27;axe horizontal est l&#x27;effort : à gauche, peu de travail ; à droite, beaucoup.</li><li>L&#x27;axe vertical est la valeur : en haut, utile ; en bas, accessoire.</li><li>Chaque lettre est une idée du tableau ci-dessus.</li><li>Le coin haut gauche (A, B, D) est à faire d&#x27;abord. C est un pari coûteux mais très utile, à planifier.</li><li>E et F, coûteux et peu utiles, sont à éviter pour l&#x27;instant.</li></ol>
+<h3>MoSCoW</h3>
+<p>MoSCoW range les idées en quatre classes : <em>Must</em> (indispensable), <em>Should</em> (important), <em>Could</em> (souhaitable), <em>Won&#x27;t</em> (pas cette fois). La classe &quot;Won&#x27;t&quot; est la plus utile : elle écrit ce qu&#x27;on refuse.</p>
+<table><thead><tr><th>Classe</th><th>Idées</th><th>Justification</th></tr></thead><tbody><tr><td>Must</td><td>A, B</td><td>Demandées par les clients, peu coûteuses</td></tr><tr><td>Should</td><td>C, D</td><td>Forte valeur, délai plus long</td></tr><tr><td>Could</td><td>G, H</td><td>Agréables, à faire s&#x27;il reste du temps</td></tr><tr><td>Won&#x27;t (ce trimestre)</td><td>E, F</td><td>Peu de demandes, coût élevé</td></tr></tbody></table>
+<h3>RICE</h3>
+<p>RICE donne un score à chaque idée : <em>Reach</em> (combien de clients par trimestre), <em>Impact</em> (de 0,25 à 3), <em>Confidence</em> (confiance dans l&#x27;estimation, de 0 à 1), <em>Effort</em> (en semaines de travail). La formule est Reach × Impact × Confidence ÷ Effort. Tous les chiffres ci-dessous sont fictifs.</p>
+<table><thead><tr><th>Idée</th><th>Reach</th><th>Impact</th><th>Confidence</th><th>Effort (sem.)</th><th>Calcul</th><th>Score</th></tr></thead><tbody><tr><td>A Export CSV</td><td>400</td><td>2</td><td>0,9</td><td>2</td><td>400 × 2 × 0,9 ÷ 2</td><td>360</td></tr><tr><td>B Rappels d&#x27;impayés</td><td>600</td><td>2</td><td>0,8</td><td>3</td><td>600 × 2 × 0,8 ÷ 3</td><td>320</td></tr><tr><td>D Devis vers facture</td><td>500</td><td>1</td><td>0,8</td><td>4</td><td>500 × 1 × 0,8 ÷ 4</td><td>100</td></tr><tr><td>C Paiement en ligne</td><td>700</td><td>3</td><td>0,5</td><td>12</td><td>700 × 3 × 0,5 ÷ 12</td><td>87,5</td></tr><tr><td>G Mode sombre</td><td>300</td><td>0,25</td><td>0,9</td><td>1</td><td>300 × 0,25 × 0,9 ÷ 1</td><td>67,5</td></tr><tr><td>H Tableau de bord du CA</td><td>400</td><td>1</td><td>0,8</td><td>5</td><td>400 × 1 × 0,8 ÷ 5</td><td>64</td></tr><tr><td>F Signature de devis</td><td>200</td><td>1</td><td>0,5</td><td>8</td><td>200 × 1 × 0,5 ÷ 8</td><td>12,5</td></tr><tr><td>E Multi-devises</td><td>50</td><td>1</td><td>0,5</td><td>10</td><td>50 × 1 × 0,5 ÷ 10</td><td>2,5</td></tr></tbody></table>
+<p>Le paiement en ligne tombe en quatrième place, alors que la matrice le jugeait très utile. La raison : son effort est de 12 semaines et la confiance de 0,5. Le score ne dit donc pas &quot;ne le faites pas&quot;, mais &quot;réduisez l&#x27;incertitude d&#x27;abord&quot;. C&#x27;est ce que fait la leçon 9.6 avec une décision d&#x27;architecture.</p>
+<h3>À retenir</h3>
+<ul><li>La matrice donne la vue, MoSCoW l&#x27;engagement, RICE le chiffre.</li><li>Un score oriente la discussion ; il ne remplace pas votre jugement.</li><li>La classe &quot;Won&#x27;t&quot; est celle qui protège votre équipe.</li></ul>
+<h3>Erreurs fréquentes</h3>
+<ul><li>Croire qu&#x27;un score RICE est une vérité : les entrées sont des estimations.</li><li>Ne jamais écrire ce qu&#x27;on refuse.</li><li>Estimer l&#x27;effort sans les développeurs ou sans l&#x27;agent qui fera le travail.</li><li>Oublier la confiance : une grosse valeur incertaine vaut moins qu&#x27;une petite valeur sûre.</li></ul>
+<h2>Leçon 9.3 : mesurer la livraison avec quatre indicateurs</h2>
+<p>Pour savoir si l&#x27;équipe va mieux ou moins bien, mesurez quatre choses simples. La fréquence de mise en ligne dit à quelle cadence vous livrez. Le délai de livraison compte le temps entre un changement terminé et sa mise en ligne. Le taux de changements en échec donne la part des mises en ligne qui provoquent un problème. Le temps de rétablissement mesure la durée pour réparer. On les appelle souvent les indicateurs DORA, du nom du programme de recherche qui les a popularisés.</p>
+<figure><img src="../img/m09-03.png" alt="quatre indicateurs de livraison"><figcaption>quatre indicateurs de livraison</figcaption></figure>
+<h3>Lire le schéma</h3>
+<ol><li>Chaque tuile est un indicateur ; la valeur est en grand, son sens dessous.</li><li>Les trois tuiles neutres sont correctes pour une petite équipe.</li><li>La tuile rouge est celle qui demande une action : 18 % d&#x27;échecs.</li><li>En bas, la lecture combinée : vitesse correcte, qualité insuffisante.</li></ol>
+<h3>Exemple Facturo : des chiffres aux décisions</h3>
+<table><thead><tr><th>Valeur observée</th><th>Ce que cela signifie</th><th>Décision</th></tr></thead><tbody><tr><td>3 mises en ligne par semaine</td><td>Cadence saine</td><td>Ne rien changer</td></tr><tr><td>2 jours de délai</td><td>Le pipeline fonctionne</td><td>Surveiller</td></tr><tr><td>18 % d&#x27;échecs</td><td>Trop de régressions</td><td>Ajouter des tests de non-régression et une relecture systématique avant fusion</td></tr><tr><td>5 heures de rétablissement</td><td>Acceptable mais lent</td><td>Rédiger une procédure de retour arrière (rollback) en 15 minutes</td></tr></tbody></table>
+<p>Attention aux fausses interprétations. Si vous fixez &quot;20 mises en ligne par semaine&quot; comme objectif, vous obtiendrez des mises en ligne minuscules, pas de meilleurs résultats. Un indicateur sert à détecter un problème, pas à noter les personnes.</p>
+<h3>À retenir</h3>
+<ul><li>Quatre indicateurs : cadence, délai, taux d&#x27;échec, temps de rétablissement.</li><li>On les lit ensemble : aller vite en cassant souvent n&#x27;est pas un progrès.</li><li>Un indicateur déclenche une question, pas une sanction.</li></ul>
+<h3>Erreurs fréquentes</h3>
+<ul><li>Fixer un objectif chiffré sur un seul indicateur.</li><li>Comparer l&#x27;équipe à une autre sans tenir compte du contexte.</li><li>Ne pas définir ce qu&#x27;est un &quot;échec&quot; avant de compter.</li></ul>
+<h2>Leçon 9.4 : gérer la dette technique</h2>
+<p>La dette technique est le coût futur d&#x27;un raccourci pris aujourd&#x27;hui. Comme une dette financière, elle porte des intérêts : chaque nouveau changement devient plus lent ou plus risqué. Elle n&#x27;est pas toujours mauvaise : un raccourci conscient peut être un bon choix, à condition de l&#x27;écrire.</p>
+<p>Le registre de dette est un tableau court où chaque raccourci est noté avec son coût et son déclencheur. Voici celui de Facturo (données fictives).</p>
+<table><thead><tr><th>N°</th><th>Dette</th><th>Intérêt (ce que ça coûte)</th><th>Coût de correction</th><th>Priorité</th><th>Déclencheur</th></tr></thead><tbody><tr><td>D1</td><td>Aucun test sur la numérotation des factures</td><td>Risque de trou dans les numéros, erreur légale</td><td>2 jours</td><td>Haute</td><td>Maintenant</td></tr><tr><td>D2</td><td>Logique de TVA dupliquée dans Facturation et Export</td><td>Deux endroits à corriger à chaque changement de taux</td><td>3 jours</td><td>Moyenne</td><td>Avant l&#x27;ajout du taux 5,5 % partout</td></tr><tr><td>D3</td><td>Fichier <code>FactureController</code> de 600 lignes</td><td>Relecture lente, erreurs d&#x27;agents</td><td>4 jours</td><td>Moyenne</td><td>Avant le paiement en ligne</td></tr><tr><td>D4</td><td>Dépendances non mises à jour depuis 8 mois</td><td>Failles de sécurité connues possibles</td><td>1 jour</td><td>Haute</td><td>Ce mois-ci</td></tr><tr><td>D5</td><td>Mise en page des e-mails copiée trois fois</td><td>Modification triple</td><td>1 jour</td><td>Basse</td><td>Au prochain changement de logo</td></tr></tbody></table>
+<p>Une règle simple : réservez une part fixe de la capacité à la dette, par exemple 20 % de chaque cycle (chiffre d&#x27;exemple, à adapter). Sans réservation, la dette perd toujours face aux nouvelles fonctionnalités.</p>
+<h3>À retenir</h3>
+<ul><li>La dette technique est un raccourci dont le coût revient plus tard.</li><li>Un registre écrit donne un coût et un déclencheur à chaque raccourci.</li><li>Une part fixe de capacité est le seul moyen de la rembourser.</li></ul>
+<h3>Erreurs fréquentes</h3>
+<ul><li>Appeler &quot;dette&quot; tout ce qui dérange, sans coût ni intérêt.</li><li>Tout vouloir corriger d&#x27;un coup.</li><li>Laisser les agents ajouter de la dette (doublons, fichiers géants) sans relecture.</li></ul>
+<h2>Leçon 9.5 : suivre les coûts</h2>
+<p>Une application a un coût mensuel qu&#x27;il faut connaître pour fixer un prix. Les agents ajoutent une ligne nouvelle : le coût en jetons, que la leçon 7.7 vous a appris à calculer. Tous les chiffres ci-dessous sont fictifs.</p>
+<table><thead><tr><th>Poste</th><th>Montant mensuel</th><th>Remarque</th></tr></thead><tbody><tr><td>Hébergement (serveur privé virtuel)</td><td>40 €</td><td>Une machine, Docker</td></tr><tr><td>Sauvegardes</td><td>8 €</td><td>Copie quotidienne</td></tr><tr><td>Nom de domaine et e-mails transactionnels</td><td>15 €</td><td>Rappels d&#x27;impayés</td></tr><tr><td>Surveillance et alertes</td><td>20 €</td><td>Disponibilité et erreurs</td></tr><tr><td>Licences d&#x27;outils de développement</td><td>60 €</td><td>Deux postes</td></tr><tr><td>Agents IA (jetons)</td><td>150 €</td><td>Environ 500 tâches à 0,30 €</td></tr><tr><td><strong>Total</strong></td><td><strong>293 €</strong></td><td>40 + 8 + 15 + 20 + 60 + 150</td></tr></tbody></table>
+<p>Avec 120 abonnés à 19 € par mois, soit 2 280 € de revenu, le coût par abonné est de 293 ÷ 120, soit environ 2,44 €. La marge brute est large, mais le poste &quot;agents&quot; croît avec l&#x27;usage. Revoyez ce tableau chaque mois et notez les écarts supérieurs à 20 %.</p>
+<h3>À retenir</h3>
+<ul><li>Connaissez le coût mensuel total et le coût par client.</li><li>Les jetons des agents sont un poste à part entière.</li><li>Un écart de plus de 20 % se commente par écrit.</li></ul>
+<h3>Erreurs fréquentes</h3>
+<ul><li>Oublier le temps humain, qui reste le premier coût.</li><li>Ne pas suivre les jetons avant la première grosse facture.</li><li>Fixer un prix sans calculer le coût par client.</li></ul>
+<h2>Leçon 9.6 : décider et documenter</h2>
+<p>Une décision non écrite est oubliée, puis refaite. Le format ADR (<em>Architecture Decision Record</em>, enregistrement de décision d&#x27;architecture) tient sur une page : contexte, options, décision, conséquences. Il répond à la question qu&#x27;un nouvel arrivant, ou un agent, posera dans six mois : pourquoi ce choix ?</p>
+<p>Avant d&#x27;écrire l&#x27;ADR, l&#x27;arbre ci-dessous aide à trancher entre construire et acheter.</p>
+<figure><img src="../img/m09-04.png" alt="construire ou acheter"><figcaption>construire ou acheter</figcaption></figure>
+<h3>Lire le schéma</h3>
+<ol><li>On part de la question du haut : le besoin est-il au cœur de votre métier ?</li><li>Si oui, on construit : c&#x27;est ce qui vous différencie (ici, le calcul des factures).</li><li>Sinon, on demande si un service couvre 80 % du besoin ; si oui, on achète.</li><li>Si aucun service ne convient, on construit le minimum ou on reporte.</li></ol>
+<h3>Exemple Facturo : l&#x27;ADR du paiement en ligne</h3>
+<pre><code>ADR-007 : Choix du prestataire de paiement en ligne
+Statut : accepté (exemple fictif)
+
+CONTEXTE
+Marie Giraud et une partie des clients demandent le paiement en ligne.
+L&#x27;équipe est petite. Les données de carte bancaire sont soumises à des
+règles de sécurité strictes que nous ne voulons pas porter.
+
+OPTIONS
+1. Construire une intégration directe avec une banque : 12 semaines,
+   responsabilité complète sur les données de carte.
+2. Prestataire de paiement avec page hébergée chez lui : 3 semaines,
+   aucune donnée de carte chez Facturo.
+3. Prestataire avec formulaire intégré à notre page : 5 semaines,
+   exigences de sécurité intermédiaires.
+
+DÉCISION
+Option 2.
+
+CONSÉQUENCES
++ Aucune donnée de carte stockée. Mise en ligne en 3 semaines.
+- Commission par transaction. Dépendance au prestataire.
+- Personnalisation de la page de paiement limitée.
+Réversibilité : l&#x27;appel est isolé dans le module Paiement, derrière
+une interface PasserelleDePaiement. Changer de prestataire
+coûte quelques jours.
+Revue : dans 6 mois, ou si la commission dépasse le seuil fixé.</code></pre>
+<p>Cet ADR reprend la question laissée ouverte par RICE : la confiance de 0,5 sur le paiement venait de l&#x27;incertitude sur la solution. Le choix de l&#x27;option 2 ramène l&#x27;effort de 12 à 3 semaines et relance le score.</p>
+<h3>À retenir</h3>
+<ul><li>Un ADR dit le contexte, les options, la décision et ses conséquences.</li><li>Construisez ce qui vous différencie ; achetez le reste.</li><li>Notez la réversibilité : comment revenir en arrière.</li></ul>
+<h3>Erreurs fréquentes</h3>
+<ul><li>Ne documenter que la décision, pas les options refusées.</li><li>Construire ce qu&#x27;un service fait déjà très bien.</li><li>Choisir un prestataire sans isoler son appel dans une interface.</li></ul>
+<h2>Leçon 9.7 : la revue mensuelle</h2>
+<p>Une revue d&#x27;une heure par mois remet tous ces outils à jour. Elle suit six questions, dans cet ordre.</p>
+<ol><li>Qu&#x27;avons-nous livré ce mois-ci, et qu&#x27;est-ce qui a glissé ?</li><li>Que disent les quatre indicateurs de livraison ?</li><li>Quelle ligne du registre de dette avons-nous remboursée ou aggravée ?</li><li>Les coûts ont-ils dévié de plus de 20 % ?</li><li>La feuille de route est-elle encore vraie ? Qu&#x27;est-ce qui change d&#x27;horizon ?</li><li>Quelle décision mérite un ADR ?</li></ol>
+<p>Notez les réponses dans un document partagé. Dix lignes suffisent.</p>
+<h2>Atelier guidé : piloter Facturo pendant un trimestre</h2>
+<p>Comptez 2 heures. Vous jouez le rôle du gestionnaire d&#x27;app.</p>
+<ol><li>Recopiez le backlog de la leçon 9.2 dans un tableau. <strong>Attendu</strong> : huit lignes, avec valeur et effort.</li><li>Placez chaque idée dans la matrice et classez-la avec MoSCoW. <strong>Attendu</strong> : au moins deux idées en &quot;Won&#x27;t&quot;.</li><li>Calculez le score RICE de trois idées de votre choix. <strong>Attendu</strong> : les mêmes résultats que le tableau, ou un écart que vous expliquez.</li><li>Construisez la feuille de route en trois horizons. <strong>Attendu</strong> : &quot;Maintenant&quot; contient trois sujets au plus.</li><li>Remplissez le registre de dette avec cinq lignes. <strong>Attendu</strong> : chaque ligne a un coût et un déclencheur.</li><li>Calculez le coût mensuel et le coût par abonné. <strong>Attendu</strong> : 293 € et environ 2,44 € avec les chiffres de la leçon.</li><li>Rédigez un ADR sur un choix réel de votre projet. <strong>Attendu</strong> : une page, trois options, une réversibilité.</li><li>Passez la revue mensuelle en six questions. <strong>Attendu</strong> : dix lignes de notes.</li></ol>
+<h2>Exercices</h2>
+<p><strong>Exercice 1.</strong> Calculez le score RICE d&#x27;une idée &quot;Export PDF des factures&quot; : Reach 350, Impact 1, Confidence 0,8, Effort 2 semaines. Comparez-la à l&#x27;export CSV (360).</p>
+<p><strong>Exercice 2.</strong> Classez en MoSCoW : correction d&#x27;une faille de sécurité, mode sombre, import de clients depuis un fichier, multi-devises. Justifiez en une phrase chacune.</p>
+<p><strong>Exercice 3.</strong> Vos indicateurs du mois : 1 mise en ligne par semaine, 9 jours de délai, 5 % d&#x27;échecs, 2 heures de rétablissement. Que concluez-vous ? Que décidez-vous ?</p>
+<p><strong>Exercice 4.</strong> Vous hésitez entre un moteur de rappels e-mail construit en interne et un service externe qui couvre 90 % du besoin. Que dit l&#x27;arbre ? Écrivez la section Contexte et Décision d&#x27;un ADR.</p>
+<details><summary>Corrigé</summary>
+<p><strong>Exercice 1.</strong> 350 × 1 × 0,8 ÷ 2 = 140. Elle dépasse le devis vers facture (100) et reste loin derrière l&#x27;export CSV (360). Elle est utile mais pas prioritaire.</p>
+<p><strong>Exercice 2.</strong> La faille de sécurité est Must : le risque est immédiat. L&#x27;import de clients est Should : il accélère l&#x27;adoption. Le mode sombre est Could : confort. Le multi-devises est Won&#x27;t ce trimestre : peu de demandes, coût élevé.</p>
+<p><strong>Exercice 3.</strong> Vous livrez peu et lentement, mais presque sans casse et vous réparez vite. Le problème n&#x27;est pas la qualité, c&#x27;est la cadence : 9 jours de délai suggèrent des blocages. Décision : chercher où les changements attendent (relecture, validation, tests lents) et réduire la taille des changements.</p>
+<p><strong>Exercice 4.</strong> Les rappels ne sont pas le cœur du métier et un service couvre 90 % du besoin : acheter. Contexte : l&#x27;équipe est petite, les rappels ne différencient pas Facturo, un service couvre 90 % du besoin. Décision : utiliser le service externe, derrière une interface dans le module Notifications, pour pouvoir le remplacer.</p>
+</details>
+<h2>Quiz d&#x27;auto-évaluation</h2>
+<table><thead><tr><th>Question</th><th>Réponse</th><th>Pourquoi</th></tr></thead><tbody><tr><td>Pourquoi trois horizons plutôt que des dates ?</td><td>Le futur lointain est incertain</td><td>On promet l&#x27;ordre et l&#x27;intention, pas des dates fragiles</td></tr><tr><td>Que signifie la lettre &quot;W&quot; de MoSCoW ?</td><td>Won&#x27;t : ce qu&#x27;on ne fera pas cette fois</td><td>Écrire un refus protège la capacité de l&#x27;équipe</td></tr><tr><td>Comment se calcule un score RICE ?</td><td>Reach × Impact × Confidence ÷ Effort</td><td>La confiance pénalise les estimations fragiles</td></tr><tr><td>Quels sont les quatre indicateurs de livraison ?</td><td>Cadence, délai, taux d&#x27;échec, temps de rétablissement</td><td>Ils se lisent ensemble : vitesse et qualité</td></tr><tr><td>Qu&#x27;est-ce qu&#x27;un déclencheur dans le registre de dette ?</td><td>L&#x27;événement qui impose de rembourser</td><td>Il évite le &quot;un jour&quot; qui n&#x27;arrive jamais</td></tr><tr><td>Quand acheter plutôt que construire ?</td><td>Quand le besoin n&#x27;est pas au cœur du métier et qu&#x27;un service couvre l&#x27;essentiel</td><td>On construit ce qui différencie, on achète le reste</td></tr></tbody></table>
+<h2>Checklist de validation</h2>
+<ul class="check"><li>Je sais construire une feuille de route en trois horizons.</li><li>Je sais utiliser la matrice, MoSCoW et RICE, et je connais leurs limites.</li><li>Je lis les quatre indicateurs de livraison et j&#x27;en déduis une action.</li><li>Je tiens un registre de dette avec coût et déclencheur.</li><li>Je connais le coût mensuel et le coût par client de mon application.</li><li>Je sais rédiger un ADR d&#x27;une page.</li><li>Je sais passer la revue mensuelle en six questions.</li></ul>
+<h2>Sources</h2>
+<p>Aucune source externe n&#x27;a été consultée pour ce module. Les méthodes (feuille de route par horizons, MoSCoW, RICE, indicateurs DORA, ADR) sont présentées d&#x27;après la pratique courante de gestion de produit. Tous les chiffres, prix et noms sont fictifs. Avant diffusion, vérifiez les définitions officielles des indicateurs DORA auprès du programme DORA.</p>
+
+<div class="pager"><a class="prev" href="../modules/module-08.html"><small>← Précédent</small>Module 8 : orchestrer des agents</a><a class="next" href="../modules/module-10.html"><small>Suivant →</small>Module 10 : gestion de projet</a></div></article></main></div>
+<script>document.querySelectorAll('.side a.nav').forEach(function(a){a.addEventListener('click',function(){document.body.classList.remove('open')})});var on=document.querySelector('.side a.on');if(on)on.scrollIntoView({block:'center'});</script>
+</body></html>

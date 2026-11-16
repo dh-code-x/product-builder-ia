@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Module 5 : serveur, mise en ligne, DevOps et CI/CD · Cursus orchestrateur</title>
+<link rel="stylesheet" href="../css/style.css"></head>
+<body><button class="menu-btn" onclick="document.body.classList.toggle('open')">☰ Menu du cursus</button>
+<div class="layout"><nav class="side"><a class="brand" href="../index.html">Cursus : orchestrateur et gestionnaire d’app<small>12 modules · 24 semaines</small></a>
+<a class="nav" href="../index.html">Accueil</a>
+<a class="nav" href="../demarrer.html">Démarrer</a>
+<h4>Le socle : savoir juger</h4>
+<a class="nav" href="../modules/module-01.html">Module 1 : fondamentaux du web et du logiciel</a>
+<a class="nav" href="../modules/module-02.html">Module 2 : lire le code et reconnaître le mauvais code</a>
+<a class="nav" href="../modules/module-03.html">Module 3 : architectures et design patterns</a>
+<a class="nav" href="../modules/module-04.html">Module 4 : tests et qualité</a>
+<a class="nav on" href="../modules/module-05.html">Module 5 : serveur, mise en ligne, DevOps et CI/CD</a>
+<a class="nav" href="../modules/module-06.html">Module 6 : sécurité, observabilité, données et conformité</a>
+<h4>Les agents IA et le pilotage</h4>
+<a class="nav" href="../modules/module-07.html">Module 7 : agents IA, définitions et fonctionnement</a>
+<a class="nav" href="../modules/module-08.html">Module 8 : orchestrer des agents</a>
+<a class="nav" href="../modules/module-09.html">Module 9 : piloter l&#x27;application en production</a>
+<h4>Les modules transversaux</h4>
+<a class="nav" href="../modules/module-10.html">Module 10 : gestion de projet</a>
+<a class="nav" href="../modules/module-11.html">Module 11 : produit et conception</a>
+<a class="nav" href="../modules/module-12.html">Module 12 : gestion du client et communication</a>
+<h4>Référence</h4>
+<a class="nav" href="../glossaire.html">Glossaire</a></nav>
+<main><article><div class="toolbar"><button onclick="window.print()">Imprimer / PDF</button><button onclick="var r=document.documentElement;var d=r.dataset.theme==='dark';r.dataset.theme=d?'light':'dark'">Clair / sombre</button></div>
+<h1>Module 5 : serveur, mise en ligne, DevOps et CI/CD</h1>
+<h2>Ce que vous saurez faire</h2>
+<p>Ce module explique comment un code devient une application accessible, et comment la mettre à jour sans stress ni coupure. Vous n'avez pas besoin de devenir administrateur système. Vous devez comprendre assez pour juger ce qu'un agent propose et pour poser les bonnes questions.</p>
+<p>À la fin du module, vous saurez :</p>
+<ul>
+<li>
+décrire le trajet d'une requête de Facturo, du navigateur jusqu'à la base de données ;
+</li>
+<li>
+lire un Dockerfile et un docker-compose.yml, et dire ce que fait chaque ligne ;
+</li>
+<li>
+lire un pipeline GitLab CI et dire quelles barrières protègent la production ;
+</li>
+<li>
+choisir une stratégie de déploiement (remplacement, rolling, blue/green, canary) selon le risque ;
+</li>
+<li>
+faire évoluer une base de données sans coupure grâce à la méthode expand / contract ;
+</li>
+<li>
+restaurer une sauvegarde et mesurer le temps que cela prend.
+</li>
+</ul>
+<p><strong>Prérequis :</strong> modules 1, 3 et 4 (requête HTTP, architecture, tests). <strong>Durée :</strong> 14 heures environ, sur deux semaines.</p>
+<p><strong>Lien avec Facturo :</strong> l'application tourne sur un serveur loué, dans des conteneurs. Chaque modification de code doit arriver en production sans interrompre Marie en pleine émission de facture, et sans jamais perdre ses données.</p>
+<h2>Leçon 5.1 : ce qu'il y a derrière l'adresse web</h2>
+<p>Un serveur est un ordinateur toujours allumé et relié à Internet, qui répond aux demandes des navigateurs. Pour Facturo, c'est un VPS : un serveur virtuel loué chez un hébergeur, avec un système Linux, que l'on administre à distance par SSH (une connexion chiffrée en ligne de commande).</p>
+<p>Pensez à un restaurant. Nginx est l'accueil : il reçoit chaque client et l'oriente. PHP-FPM est la cuisine : il prépare la réponse en appliquant les règles de Facturo. PostgreSQL est la réserve, où tout est rangé durablement. Redis est le passe-plat, où l'on dépose les commandes à traiter. Le worker est l'employé en arrière-salle qui s'occupe de ces commandes sans faire attendre le client (envoyer un e-mail, fabriquer un PDF).</p>
+<table>
+<thead>
+<tr>
+<th>Composant</th>
+<th>Rôle</th>
+<th>Exemple dans Facturo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nginx</td>
+<td>Reçoit les requêtes HTTPS, sert les fichiers du front, transmet le reste</td>
+<td>Affiche l'application React, renvoie <code>/api/...</code> vers PHP</td>
+</tr>
+<tr>
+<td>PHP-FPM</td>
+<td>Exécute le code de l'API</td>
+<td>Crée une facture, applique la TVA</td>
+</tr>
+<tr>
+<td>PostgreSQL</td>
+<td>Stocke les données de façon durable</td>
+<td>Clients, factures, avoirs</td>
+</tr>
+<tr>
+<td>Redis</td>
+<td>Mémoire rapide : cache et file d'attente</td>
+<td>Liste des e-mails de rappel à envoyer</td>
+</tr>
+<tr>
+<td>Worker</td>
+<td>Traite les tâches en arrière-plan</td>
+<td>Envoie le rappel d'impayé, génère le PDF</td>
+</tr>
+</tbody></table>
+<p>Quand Marie ouvre <code>https://facturo.example</code>, voici ce qui se passe en quelques centièmes de seconde. Le nom est converti en adresse du serveur par le DNS. Le navigateur ouvre une connexion chiffrée (HTTPS) vers Nginx. Nginx sert la page React. Cette page demande ensuite ses données à l'API, et Nginx transmet cet appel à PHP-FPM, qui interroge PostgreSQL.</p>
+<figure><img src="../img/m05-01.png" alt="serveur Facturo · 5 conteneurs sur un VPS"><figcaption>serveur Facturo · 5 conteneurs sur un VPS</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol>
+<li>
+Le navigateur de Marie parle à Nginx, la seule porte ouverte sur Internet.
+</li>
+<li>
+Nginx transmet les appels d'API à PHP-FPM (en bleu, c'est là que vit le code de Facturo).
+</li>
+<li>
+PHP-FPM lit et écrit les données dans PostgreSQL.
+</li>
+<li>
+Les tâches lentes passent par Redis : le worker les traite sans faire attendre Marie.
+</li>
+</ol>
+<p>Pour vérifier qu'un serveur est en bonne santé, trois commandes suffisent à un non-spécialiste.</p>
+<pre><code>$ ssh deploy@facturo.example          # se connecter au serveur
+$ docker compose ps                   # quels conteneurs tournent ?
+NAME      SERVICE   STATUS
+web       nginx     Up 3 days
+api       php       Up 3 days
+db        postgres  Up 3 days (healthy)
+cache     redis     Up 3 days
+worker    php       Up 3 days
+
+$ curl -I https://facturo.example/api/health   # l'API répond-elle ?
+HTTP/2 200</code></pre>
+<p>Un <code>200</code> dit que l'API répond. Un <code>502</code> (mauvaise passerelle) dit que Nginx est vivant mais ne joint plus PHP : le problème est derrière. Un <code>503</code> dit que le service est indisponible. Ce vocabulaire (module 1) suffit souvent à situer une panne en une minute.</p>
+<p><strong>À retenir</strong></p>
+<ul>
+<li>
+Une requête traverse une chaîne : Nginx, PHP-FPM, la base. Une panne se situe à un maillon.
+</li>
+<li>
+Redis et le worker sortent du chemin du client les tâches lentes.
+</li>
+<li>
+<code>docker compose ps</code> et <code>curl -I</code> donnent un premier diagnostic en deux commandes.
+</li>
+</ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul>
+<li>
+Confondre « le site est lent » et « le serveur est en panne » : ce sont des maillons différents.
+</li>
+<li>
+Ouvrir la base de données à tout Internet pour « simplifier » (module 6).
+</li>
+</ul>
+<h2>Leçon 5.2 : mettre l'application dans des conteneurs</h2>
+<p>Sans conteneur, installer Facturo sur un serveur ressemble à une recette où l'on devrait recréer sa cuisine à chaque fois : bonne version de PHP, bonnes extensions, bonne configuration. Un conteneur emballe l'application avec tout ce dont elle a besoin. Il tourne de la même façon sur l'ordinateur du développeur, sur la recette et en production. Le « ça marche chez moi » disparaît.</p>
+<p>Deux fichiers décrivent cet emballage. Le <strong>Dockerfile</strong> est la recette d'une image (un modèle figé de l'application). Le <strong>docker-compose.yml</strong> décrit comment faire tourner ensemble plusieurs conteneurs : l'API, la base, Redis, le worker.</p>
+<h3>Le Dockerfile de l'API</h3>
+<pre><code>FROM php:8.3-fpm-alpine AS base
+RUN docker-php-ext-install pdo_pgsql opcache
+WORKDIR /app
+
+FROM base AS vendor
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --prefer-dist
+
+FROM base AS final
+COPY --from=vendor /app/vendor ./vendor
+COPY . .
+RUN adduser -D appuser &amp;&amp; chown -R appuser /app
+USER appuser
+HEALTHCHECK --interval=30s CMD php-fpm-healthcheck || exit 1</code></pre>
+<p>Lecture ligne à ligne :</p>
+<ul>
+<li>
+<code>FROM php:8.3-fpm-alpine</code> : on part d'une image officielle PHP 8.3 avec PHP-FPM, dans une version légère (Alpine).
+</li>
+<li>
+<code>RUN docker-php-ext-install ...</code> : on ajoute les extensions dont Facturo a besoin pour parler à PostgreSQL.
+</li>
+<li>
+Les trois blocs <code>FROM</code> forment un build en plusieurs étapes : les dépendances sont installées dans une étape, puis seul le résultat est copié dans l'image finale. L'image est plus petite et ne contient pas les outils de développement.
+</li>
+<li>
+<code>--no-dev</code> : les outils de test ne partent pas en production.
+</li>
+<li>
+<code>USER appuser</code> : l'application tourne avec un utilisateur sans pouvoirs, pas en administrateur. Si quelqu'un exploite une faille, il hérite de droits limités.
+</li>
+</ul>
+<h3>Le docker-compose.yml</h3>
+<pre><code>services:
+  web:
+    image: nginx:1.27-alpine
+    ports: ["443:443"]
+    depends_on: [api]
+    volumes: ["./nginx.conf:/etc/nginx/conf.d/default.conf:ro"]
+  api:
+    image: registry.example/facturo/api:${TAG}
+    env_file: .env
+    depends_on:
+      db: { condition: service_healthy }
+      cache: { condition: service_started }
+  worker:
+    image: registry.example/facturo/api:${TAG}
+    command: php bin/console messenger:consume async
+    env_file: .env
+    depends_on: [db, cache]
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+  cache:
+    image: redis:7-alpine
+volumes:
+  pgdata:</code></pre>
+<p>Ce qu'il faut savoir lire dans ce fichier :</p>
+<ul>
+<li>
+<strong>ports</strong> : seul <code>web</code> (Nginx) expose un port vers Internet. La base et Redis n'ont aucun <code>ports</code> : ils ne sont joignables que par les autres conteneurs. C'est un réglage de sécurité capital.
+</li>
+<li>
+<strong>volumes</strong> : <code>pgdata</code> garde les données de la base en dehors du conteneur. Un conteneur est jetable, les données non. Sans ce volume, remplacer le conteneur effacerait toutes les factures.
+</li>
+<li>
+<strong>depends_on + healthcheck</strong> : l'API attend que la base soit réellement prête, pas seulement démarrée.
+</li>
+<li>
+<strong>Une seule image, deux rôles</strong> : <code>api</code> et <code>worker</code> utilisent la même image avec une commande différente.
+</li>
+<li>
+<strong>Les secrets</strong> : le mot de passe est lu depuis un fichier ou un fichier <code>.env</code> qui n'est jamais dans Git. Voir la leçon 5.7.
+</li>
+</ul>
+<p><strong>Exercice de lecture rapide.</strong> Que se passe-t-il si quelqu'un ajoute <code>ports: ["5432:5432"]</code> au service <code>db</code> ? La base devient accessible depuis Internet. C'est exactement le genre de modification qu'un agent peut proposer « pour faciliter le débogage ». Vous la refusez.</p>
+<p><strong>À retenir</strong></p>
+<ul>
+<li>
+Un conteneur est jetable, les données vivent dans des volumes.
+</li>
+<li>
+Une seule porte ouverte sur Internet : Nginx.
+</li>
+<li>
+Test à faire devant tout fichier Compose : quels ports sont exposés, où sont les volumes, d'où viennent les secrets ?
+</li>
+</ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul>
+<li>
+Utiliser l'étiquette <code>latest</code> pour une image : on ne sait plus quelle version tourne.
+</li>
+<li>
+Mettre un mot de passe en clair dans le fichier Compose ou dans l'image.
+</li>
+<li>
+Oublier le volume de la base, et perdre les données au premier redéploiement.
+</li>
+</ul>
+<h2>Leçon 5.3 : le pipeline CI/CD, une chaîne de barrières</h2>
+<p>La <strong>CI</strong> (intégration continue) vérifie automatiquement chaque modification. Le <strong>CD</strong> (livraison ou déploiement continu) l'envoie ensuite vers les serveurs. Ensemble, ils forment un pipeline : une chaîne d'étapes où chaque étape est une barrière. Si une barrière échoue, la modification ne passe pas.</p>
+<p>Pour vous, orchestrateur, le pipeline est l'endroit où les règles de qualité deviennent automatiques. Un agent peut oublier une consigne ; le pipeline, lui, ne se fatigue pas.</p>
+<h3>Le fichier .gitlab-ci.yml de Facturo</h3>
+<pre><code>stages: [lint, test, build, recette, production]
+
+lint:
+  stage: lint
+  script:
+    - composer phpstan
+    - composer cs-check
+    - npm run lint
+
+tests:
+  stage: test
+  script:
+    - composer test
+    - npm test
+  coverage: '/Lines:\s+(\d+\.\d+)%/'
+
+build-image:
+  stage: build
+  script:
+    - docker build -t registry.example/facturo/api:$CI_COMMIT_SHORT_SHA .
+    - docker push registry.example/facturo/api:$CI_COMMIT_SHORT_SHA
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+
+deploy-recette:
+  stage: recette
+  script: ./deploy.sh recette $CI_COMMIT_SHORT_SHA
+  environment: recette
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+
+deploy-production:
+  stage: production
+  script: ./deploy.sh production $CI_COMMIT_SHORT_SHA
+  environment: production
+  when: manual
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"</code></pre>
+<p>Ce qu'il faut y lire :</p>
+<ul>
+<li>
+<strong>stages</strong> : l'ordre des étapes. Une étape ne démarre que si la précédente a réussi.
+</li>
+<li>
+<strong>lint</strong> puis <strong>tests</strong> : analyse statique et tests du module 4. Si un test casse, rien ne part plus loin.
+</li>
+<li>
+<strong>build-image</strong> : fabrique l'image Docker, étiquetée avec l'identifiant du commit. On sait ainsi exactement quel code tourne.
+</li>
+<li>
+<strong>deploy-recette</strong> : déploiement automatique sur un environnement de répétition, identique à la production.
+</li>
+<li>
+<strong>deploy-production</strong> avec <code>when: manual</code> : un humain doit cliquer. C'est votre barrière : vous décidez du moment, après avoir regardé la recette.
+</li>
+<li>
+<strong>rules</strong> : seule la branche <code>main</code> va jusqu'au déploiement.
+</li>
+</ul>
+<figure><img src="../img/m05-02.png" alt="pipeline Facturo · 5 barrières"><figcaption>pipeline Facturo · 5 barrières</figcaption></figure>
+<p>Lisez le schéma de gauche à droite : une modification franchit chaque barrière dans l'ordre. Sous chaque barrière, la famille d'erreurs qu'elle arrête. Seule la dernière, en bleu, dépend d'un humain.</p>
+<p><strong>À retenir</strong></p>
+<ul>
+<li>
+Chaque barrière protège contre une famille d'erreurs : style, logique, assemblage, comportement réel, décision humaine.
+</li>
+<li>
+La production se déploie par un clic humain, jamais par un agent seul.
+</li>
+<li>
+Un pipeline qui laisse passer des tests rouges, ou dont les contrôles sont désactivés, ne protège plus rien.
+</li>
+</ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul>
+<li>
+Ajouter <code>allow_failure: true</code> à une étape pour « débloquer » le pipeline : la barrière devient décorative.
+</li>
+<li>
+Déployer directement en production sans passer par la recette.
+</li>
+<li>
+Étiqueter les images <code>latest</code> : impossible de revenir à la version précédente.
+</li>
+</ul>
+<h2>Leçon 5.4 : choisir comment déployer</h2>
+<p>Déployer, c'est remplacer la version 1 de Facturo par la version 2. Il existe quatre façons de le faire. Elles se distinguent par ce qui arrive aux utilisateurs pendant le changement et par la facilité du retour en arrière.</p>
+<figure><img src="../img/m05-03.png" alt="stratégies de déploiement · 4 lignes"><figcaption>stratégies de déploiement · 4 lignes</figcaption></figure>
+<table>
+<thead>
+<tr>
+<th>Stratégie</th>
+<th>Principe</th>
+<th>Avantage</th>
+<th>Prix à payer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Remplacement</td>
+<td>On arrête la v1 puis on démarre la v2</td>
+<td>Simple, une seule copie à gérer</td>
+<td>Coupure de quelques secondes</td>
+</tr>
+<tr>
+<td>Rolling</td>
+<td>On remplace les instances une par une</td>
+<td>Pas de coupure</td>
+<td>Il faut plusieurs instances ; v1 et v2 coexistent un moment</td>
+</tr>
+<tr>
+<td>Blue/green</td>
+<td>On prépare un second environnement complet, puis on bascule le trafic</td>
+<td>Retour arrière immédiat (on rebascule)</td>
+<td>Deux environnements à entretenir</td>
+</tr>
+<tr>
+<td>Canary</td>
+<td>Un petit groupe d'utilisateurs reçoit la v2 d'abord</td>
+<td>On détecte un problème avant qu'il touche tout le monde</td>
+<td>Demande de la mesure et un routage plus fin</td>
+</tr>
+</tbody></table>
+<p><strong>Le choix de Facturo.</strong> L'application tourne sur un seul serveur et sert un cabinet de 12 personnes. Le remplacement suffit : on déploie en dehors des heures de bureau, le conteneur attend son healthcheck avant de recevoir du trafic, et l'on garde l'étiquette de l'image précédente pour revenir en arrière. Le jour où Facturo aura des centaines de cabinets clients, on passera à un rolling ou à un blue/green. Choisir plus compliqué que nécessaire est une dérive classique : un agent propose volontiers un canary pour une application de 12 utilisateurs.</p>
+<p><strong>Le piège commun : v1 et v2 coexistent.</strong> Avec un rolling, un blue/green ou un canary, les deux versions du code utilisent la même base pendant un moment. La v2 ne doit donc rien casser pour la v1. C'est le sujet de la leçon suivante.</p>
+<p><strong>À retenir</strong></p>
+<ul>
+<li>
+Quatre stratégies : remplacement, rolling, blue/green, canary. Plus on veut de sécurité, plus on paie en complexité.
+</li>
+<li>
+Le bon choix dépend du nombre d'utilisateurs et du coût d'une panne, pas de la mode.
+</li>
+<li>
+Quelle que soit la stratégie, il faut un retour arrière prévu et testé.
+</li>
+</ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul>
+<li>
+Déployer le vendredi soir, sans personne pour surveiller.
+</li>
+<li>
+Ne pas conserver l'image de la version précédente : le retour arrière devient une reconstruction.
+</li>
+</ul>
+<h2>Leçon 5.5 : changer la base de données sans coupure</h2>
+<p>Changer le code est facile à défaire : on redéploie l'ancienne image. Changer la base est plus délicat, car les données persistent. Une migration est un script qui modifie la structure de la base. La règle d'or est de ne jamais casser l'ancien code avec une migration : tant que la v1 tourne, la base doit rester compatible avec elle.</p>
+<p>La méthode s'appelle <strong>expand / contract</strong> (élargir puis resserrer). On l'applique à un cas réel de Facturo : on veut stocker la date d'échéance de chaque facture dans une colonne <code>date_echeance</code>, alors qu'elle était jusqu'ici calculée à la volée (émission + 30 jours).</p>
+<figure><img src="../img/m05-04.png" alt="expand / contract · 4 étapes"><figcaption>expand / contract · 4 étapes</figcaption></figure>
+<p>Lisez le schéma colonne par colonne : chaque étape est un déploiement distinct, et l'état de la base (haut) reste compatible avec le code qui tourne (bas).</p>
+<p>La mauvaise méthode tient en une migration : ajouter la colonne en <code>NOT NULL</code>, et déployer le nouveau code en même temps. Pendant le déploiement, l'ancien code continue d'insérer des factures sans cette colonne : la base les refuse, et Marie voit une erreur en émettant sa facture.</p>
+<p>La bonne méthode, en quatre déploiements séparés :</p>
+<pre><code>// Étape 1, élargir : la colonne est facultative, l'ancien code ne la voit pas
+$this-&gt;addSql('ALTER TABLE facture ADD date_echeance DATE DEFAULT NULL');
+
+// Étape 2, remplir : les factures déjà émises reçoivent leur échéance
+$this-&gt;addSql("UPDATE facture
+    SET date_echeance = date_emission + INTERVAL '30 days'
+    WHERE date_emission IS NOT NULL AND date_echeance IS NULL");
+
+// Étape 4, resserrer (bien plus tard) : une facture émise doit avoir une échéance
+$this-&gt;addSql("ALTER TABLE facture ADD CONSTRAINT facture_echeance_chk
+    CHECK (statut = 'brouillon' OR date_echeance IS NOT NULL)");</code></pre>
+<p>L'étape 3 est un déploiement de code : le nouveau code lit la colonne et l'écrit à chaque émission. Remarquez la contrainte finale : un brouillon n'a pas de date d'émission, donc pas d'échéance. Imposer <code>NOT NULL</code> à toute la table aurait échoué sur les brouillons. Une règle métier du module 3 façonne la forme de la migration.</p>
+<p><strong>Ce qu'il faut vérifier quand un agent propose une migration</strong></p>
+<ul>
+<li>
+Supprime-t-elle ou renomme-t-elle une colonne que l'ancien code utilise encore ? Si oui, elle doit être découpée.
+</li>
+<li>
+Ajoute-t-elle une contrainte <code>NOT NULL</code> sans valeur par défaut sur une table déjà remplie ?
+</li>
+<li>
+Existe-t-il un moyen de la défaire (une méthode <code>down</code>) et a-t-elle été essayée sur une copie de la base ?
+</li>
+<li>
+Modifie-t-elle beaucoup de lignes d'un coup ? Sur une grosse table, on remplit par paquets pour ne pas bloquer les autres requêtes.
+</li>
+</ul>
+<p><strong>À retenir</strong></p>
+<ul>
+<li>
+Élargir d'abord, resserrer plus tard : chaque étape est compatible avec l'ancien code.
+</li>
+<li>
+Une migration se teste sur une copie des données réelles, jamais pour la première fois en production.
+</li>
+<li>
+Supprimer une colonne est l'étape qu'on ne défait pas : on la fait en dernier, après une sauvegarde vérifiée.
+</li>
+</ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul>
+<li>
+Renommer une colonne en une seule étape (l'ancien code casse aussitôt).
+</li>
+<li>
+Modifier à la main la base de production sans migration versionnée : personne ne sait ce qui a changé.
+</li>
+</ul>
+<h2>Leçon 5.6 : sauvegardes et restauration</h2>
+<p>Une sauvegarde dont on n'a jamais testé la restauration est une hypothèse, pas une sauvegarde. Deux mesures vous aident à fixer vos exigences :</p>
+<ul>
+<li>
+le <strong>RPO</strong> (perte de données acceptable) : jusqu'à quand accepte-t-on de remonter dans le temps ? Avec une sauvegarde par nuit, on peut perdre jusqu'à une journée de factures ;
+</li>
+<li>
+le <strong>RTO</strong> (durée d'interruption acceptable) : en combien de temps doit-on être de nouveau en ligne ?
+</li>
+</ul>
+<p>Pour Facturo, ces chiffres se décident avec Marie, pas avec le technicien : une journée de factures perdue est-elle supportable ? Une heure d'arrêt, un jour ouvré ?</p>
+<p>La règle simple dite « 3-2-1 » aide à ne pas tout perdre : trois copies des données, sur deux supports différents, dont une hors du serveur et hors du site de l'hébergeur. Une sauvegarde stockée sur le serveur même disparaît avec lui.</p>
+<p>Les commandes, à faire exécuter par un agent mais à savoir lire :</p>
+<pre><code># Sauvegarde (chaque nuit, copiée ensuite hors du serveur)
+$ docker compose exec -T db pg_dump -U postgres -Fc facturo &gt; /backups/facturo-2026-11-12.dump
+
+# Test de restauration, dans une base séparée
+$ docker compose exec -T db createdb -U postgres facturo_restore
+$ docker compose exec -T db pg_restore -U postgres -d facturo_restore &lt; /backups/facturo-2026-11-12.dump
+$ docker compose exec db psql -U postgres -d facturo_restore -c "SELECT count(*) FROM facture;"</code></pre>
+<p>Le test ne s'arrête pas à l'absence d'erreur : on compare le nombre de factures avec celui de la production, et l'on note la durée. Cette durée mesurée est votre vrai RTO.</p>
+<p><strong>À retenir</strong></p>
+<ul>
+<li>
+Une sauvegarde n'existe que si on a déjà restauré avec succès.
+</li>
+<li>
+RPO et RTO sont des décisions d'entreprise, chiffrées avec le client.
+</li>
+<li>
+Une copie hors du serveur est indispensable.
+</li>
+</ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul>
+<li>
+Croire que la réplication ou un « snapshot » de l'hébergeur remplace une sauvegarde testée.
+</li>
+<li>
+Ne jamais mesurer la durée d'une restauration : on la découvre le jour de la panne.
+</li>
+</ul>
+<h2>Leçon 5.7 : choisir un hébergement et protéger ses secrets</h2>
+<p>Où faire tourner Facturo ? La réponse dépend du niveau de contrôle voulu et du temps que l'on peut consacrer à l'administration.</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Ce que vous gérez</th>
+<th>Convient quand</th>
+<th>Point de vigilance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VPS</td>
+<td>Tout : système, mises à jour, sauvegardes, sécurité</td>
+<td>Petite équipe technique, budget serré, besoin de contrôle</td>
+<td>La charge d'administration retombe sur vous</td>
+</tr>
+<tr>
+<td>PaaS (plateforme prête à l'emploi)</td>
+<td>Le code et sa configuration</td>
+<td>On veut livrer vite sans administrer de serveur</td>
+<td>Dépendance à la plateforme, coût qui croît avec l'usage</td>
+</tr>
+<tr>
+<td>Cloud managé (services séparés pour base, files, etc.)</td>
+<td>L'assemblage des services</td>
+<td>Charge variable, besoin de haute disponibilité</td>
+<td>Complexité et facture difficiles à prévoir</td>
+</tr>
+</tbody></table>
+<p>Quatre questions à poser avant de choisir : où sont stockées les données (pays, voir module 6) ? Qui s'occupe des mises à jour de sécurité ? Que se passe-t-il à la panne d'un serveur ? Peut-on partir facilement chez un autre hébergeur ? Pour Facturo, un VPS est un point de départ raisonnable, mais la question des données de santé ou des exigences d'hébergement spécifiques se traite avec le module 6.</p>
+<p><strong>Les secrets</strong> (mots de passe, clés d'API, clé de signature) suivent quatre règles : jamais dans Git, jamais dans une image Docker, stockés dans les variables protégées de la CI ou dans un fichier lisible uniquement par le serveur, et changés dès qu'on soupçonne une fuite. Si un agent colle un mot de passe dans le code « pour tester », c'est une dérive à corriger tout de suite, même si le dépôt est privé.</p>
+<p>L'<strong>infrastructure as code</strong> consiste à décrire le serveur dans des fichiers (installation, utilisateurs, pare-feu) plutôt que de le configurer à la main. L'avantage est double : on peut reconstruire le serveur à l'identique après un incident, et chaque changement est relu comme du code.</p>
+<p><strong>À retenir</strong></p>
+<ul>
+<li>
+VPS, PaaS ou cloud managé : on choisit entre contrôle et temps d'administration.
+</li>
+<li>
+Un secret exposé est un secret à remplacer, même si on pense que personne ne l'a vu.
+</li>
+<li>
+Un serveur reconstructible à partir de fichiers est un serveur qu'on ne craint pas de perdre.
+</li>
+</ul>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul>
+<li>
+Choisir l'hébergement sur le prix d'appel sans regarder où sont les données ni qui fait les mises à jour.
+</li>
+<li>
+Garder un fichier <code>.env</code> de production partagé par e-mail ou messagerie.
+</li>
+</ul>
+<h2>Atelier guidé : un déploiement raté, puis le retour arrière</h2>
+<p>Objectif : vivre un déploiement qui échoue et revenir en arrière sans perdre de données. Faites-le sur l'environnement de recette, jamais sur la production.</p>
+<ul>
+<li>
+<strong>Étape 1.</strong> Notez l'étiquette de l'image en cours (par exemple <code>a1b2c3d</code>) avec <code>docker compose ps</code> ou l'historique du pipeline.
+</li>
+<li>
+<strong>Étape 2.</strong> Demandez à l'agent de préparer une version volontairement cassée : une variable <code>DATABASE_URL</code> erronée dans l'environnement de la recette.
+</li>
+<li>
+<strong>Étape 3.</strong> Lancez le déploiement de recette depuis le pipeline. Observez que le healthcheck de l'API reste rouge et que le conteneur est signalé comme non sain.
+</li>
+<li>
+<strong>Étape 4.</strong> Faites un <code>curl -I https://recette.facturo.example/api/health</code> et notez le code reçu (un 502 ou 503 attendu).
+</li>
+<li>
+<strong>Étape 5.</strong> Retournez à l'ancienne étiquette : relancez le déploiement avec <code>a1b2c3d</code>. Vérifiez que <code>curl</code> renvoie de nouveau 200.
+</li>
+<li>
+<strong>Étape 6.</strong> Rédigez trois lignes : ce qui a cassé, comment vous l'avez vu, combien de temps le retour arrière a pris.
+</li>
+</ul>
+<p>Critère de réussite : vous avez repéré l'échec grâce au healthcheck et pas grâce à un utilisateur, et le retour arrière a pris moins de temps que ce que Marie tolère.</p>
+<h2>Exercices (avec corrigés)</h2>
+<p><strong>Exercice 1.</strong> Un agent vous livre ce fragment pour la base de données du fichier Compose : <code>ports: ["5432:5432"]</code>. Que répondez-vous ?</p>
+<details><summary>Corrigé</summary><p>Je refuse. Ce réglage rend la base accessible depuis Internet. Le service <code>db</code> ne doit être joignable que par les autres conteneurs. Si l'agent veut un accès pour le débogage, on passe par un tunnel SSH temporaire.</p>
+</details>
+<p><strong>Exercice 2.</strong> Dans le pipeline, on voit <code>allow_failure: true</code> sur l'étape <code>tests</code>. Pourquoi est-ce grave ?</p>
+<details><summary>Corrigé</summary><p>L'étape peut échouer sans bloquer la suite : des tests rouges n'empêchent plus le déploiement. La barrière existe encore sur le papier, mais ne protège plus rien. On cherche pourquoi les tests échouent et on les corrige, on ne les neutralise pas.</p>
+</details>
+<p><strong>Exercice 3.</strong> Une migration propose <code>ALTER TABLE facture RENAME COLUMN numero TO numero_facture</code>. Comment la rendre sûre ?</p>
+<details><summary>Corrigé</summary><p>On la découpe en expand / contract : (1) ajouter <code>numero_facture</code>, (2) copier les valeurs, (3) déployer du code qui lit et écrit les deux colonnes puis seulement la nouvelle, (4) retirer <code>numero</code> quand plus aucun code ne l'utilise. Le numéro de facture est une donnée légale : on garde une sauvegarde vérifiée avant l'étape 4.</p>
+</details>
+<p><strong>Exercice 4.</strong> Votre sauvegarde tourne chaque nuit à 2 h. Le serveur tombe à 16 h. Que perd-on au pire ? Que faut-il demander à Marie ?</p>
+<details><summary>Corrigé</summary><p>Au pire, tout ce qui a été saisi depuis 2 h, soit presque quatorze heures de factures. Il faut demander à Marie si c'est acceptable (RPO). Si non, on sauvegarde plus souvent ou on archive en continu les journaux de la base. On demande aussi quelle durée d'interruption elle tolère (RTO).</p>
+</details>
+<h2>Quiz</h2>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Réponse</th>
+<th>Pourquoi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Quel composant est la seule porte ouverte sur Internet ?</td>
+<td>Nginx</td>
+<td>La base et Redis ne doivent pas être exposés</td>
+</tr>
+<tr>
+<td>À quoi sert un volume Docker ?</td>
+<td>Garder les données hors du conteneur</td>
+<td>Un conteneur est jetable</td>
+</tr>
+<tr>
+<td>Que protège la mention <code>when: manual</code> ?</td>
+<td>La production</td>
+<td>Un humain décide du moment du déploiement</td>
+</tr>
+<tr>
+<td>Quelle stratégie évite toute coupure sans doubler l'environnement ?</td>
+<td>Le rolling</td>
+<td>Il remplace les instances une par une (avec plusieurs instances)</td>
+</tr>
+<tr>
+<td>Pourquoi ajouter une colonne <code>NOT NULL</code> d'un coup est risqué ?</td>
+<td>L'ancien code ne la remplit pas</td>
+<td>Les insertions échouent pendant le déploiement</td>
+</tr>
+<tr>
+<td>Quand une sauvegarde est-elle fiable ?</td>
+<td>Quand on a déjà restauré avec succès</td>
+<td>Sinon c'est une hypothèse</td>
+</tr>
+</tbody></table>
+<h2>Checklist du module 5</h2>
+<ul class="check">
+<li>
+Je sais décrire le trajet d'une requête de Facturo, du navigateur à la base.
+</li>
+<li>
+Je sais lire un Dockerfile et dire quels ports et volumes sont exposés.
+</li>
+<li>
+Je repère un secret en clair dans un fichier Compose ou un dépôt.
+</li>
+<li>
+Je sais dire quelles familles d'erreurs chaque barrière du pipeline arrête.
+</li>
+<li>
+Je sais justifier le choix d'une stratégie de déploiement.
+</li>
+<li>
+Je sais découper une migration risquée en expand / contract.
+</li>
+<li>
+J'ai déjà restauré une sauvegarde et mesuré le temps nécessaire.
+</li>
+<li>
+J'ai fait l'atelier du déploiement raté et du retour arrière.
+</li>
+</ul>
+<h2>Sources et limites</h2>
+<ul>
+<li>
+<a href="https://docs.docker.com/reference/compose-file/version-and-name/">Docker, éléments </a><a href="https://docs.docker.com/reference/compose-file/version-and-name/"><code>version</code></a><a href="https://docs.docker.com/reference/compose-file/version-and-name/"> et </a><a href="https://docs.docker.com/reference/compose-file/version-and-name/"><code>name</code></a><a href="https://docs.docker.com/reference/compose-file/version-and-name/"> d'un fichier Compose</a> : l'élément <code>version</code> est obsolète et seulement informatif, c'est pourquoi le fichier Compose de la leçon 5.2 n'en comporte pas.
+</li>
+<li>
+Non vérifié en ligne lors de la rédaction : la syntaxe détaillée de <code>.gitlab-ci.yml</code> (la page de référence GitLab n'était pas accessible), les commandes PostgreSQL de la leçon 5.6 et les options Doctrine de la leçon 5.5. Les exemples sont pédagogiques : faites-les valider par un agent de revue et testez-les sur la recette avant tout usage réel.
+</li>
+</ul>
+
+<div class="pager"><a class="prev" href="../modules/module-04.html"><small>← Précédent</small>Module 4 : tests et qualité</a><a class="next" href="../modules/module-06.html"><small>Suivant →</small>Module 6 : sécurité, observabilité, données et conformité</a></div></article></main></div>
+<script>document.querySelectorAll('.side a.nav').forEach(function(a){a.addEventListener('click',function(){document.body.classList.remove('open')})});var on=document.querySelector('.side a.on');if(on)on.scrollIntoView({block:'center'});</script>
+</body></html>

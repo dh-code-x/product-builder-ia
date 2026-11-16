@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Module 11 : produit et conception · Cursus orchestrateur</title>
+<link rel="stylesheet" href="../css/style.css"></head>
+<body><button class="menu-btn" onclick="document.body.classList.toggle('open')">☰ Menu du cursus</button>
+<div class="layout"><nav class="side"><a class="brand" href="../index.html">Cursus : orchestrateur et gestionnaire d’app<small>12 modules · 24 semaines</small></a>
+<a class="nav" href="../index.html">Accueil</a>
+<a class="nav" href="../demarrer.html">Démarrer</a>
+<h4>Le socle : savoir juger</h4>
+<a class="nav" href="../modules/module-01.html">Module 1 : fondamentaux du web et du logiciel</a>
+<a class="nav" href="../modules/module-02.html">Module 2 : lire le code et reconnaître le mauvais code</a>
+<a class="nav" href="../modules/module-03.html">Module 3 : architectures et design patterns</a>
+<a class="nav" href="../modules/module-04.html">Module 4 : tests et qualité</a>
+<a class="nav" href="../modules/module-05.html">Module 5 : serveur, mise en ligne, DevOps et CI/CD</a>
+<a class="nav" href="../modules/module-06.html">Module 6 : sécurité, observabilité, données et conformité</a>
+<h4>Les agents IA et le pilotage</h4>
+<a class="nav" href="../modules/module-07.html">Module 7 : agents IA, définitions et fonctionnement</a>
+<a class="nav" href="../modules/module-08.html">Module 8 : orchestrer des agents</a>
+<a class="nav" href="../modules/module-09.html">Module 9 : piloter l&#x27;application en production</a>
+<h4>Les modules transversaux</h4>
+<a class="nav" href="../modules/module-10.html">Module 10 : gestion de projet</a>
+<a class="nav on" href="../modules/module-11.html">Module 11 : produit et conception</a>
+<a class="nav" href="../modules/module-12.html">Module 12 : gestion du client et communication</a>
+<h4>Référence</h4>
+<a class="nav" href="../glossaire.html">Glossaire</a></nav>
+<main><article><div class="toolbar"><button onclick="window.print()">Imprimer / PDF</button><button onclick="var r=document.documentElement;var d=r.dataset.theme==='dark';r.dataset.theme=d?'light':'dark'">Clair / sombre</button></div>
+<h1>Module 11 : produit et conception</h1>
+<h2>Ce que vous saurez faire</h2>
+<p>À la fin de ce module, vous saurez transformer un besoin flou en une spécification qu&#x27;un agent de code peut exécuter sans deviner. Vous partirez d&#x27;une vraie conversation avec Marie Giraud, vous dessinerez son parcours, vous maquetterez l&#x27;écran, puis vous écrirez les règles et les cas limites.</p>
+<ul><li>Mener un entretien utilisateur qui fait parler de faits, pas d&#x27;opinions.</li><li>Dessiner un parcours actuel et un parcours cible, et mesurer le gain.</li><li>Maquetter un écran avec ses quatre états : vide, chargement, erreur, succès.</li><li>Écrire des user stories avec critères Étant donné / Quand / Alors, cas limites compris.</li><li>Modéliser le cycle de vie d&#x27;une facture avec ses transitions autorisées.</li><li>Découper un MVP en tranches verticales livrables une par une.</li><li>Préparer un test d&#x27;usage avec cinq personnes.</li><li>Rédiger une spécification prête pour un agent, sans ambiguïté.</li></ul>
+<table><thead><tr><th>Repère</th><th>Valeur</th></tr></thead><tbody><tr><td>Prérequis</td><td>Module 10 (cadrage du projet d&#x27;export comptable)</td></tr><tr><td>Durée</td><td>5 à 6 heures, atelier compris</td></tr><tr><td>Lien avec Facturo</td><td>Le même projet d&#x27;export CSV pour le cabinet de Marie Giraud</td></tr><tr><td>Livrable final</td><td>Une spécification d&#x27;une page, un parcours cible, une maquette et un plan de test</td></tr></tbody></table>
+<h2>Leçon 11.1 : comprendre le besoin par l&#x27;entretien</h2>
+<p>Un client décrit presque toujours une solution, rarement un problème. Marie dit « il me faut un bouton Export CSV », mais ce qu&#x27;elle veut vraiment, c&#x27;est ne plus ressaisir 45 minutes de factures par client. Votre travail est de remonter de la solution demandée vers le problème vécu.</p>
+<p>La règle d&#x27;or : on interroge sur le passé et sur des faits, pas sur l&#x27;avenir ni sur l&#x27;opinion. « Racontez-moi la dernière fois que vous avez préparé la clôture » apprend plus que « Aimeriez-vous un export automatique ? ». La seconde question appelle un « oui » poli qui ne prouve rien.</p>
+<table><thead><tr><th>Mauvaise question</th><th>Pourquoi elle échoue</th><th>Bonne question</th></tr></thead><tbody><tr><td>Voulez-vous un export CSV ?</td><td>Suggère la réponse, appelle un oui poli</td><td>Comment transmettez-vous aujourd&#x27;hui vos factures à votre comptable ?</td></tr><tr><td>Utiliseriez-vous cette fonction ?</td><td>Porte sur le futur, donc sur l&#x27;imagination</td><td>La dernière fois, qu&#x27;avez-vous fait, étape par étape ?</td></tr><tr><td>Ça vous plaît, cet écran ?</td><td>Invite à la politesse</td><td>Montrez-moi comment vous faites. Où hésitez-vous ?</td></tr><tr><td>Combien de temps ça vous prend ?</td><td>Estimation vague</td><td>Combien de temps cela a-t-il pris la dernière fois, et pourquoi ?</td></tr></tbody></table>
+<p>Voici un extrait annoté de l&#x27;entretien de 30 minutes entre le lecteur et Marie Giraud, le lundi 11 janvier 2027.</p>
+<pre><code>Lecteur : Racontez-moi la dernière clôture mensuelle.  [question sur un fait passé]
+Marie : On a reçu les factures de nos clients par mail, en PDF.
+        Une collaboratrice ressaisit tout dans notre logiciel comptable.
+Lecteur : Combien de temps cela a-t-il pris ?  [on chiffre le réel]
+Marie : Environ 45 minutes par client. On en a 30 chez Facturo.
+Lecteur : Qu&#x27;est-ce qui est le plus pénible ?  [on cherche la douleur]
+Marie : Les erreurs. Un chiffre faux et on le trouve trois semaines après.
+Lecteur : Que faites-vous quand vous en trouvez une ?  [on cherche le coût de l&#x27;erreur]
+Marie : On rappelle le client, il renvoie un avoir, on reprend tout.
+Lecteur : Quel format votre logiciel accepte-t-il ?  [on vérifie une contrainte]
+Marie : Un CSV, avec séparateur point-virgule et dates en JJ/MM/AAAA.</code></pre>
+<p>Ce que l&#x27;on retient de ce court échange, sans avoir proposé de solution :</p>
+<ul><li>Le problème n&#x27;est pas l&#x27;export, c&#x27;est la ressaisie : 45 minutes fois 30 clients, soit 22 heures et demie par mois.</li><li>Le vrai coût est l&#x27;erreur, pas seulement le temps.</li><li>Une contrainte technique est apparue : séparateur point-virgule et dates JJ/MM/AAAA.</li></ul>
+<p>Après l&#x27;entretien, rédigez le jour même un compte rendu de dix lignes et faites-le relire à Marie. Une correction de sa part à ce stade coûte une minute ; une correction après le développement coûte des jours.</p>
+<p><strong>À retenir</strong></p>
+<p>Interrogez sur des faits passés, chiffrez le réel et cherchez la douleur, pas la solution. Notez les contraintes techniques dès qu&#x27;elles apparaissent. Faites relire le compte rendu.</p>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Proposer sa solution pendant l&#x27;entretien : le client s&#x27;y accroche et cesse de décrire son problème.</li><li>Interroger une seule personne alors que l&#x27;utilisateur, le payeur et le décideur sont parfois trois personnes (voir le module 12).</li><li>Ne rien écrire et se fier à sa mémoire.</li></ul>
+<h2>Leçon 11.2 : dessiner le parcours avant l&#x27;écran</h2>
+<p>Un parcours montre ce que fait la personne, étape par étape, avant de dessiner quoi que ce soit. On le trace deux fois : tel qu&#x27;il est aujourd&#x27;hui, puis tel qu&#x27;on veut qu&#x27;il soit. L&#x27;écart entre les deux est la valeur du projet.</p>
+<p>Pour Facturo, le parcours actuel de Marie compte quatre étapes, dont une seule est vraiment coûteuse : la ressaisie. Le parcours cible la remplace par un téléchargement et un import.</p>
+<figure><img src="../img/m11-01.png" alt="parcours actuel et parcours cible de l&#x27;export · 2 lignes de 4 étapes"><figcaption>parcours actuel et parcours cible de l&#x27;export · 2 lignes de 4 étapes</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>La ligne du haut est la situation actuelle, la ligne du bas la cible.</li><li>La boîte orange marque la douleur découverte lors de l&#x27;entretien : la ressaisie, 45 minutes par client.</li><li>La boîte verte marque ce qui la remplace : un téléchargement du CSV conforme au format du cabinet.</li><li>La flèche verticale relie le problème à sa solution ; tout ce qui n&#x27;est pas relié reste identique.</li></ol>
+<p>Un parcours cible se vérifie avec trois questions : chaque étape retire-t-elle quelque chose de la douleur ? Peut-on la mesurer (temps, erreurs) ? Que se passe-t-il quand elle échoue ?</p>
+<p>La dernière question prépare les états d&#x27;erreur de la leçon suivante. Pour l&#x27;export, le parcours cible doit prévoir au moins : aucune facture sur la période, une période invalide, un fichier trop gros pour être préparé instantanément.</p>
+<p><strong>À retenir</strong></p>
+<p>Tracez le parcours actuel avant le parcours cible. Reliez chaque amélioration à une douleur mesurée. Demandez-vous toujours ce qui se passe en cas d&#x27;échec.</p>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Dessiner directement l&#x27;écran, sans savoir quelle étape il remplace.</li><li>Imaginer le parcours idéal seulement : on oublie les étapes d&#x27;erreur et de reprise.</li><li>Ne pas mesurer l&#x27;avant, donc ne jamais pouvoir prouver le gain.</li></ul>
+<h2>Leçon 11.3 : maquetter sans dessiner joli</h2>
+<p>Une maquette basse fidélité est un croquis qui répond à une seule question : que voit la personne à chaque instant ? Elle ne montre ni couleurs ni logo. Elle montre ce que l&#x27;on affiche, ce que l&#x27;on peut cliquer et ce qui se passe quand tout ne va pas bien.</p>
+<p>La règle des quatre états est la plus rentable de ce module. Tout écran qui charge des données existe au moins sous quatre formes : vide, chargement, erreur, succès. Les agents de code oublient presque toujours les trois premières si on ne les demande pas.</p>
+<figure><img src="../img/m11-02.png" alt="maquette basse fidélité · l&#x27;écran Export dans ses 4 états"><figcaption>maquette basse fidélité · l&#x27;écran Export dans ses 4 états</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>Les quatre cartes montrent le même écran à quatre moments différents ; le titre et la période ne changent pas.</li><li>Dans l&#x27;état vide, on dit pourquoi il n&#x27;y a rien et on propose une action (changer de période).</li><li>Dans l&#x27;état de chargement, le bouton est désactivé pour éviter un double clic, et une barre indique que ça travaille.</li><li>Dans l&#x27;état d&#x27;erreur, le message rassure (les factures sont intactes) et propose une action (réessayer) ; il ne montre jamais un message technique.</li><li>Dans l&#x27;état de succès, le fichier est nommé et le bouton dit exactement ce qu&#x27;il fait.</li></ol>
+<p>Pour chaque état, écrivez dans la spécification les mots exacts affichés. Ces mots sont du contenu, pas de la décoration : « Ça n&#x27;a pas marché » et « L&#x27;export a échoué, vos factures sont intactes » ne donnent pas la même confiance.</p>
+<table><thead><tr><th>État</th><th>Ce que la personne voit</th><th>Ce qu&#x27;elle peut faire</th></tr></thead><tbody><tr><td>Vide</td><td>Un message qui explique l&#x27;absence de données</td><td>Changer de période</td></tr><tr><td>Chargement</td><td>Une indication de travail en cours</td><td>Attendre ; le bouton est inactif</td></tr><tr><td>Erreur</td><td>Un message clair, sans jargon</td><td>Réessayer</td></tr><tr><td>Succès</td><td>Le nom du fichier prêt</td><td>Télécharger</td></tr></tbody></table>
+<p><strong>À retenir</strong></p>
+<p>Maquettez d&#x27;abord avec des boîtes et des mots réels. Prévoyez toujours vide, chargement, erreur et succès. Écrivez les textes exacts dans la spécification.</p>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Ne dessiner que le cas heureux, puis découvrir les autres cas en production.</li><li>Remplir la maquette de faux textes (« Lorem ipsum ») qui cachent les vrais problèmes de longueur ou de ton.</li><li>Laisser l&#x27;agent inventer les messages d&#x27;erreur : ils sont techniques, longs, ou alarmants.</li></ul>
+<h2>Leçon 11.4 : écrire des user stories et leurs cas limites</h2>
+<p>Une user story dit qui veut quoi et pourquoi, en une phrase. Elle ne suffit pas : ce sont ses critères d&#x27;acceptation qui la rendent testable. On les écrit au format Étant donné, Quand, Alors, parce qu&#x27;il force à citer un contexte, une action et un résultat observable.</p>
+<pre><code>En tant que comptable du cabinet,
+je veux télécharger un CSV des factures émises d&#x27;un mois,
+afin de l&#x27;importer sans ressaisie.
+
+Critère 1 : cas nominal
+  Étant donné que le mois de janvier 2027 contient 3 factures émises,
+  Quand je demande l&#x27;export de janvier 2027,
+  Alors je reçois un fichier de 3 lignes plus l&#x27;en-tête.
+
+Critère 2 : période vide
+  Étant donné qu&#x27;aucune facture n&#x27;est émise en février 2027,
+  Quand je demande l&#x27;export de février 2027,
+  Alors je vois « Aucune facture émise sur cette période » et aucun fichier n&#x27;est créé.
+
+Critère 3 : brouillons exclus
+  Étant donné qu&#x27;une facture est au statut brouillon,
+  Quand j&#x27;exporte la période qui la contient,
+  Alors elle n&#x27;apparaît pas dans le fichier.</code></pre>
+<p>Les cas limites sont ce qui casse en production. Cherchez-les avec cinq questions : que se passe-t-il quand c&#x27;est vide, quand c&#x27;est très grand, quand c&#x27;est invalide, quand c&#x27;est en double, et quand deux personnes agissent en même temps ?</p>
+<table><thead><tr><th>Famille</th><th>Cas limite pour l&#x27;export</th><th>Comportement attendu</th></tr></thead><tbody><tr><td>Vide</td><td>Aucune facture sur la période</td><td>Message clair, pas de fichier vide</td></tr><tr><td>Grand</td><td>Plusieurs milliers de factures</td><td>Préparation en arrière-plan, pas de plantage</td></tr><tr><td>Invalide</td><td>Date de fin avant la date de début</td><td>Message d&#x27;erreur, aucune requête lancée</td></tr><tr><td>Doublon</td><td>Deux clics rapides sur Exporter</td><td>Un seul export est lancé</td></tr><tr><td>Concurrence</td><td>Une facture est émise pendant l&#x27;export</td><td>Elle est incluse ou exclue de façon prévisible, documentée</td></tr><tr><td>Texte</td><td>Nom de client avec point-virgule ou guillemet</td><td>Valeur correctement protégée dans le CSV</td></tr></tbody></table>
+<p>Un critère vague comme « l&#x27;export est rapide » ne se teste pas. Écrivez un seuil : « pour 500 factures, le fichier est prêt en moins de 10 secondes », quitte à le faire valider par la mesure.</p>
+<h3>Epic, story, tâche : trois niveaux</h3>
+<p>Une même demande se découpe à trois niveaux, qui répondent à trois questions différentes. Ce découpage est un repère courant des méthodes agiles ; les outils de suivi le nomment parfois autrement.</p>
+<table><thead><tr><th>Niveau</th><th>Question à laquelle il répond</th><th>Taille</th><th>Exemple Facturo</th></tr></thead><tbody><tr><td>Epic</td><td>Quel résultat de valeur pour l'utilisateur ?</td><td>Plusieurs semaines ; un lot (leçon 10.3), souvent une tranche verticale (11.6)</td><td>« Exporter la comptabilité »</td></tr><tr><td>User story</td><td>Quel incrément vérifiable, pour qui et pourquoi ?</td><td>Quelques jours</td><td>« En tant que comptable, je veux télécharger un CSV du mois… »</td></tr><tr><td>Tâche</td><td>Que peut faire une personne ou un agent seul, relu en dix minutes ?</td><td>Une session</td><td>« Endpoint qui produit le CSV » (leçon 8.2)</td></tr></tbody></table>
+<p>La story est le niveau où l'on parle au client. Elle porte le <strong>pourquoi</strong> (« afin de l'importer sans ressaisie »), qui sert à arbitrer quand une tâche hésite entre deux solutions. Une tâche technique comme « créer la table des exports » n'est pas une story : elle ne dit ni pour qui ni pourquoi.</p>
+<h3>Pourquoi des critères d'acceptation ?</h3>
+<p>Ils jouent trois rôles à la fois. Ils définissent « fini » : sans eux, chacun juge à l'œil. Ils deviennent le test : le test rouge de la leçon 4.4 est un critère écrit en code. Ils servent de recette : le client valide ce qu'il a lu avant le développement, pas ce qu'il découvre après. Pour un agent, ils tiennent lieu de preuve attendue (leçon 8.1) ; sans eux, il s'arrête quand son code lui paraît plausible.</p>
+<p><strong>À retenir</strong></p>
+<p>Une story sans critères n&#x27;est qu&#x27;une intention. Écrivez Étant donné, Quand, Alors avec des valeurs concrètes. Cherchez les cas limites avant l&#x27;agent, pas après. L'epic donne la valeur, la story le critère, la tâche le travail d'un agent.</p>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Écrire des critères en adjectifs (rapide, simple, intuitif) au lieu de valeurs mesurables.</li><li>Ne décrire que le cas nominal.</li><li>Mélanger plusieurs comportements dans un seul critère : on ne sait plus lequel échoue.</li><li>Écrire une tâche technique à la place d'une story : on perd le pour qui et le pourquoi.</li></ul>
+<h2>Leçon 11.5 : modéliser les états d&#x27;une facture</h2>
+<p>Un objet métier qui change de statut a un cycle de vie, et un cycle de vie se dessine. Une facture Facturo passe par quatre états : brouillon, émise, payée, annulée. Ce qui importe n&#x27;est pas la liste des états, mais les transitions permises entre eux.</p>
+<figure><img src="../img/m11-03.png" alt="cycle de vie d&#x27;une facture · 4 états, transitions autorisées et interdites"><figcaption>cycle de vie d&#x27;une facture · 4 états, transitions autorisées et interdites</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>Chaque boîte est un état ; chaque flèche pleine est une transition autorisée, avec l&#x27;événement qui la déclenche.</li><li>Seul le brouillon est modifiable. Dès l&#x27;émission, la facture reçoit son numéro (FAC-2027-0001, par exemple) et devient figée.</li><li>On n&#x27;annule jamais une facture émise en la modifiant : on crée un avoir, qui est un nouveau document lié à la facture.</li><li>La flèche pointillée rouge montre ce qui est interdit : revenir en brouillon efface la trace comptable.</li><li>« Annulée » est un état final, sans flèche de sortie.</li></ol>
+<p>Ce schéma se traduit directement en règle pour l&#x27;agent de code : une table des transitions autorisées, et un test par transition interdite. Si le code accepte un changement qui n&#x27;est pas sur le schéma, c&#x27;est un bug.</p>
+<pre><code>Transitions autorisées :
+  brouillon -&gt; émise     (attribue le numéro, fixe la date d&#x27;échéance à +30 jours)
+  émise    -&gt; payée      (enregistre la date de paiement)
+  émise    -&gt; annulée    (exige un avoir)
+  payée     -&gt; annulée    (exige un avoir et un remboursement)
+Toute autre transition est refusée avec une erreur explicite.</code></pre>
+<p><strong>À retenir</strong></p>
+<p>Dessinez les états et surtout les transitions permises. Montrez l&#x27;interdit explicitement. Transformez chaque transition en test.</p>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Autoriser la modification d&#x27;une facture émise « juste pour corriger une faute » : la numérotation continue ne le permet pas.</li><li>Oublier les états finaux : on ne sait plus ce qui peut encore arriver à un objet.</li><li>Coder les statuts avec des chaînes libres au lieu d&#x27;une liste fermée.</li></ul>
+<h2>Leçon 11.6 : définir un MVP en tranches verticales</h2>
+<p>Un MVP est la plus petite version qui apporte déjà de la valeur et permet d&#x27;apprendre. Il ne s&#x27;agit pas d&#x27;un produit bâclé : chaque morceau doit fonctionner de bout en bout. On découpe donc en tranches verticales plutôt qu&#x27;en couches horizontales.</p>
+<p>Un découpage horizontal fait d&#x27;abord toute la base de données, puis toute l&#x27;API, puis tous les écrans. Rien n&#x27;est utilisable avant la fin, et l&#x27;on découvre les erreurs au dernier moment. Un découpage vertical livre d&#x27;abord un export complet mais minimal, puis l&#x27;améliore. Une tranche verticale fait une bonne epic : un résultat visible de bout en bout (leçon 11.4).</p>
+<figure><img src="../img/m11-04.png" alt="découpage en tranches verticales · 3 couches, 4 tranches, MVP en 3"><figcaption>découpage en tranches verticales · 3 couches, 4 tranches, MVP en 3</figcaption></figure>
+<p><strong>Lire le schéma</strong></p>
+<ol><li>Les lignes sont les couches techniques ; les colonnes sont les tranches livrables.</li><li>La tranche 1 traverse écran, API et base de données : Marie peut déjà télécharger un mois de factures, sans filtre.</li><li>Les tranches 2 et 3 ajoutent un filtre par client puis l&#x27;envoi par e-mail, chacune à son tour utilisable.</li><li>La tranche 4, hors cadre pointillé, attend la suite : le MVP se termine à la tranche 3.</li></ol>
+<p>Pour choisir ce qui entre dans le MVP, classez chaque idée avec une question : sans elle, Marie peut-elle encore supprimer sa ressaisie ? Si la réponse est oui, l&#x27;idée attend.</p>
+<table><thead><tr><th>Idée</th><th>Sans elle, la ressaisie disparaît-elle ?</th><th>Décision</th></tr></thead><tbody><tr><td>Export d&#x27;un mois</td><td>Non : c&#x27;est le cœur</td><td>MVP, tranche 1</td></tr><tr><td>Filtre par client</td><td>Oui, mais le tri manuel reste pénible</td><td>MVP, tranche 2</td></tr><tr><td>Envoi par e-mail</td><td>Oui : Marie peut télécharger</td><td>MVP, tranche 3 si le budget le permet</td></tr><tr><td>Export planifié chaque mois</td><td>Oui</td><td>Après le MVP</td></tr><tr><td>Export vers un autre format</td><td>Oui</td><td>Hors périmètre, demande de changement</td></tr></tbody></table>
+<p>Dites aussi non à voix haute : une liste « pas maintenant » écrite et partagée avec Marie évite que ces idées reviennent comme des urgences.</p>
+<p><strong>À retenir</strong></p>
+<p>Découpez par tranches qui traversent toutes les couches. Gardez dans le MVP ce qui supprime la douleur principale. Écrivez la liste des refus.</p>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Livrer par couches : trois mois de travail sans rien à montrer.</li><li>Un MVP qui contient tout « au cas où » : ce n&#x27;est plus un MVP.</li><li>Ne pas écrire ce qui est exclu, puis le voir revenir en cours de route.</li></ul>
+<h2>Leçon 11.7 : tester l&#x27;usage et rédiger une spécification pour un agent</h2>
+<p>Un test d&#x27;usage observe des personnes réelles utiliser la maquette, sans les aider. Cinq personnes suffisent pour repérer la plupart des problèmes récurrents d&#x27;un écran. Le but n&#x27;est pas de savoir si l&#x27;écran plaît, mais où les gens hésitent.</p>
+<table><thead><tr><th>Élément</th><th>Contenu pour l&#x27;écran Export</th></tr></thead><tbody><tr><td>Objectif</td><td>Vérifier qu&#x27;une comptable télécharge un CSV sans aide</td></tr><tr><td>Participants</td><td>5 personnes du cabinet : 3 comptables, 1 assistante, 1 associée</td></tr><tr><td>Durée</td><td>20 minutes par personne</td></tr><tr><td>Tâche donnée</td><td>« Vous avez besoin des factures de janvier 2027 pour les importer. Montrez-moi comment vous feriez. »</td></tr><tr><td>Ce que l&#x27;on observe</td><td>Où la personne hésite, ce qu&#x27;elle clique à tort, les mots qu&#x27;elle utilise</td></tr><tr><td>Ce que l&#x27;on ne fait pas</td><td>Expliquer, guider, justifier l&#x27;écran</td></tr><tr><td>Critère de réussite</td><td>4 personnes sur 5 réussissent sans aide en moins de 2 minutes</td></tr></tbody></table>
+<p>Pendant le test, une consigne tient en une phrase : se taire. Si la personne demande « je clique ici ? », répondez « que feriez-vous à ma place ? ». À la fin, classez les problèmes par gravité : bloquant, gênant, mineur.</p>
+<p>La dernière étape du module est la plus utile pour un orchestrateur : rédiger la spécification que l&#x27;agent de code exécutera. Un agent ne devine pas bien. Chaque mot flou devient une décision prise à votre place, sans que vous le sachiez.</p>
+<p>Voici une spécification trop vague, puis sa version corrigée.</p>
+<pre><code>SPÉCIFICATION VAGUE
+Ajoute un export CSV des factures. Il doit être rapide et simple.
+Gère les erreurs correctement.</code></pre>
+<p>Ce texte laisse l&#x27;agent décider du format, des colonnes, des statuts à inclure, de la période, du comportement en cas d&#x27;erreur et de ce que « rapide » veut dire. Chacun de ces choix peut être mauvais.</p>
+<pre><code>SPÉCIFICATION PRÊTE POUR UN AGENT
+Objectif : permettre à un utilisateur de télécharger un CSV des factures
+  émises ou payées d&#x27;une période, pour import dans le logiciel du cabinet.
+
+Portée : module Export uniquement. Ne pas modifier les modules Facturation
+  et Paiement.
+
+Entrée : date_debut et date_fin (format AAAA-MM-JJ), fenêtre max 12 mois.
+Sortie : fichier CSV, séparateur point-virgule, encodage UTF-8,
+  dates JJ/MM/AAAA, montants avec virgule décimale (ex. 1250,00).
+Colonnes : numero;date_emission;client;siret;total_ht;taux_tva;total_ttc;statut
+Filtre : statuts émise et payée uniquement ; exclure brouillon et annulée.
+
+Règles :
+  - Total TTC = total HT x (1 + taux TVA), arrondi au centime.
+  - Valeurs avec point-virgule ou guillemet : entre guillemets, guillemets doublés.
+
+Erreurs :
+  - date_fin &lt; date_debut -&gt; 422, message « La date de fin doit suivre la date de début ».
+  - aucune facture -&gt; 200, corps vide, interface affiche « Aucune facture émise sur cette période ».
+
+Performance : 500 factures en moins de 10 secondes.
+Tests exigés : cas nominal, période vide, dates inversées, caractères spéciaux,
+  brouillon exclu, arrondi.
+Critère d&#x27;acceptation : le CSV est importé sans erreur par le logiciel du cabinet
+  (vérifié par le lecteur sur un fichier d&#x27;exemple).</code></pre>
+<p>Une bonne spécification répond à sept questions : pourquoi, où (et où ne pas toucher), avec quelles entrées, quelles sorties, quelles règles, quelles erreurs, comment vérifier. Si une question reste sans réponse, l&#x27;agent répondra à votre place.</p>
+<p><strong>À retenir</strong></p>
+<p>Testez avec cinq personnes, en vous taisant. Écrivez des spécifications chiffrées, avec la portée, les erreurs et les tests exigés. Ce qui n&#x27;est pas écrit sera inventé.</p>
+<p><strong>Erreurs fréquentes</strong></p>
+<ul><li>Guider le participant pendant le test : on ne mesure plus l&#x27;écran, mais votre aide.</li><li>Utiliser des adjectifs dans la spécification (rapide, simple, propre).</li><li>Oublier de dire où l&#x27;agent ne doit pas toucher : il « améliore » alors un autre module.</li></ul>
+<h2>Atelier guidé : de l&#x27;entretien à la spécification</h2>
+<p>Prévoyez deux à trois heures. Vous allez refaire, sur une nouvelle fonction de Facturo (les relances d&#x27;impayés par e-mail), toute la chaîne du module.</p>
+<p>Point de départ : Marie Giraud dit « Je voudrais que Facturo relance mes clients qui ne paient pas. »</p>
+<table><thead><tr><th>Étape</th><th>Ce que vous faites</th><th>Résultat attendu</th></tr></thead><tbody><tr><td>1</td><td>Écrivez 8 questions d&#x27;entretien sur des faits passés</td><td>Aucune question ne contient « aimeriez-vous » ou « voudriez-vous »</td></tr><tr><td>2</td><td>Imaginez les réponses de Marie et rédigez un compte rendu de 10 lignes</td><td>Un problème chiffré et une contrainte technique identifiés</td></tr><tr><td>3</td><td>Dessinez le parcours actuel et le parcours cible en 4 étapes chacun</td><td>Chaque amélioration est reliée à une douleur</td></tr><tr><td>4</td><td>Maquettez l&#x27;écran de relance avec ses 4 états</td><td>Les textes exacts sont écrits dans chaque état</td></tr><tr><td>5</td><td>Rédigez 3 user stories avec critères Étant donné, Quand, Alors</td><td>Au moins un cas limite par story</td></tr><tr><td>6</td><td>Dessinez le cycle de vie d&#x27;une relance (planifiée, envoyée, échouée, annulée)</td><td>Les transitions interdites sont marquées</td></tr><tr><td>7</td><td>Découpez en 3 tranches verticales et dites ce qui est hors MVP</td><td>Une liste « pas maintenant » de 3 idées</td></tr><tr><td>8</td><td>Rédigez la spécification pour l&#x27;agent</td><td>Les sept questions de la leçon 11.7 ont une réponse</td></tr></tbody></table>
+<p>Pour contrôler le résultat, donnez votre spécification à un collègue et demandez-lui de la reformuler. Si sa reformulation diffère de votre intention, la spécification est ambiguë.</p>
+<h2>Exercices</h2>
+<h3>Exercice 1 : reformuler cinq questions</h3>
+<p>Transformez chaque question en une question sur un fait passé.</p>
+<p>a. Aimeriez-vous un tableau de bord ? b. Trouvez-vous le processus actuel trop long ? c. Utiliseriez-vous des rappels automatiques ? d. Qu&#x27;est-ce qui serait idéal pour vous ? e. Ça vous gêne, les factures en retard ?</p>
+<details><summary>Corrigé</summary>
+<table><thead><tr><th>Question</th><th>Question reformulée</th></tr></thead><tbody><tr><td>a</td><td>La dernière fois que vous avez voulu connaître l&#x27;état de vos factures, qu&#x27;avez-vous fait ?</td></tr><tr><td>b</td><td>Combien de temps a pris le dernier traitement, et quelles étapes ont duré le plus ?</td></tr><tr><td>c</td><td>Comment avez-vous relancé le dernier client en retard ? Qui l&#x27;a fait, quand ?</td></tr><tr><td>d</td><td>Racontez-moi la dernière fois où un outil vous a bloqué dans votre travail.</td></tr><tr><td>e</td><td>Quelle est la dernière facture en retard dont vous vous souvenez ? Que s&#x27;est-il passé ensuite ?</td></tr></tbody></table>
+<p>Ce qui compte : chaque reformulation demande un souvenir précis, pas un avis.</p>
+</details>
+<h3>Exercice 2 : écrire les critères d&#x27;une story</h3>
+<p>Story : « En tant que comptable, je veux filtrer l&#x27;export par client, afin de n&#x27;importer que les factures d&#x27;un client. » Écrivez trois critères, dont un cas limite.</p>
+<details><summary>Corrigé</summary>
+<pre><code>Critère 1 : nominal
+  Étant donné que le client Dupont a 2 factures émises en janvier 2027 et le client Martin 1,
+  Quand j&#x27;exporte janvier 2027 pour Dupont,
+  Alors le fichier contient 2 lignes, toutes au nom de Dupont.
+
+Critère 2 : client sans facture
+  Étant donné que le client Martin n&#x27;a aucune facture en février 2027,
+  Quand j&#x27;exporte février 2027 pour Martin,
+  Alors je vois « Aucune facture émise sur cette période ».
+
+Critère 3 : client supprimé ou archivé (cas limite)
+  Étant donné qu&#x27;un client est archivé mais a des factures émises,
+  Quand j&#x27;exporte la période sans filtre,
+  Alors ses factures apparaissent quand même, car elles sont comptables.</code></pre>
+<p>Ce qui compte : des valeurs concrètes, un résultat observable, et un cas limite qui révèle une règle métier (une facture archivée reste comptable).</p>
+</details>
+<h3>Exercice 3 : trouver les transitions manquantes</h3>
+<p>Un développeur propose cette liste de transitions : brouillon vers émise, émise vers payée, payée vers brouillon, émise vers brouillon. Lesquelles sont à refuser, et que manque-t-il ?</p>
+<details><summary>Corrigé</summary>
+<p>Il faut refuser payée vers brouillon et émise vers brouillon : revenir en brouillon efface la trace comptable et casse la numérotation continue. Il manque l&#x27;annulation, qui passe par un avoir : émise vers annulée, et payée vers annulée avec remboursement. Il manque aussi de dire que l&#x27;état annulée est final.</p>
+</details>
+<h3>Exercice 4 : sortir un MVP</h3>
+<p>Idées pour l&#x27;export : (1) export d&#x27;un mois, (2) export en Excel, (3) filtre par client, (4) envoi automatique chaque mois, (5) historique des exports. Choisissez le MVP en trois tranches.</p>
+<details><summary>Corrigé</summary>
+<p>Tranche 1 : export d&#x27;un mois, car il supprime déjà la ressaisie. Tranche 2 : filtre par client, car il réduit le tri manuel. Tranche 3 : historique des exports, utile pour retrouver un fichier et contrôler les erreurs. Reportés après le MVP : l&#x27;envoi automatique mensuel (dépend d&#x27;un déclencheur planifié). Hors périmètre : l&#x27;export Excel, à traiter comme une demande de changement, car le logiciel du cabinet lit le CSV.</p>
+</details>
+<h3>Exercice 5 : corriger une spécification</h3>
+<p>« Crée un écran pour voir les factures en retard. Il doit être clair et réactif. » Listez ce qui manque, puis rédigez la première version corrigée.</p>
+<details><summary>Corrigé</summary>
+<p>Manque : la définition de « en retard », les colonnes, l&#x27;ordre de tri, les états vide/chargement/erreur, les droits d&#x27;accès, la portée, un seuil de performance, les tests exigés.</p>
+<pre><code>Objectif : lister les factures émises dont la date d&#x27;échéance est dépassée.
+Portée : module Facturation, lecture seule ; ne pas modifier le statut des factures.
+Règle : en retard = statut émise et date_echeance &lt; aujourd&#x27;hui.
+Colonnes : numero, client, total_ttc, date_echeance, jours_de_retard.
+Tri : jours_de_retard décroissant.
+États : vide (« Aucune facture en retard »), chargement, erreur (« Chargement impossible, réessayez »).
+Droits : visible par l&#x27;administrateur du compte uniquement.
+Performance : 1 000 factures affichées en moins de 2 secondes.
+Tests : aucune en retard, une en retard, échéance aujourd&#x27;hui (pas en retard), facture payée exclue.</code></pre>
+<p>Ce qui compte : le cas limite « échéance aujourd&#x27;hui » est décidé par écrit, et la portée interdit d&#x27;altérer les factures.</p>
+</details>
+<h2>Quiz d&#x27;auto-évaluation</h2>
+<table><thead><tr><th>Question</th><th>Réponse</th><th>Pourquoi</th></tr></thead><tbody><tr><td>Pourquoi interroger sur le passé plutôt que sur l&#x27;avenir ?</td><td>Le passé est un fait, l&#x27;avenir une imagination</td><td>Les gens prédisent mal leurs usages futurs mais racontent bien ce qu&#x27;ils ont fait</td></tr><tr><td>Quels sont les quatre états d&#x27;un écran qui charge des données ?</td><td>Vide, chargement, erreur, succès</td><td>Ce sont les trois derniers que les agents oublient sans consigne</td></tr><tr><td>Que contient un critère Étant donné, Quand, Alors ?</td><td>Un contexte, une action et un résultat observable</td><td>Il est ainsi testable sans interprétation</td></tr><tr><td>Pourquoi ne revient-on jamais d&#x27;émise à brouillon ?</td><td>La numérotation continue et la trace comptable seraient cassées</td><td>Une facture émise se corrige par un avoir</td></tr><tr><td>Quelle différence entre tranche verticale et horizontale ?</td><td>La verticale traverse toutes les couches et se livre seule</td><td>L&#x27;horizontale ne donne rien d&#x27;utilisable avant la fin</td></tr><tr><td>Que se passe-t-il quand une spécification ne dit pas où l&#x27;agent ne doit pas toucher ?</td><td>Il peut modifier d&#x27;autres modules</td><td>Ce qui n&#x27;est pas interdit est permis pour un agent qui cherche à bien faire</td></tr></tbody></table>
+<h2>Checklist de validation</h2>
+<p>Cochez chaque ligne quand vous pouvez le prouver avec un document.</p>
+<ul class="check"><li>Je mène un entretien de 30 minutes sans proposer de solution et je rédige un compte rendu relu par le client.</li><li>Je dessine un parcours actuel et un parcours cible, et j&#x27;identifie la douleur chiffrée.</li><li>Je maquette un écran avec ses quatre états et les textes exacts.</li><li>J&#x27;écris des user stories avec critères Étant donné, Quand, Alors et au moins un cas limite chacune.</li><li>Je modélise le cycle de vie d&#x27;un objet avec ses transitions autorisées et interdites.</li><li>Je découpe un MVP en tranches verticales et j&#x27;écris la liste des refus.</li><li>Je prépare un test d&#x27;usage avec cinq personnes et un critère de réussite.</li><li>Je rédige une spécification qu&#x27;un agent peut exécuter, avec portée, erreurs et tests exigés.</li><li>Je distingue epic, story et tâche, et j'explique pourquoi une story a des critères d'acceptation mesurables.</li></ul>
+
+<div class="pager"><a class="prev" href="../modules/module-10.html"><small>← Précédent</small>Module 10 : gestion de projet</a><a class="next" href="../modules/module-12.html"><small>Suivant →</small>Module 12 : gestion du client et communication</a></div></article></main></div>
+<script>document.querySelectorAll('.side a.nav').forEach(function(a){a.addEventListener('click',function(){document.body.classList.remove('open')})});var on=document.querySelector('.side a.on');if(on)on.scrollIntoView({block:'center'});</script>
+</body></html>
